@@ -2,6 +2,8 @@
 
 A 3D-printable pool filter cleaning system designed to efficiently clean cylindrical pool filters by spraying them while they rotate. This system allows for thorough cleaning of pool filter cartridges without manual scrubbing.
 
+**Attribution / Inspiration:** This horizontal pool filter cleaner was inspired by the vertical pool filter cleaner on MakerWorld: https://makerworld.com/en/models/1333859-pool-filter-washing-stand. I based some parts in this project on that design and used OpenSCAD to create all 3D models for the horizontal stand in this repository.
+
 ## Quick Reference
 
 | Component | SCAD File | STL Location | Quantity Needed |
@@ -15,7 +17,7 @@ A 3D-printable pool filter cleaning system designed to efficiently clean cylindr
 - 2× S6904ZZ ball bearings (37mm × 20mm × 9mm)
 - 1× Horizontal 3/4" aluminum rod (36-40" length)
 - 4× Leg support 3/4" aluminum rods (24-36" length each)
-- 6× M4 set screws
+- Optional: up to 6× M4 set screws (holes are already included in the models if you want to use them)
 
 ## Overview
 
@@ -176,9 +178,9 @@ The complete cleaning system consists of:
    - Two legs per base (four total for both ends)
    - Length depends on desired working height (typically 24-36")
    
-7. **Set screws** (M4 or #8-32)
-   - For securing rods in filter holders and leg bases
-   - Six screws total (one per tube connection)
+7. **Optional set screws** (M4 or #8-32)
+   - Holes are already included in the printed models if you want to secure rods in filter holders and leg bases
+   - Up to six screws total (one per tube connection)
 
 ### Assembly Steps
 
@@ -199,12 +201,12 @@ The complete cleaning system consists of:
 4. **Attach leg bases:**
    - Slide one leg base onto each end of the horizontal rod
    - Position them outside the filter holders
-   - Tighten set screws in the horizontal tubes to secure bases
+   - Optional: tighten set screws in the horizontal tubes to secure bases
    
 5. **Install support legs:**
    - Insert two 3/4" aluminum rods into the angled leg sockets on each base
    - Adjust leg extension for desired working height
-   - Tighten set screws to secure legs
+   - Optional: tighten set screws to secure legs
    
 6. **Connect nozzle:**
    - Attach the 5-prong nozzle to your garden hose
@@ -271,8 +273,8 @@ The bearings allow the filter to spin freely on the stationary aluminum rod whil
 2. **Install bearings** into filter holders and secure with set screws
 3. **Mount filter holders** on both ends of the pool filter cartridge
 4. **Thread horizontal rod** through filter holders and bearings
-5. **Attach leg bases** to rod ends and secure with set screws
-6. **Insert support legs** into angled sockets and tighten set screws
+5. **Attach leg bases** to rod ends (optional set screws can be used via the built-in holes)
+6. **Insert support legs** into angled sockets (optional set screws can be used via the built-in holes)
 7. **Level the assembly** on flat ground, adjust leg heights if needed
 
 ### Cleaning Operation
@@ -285,13 +287,13 @@ The bearings allow the filter to spin freely on the stationary aluminum rod whil
 
 ### Maintenance
 - **After each use:** Rinse nozzle to prevent buildup
-- **Weekly:** Check set screws and tighten if needed
+- **Weekly (if using set screws):** Check set screws and tighten if needed
 - **Monthly:** Inspect bearings for smooth rotation, clean if necessary
 - **Annually:** Check 3D-printed parts for wear or UV damage
 
 ### Safety Notes
 - Always use on level ground to prevent tipping
-- Ensure all set screws are tight before adding water pressure
+- If using set screws, ensure they are tight before adding water pressure
 - Do not exceed 80 PSI water pressure to avoid damaging components
 - Keep electrical equipment away from water spray area
 
