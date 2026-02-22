@@ -6,10 +6,12 @@
 include <BOSL2/std.scad>
 // https://github.com/BelfrySCAD/BOSL2
 
-$fn = 60;  // Reduce to 60 for faster preview, increase to 180+ to for final render
+$fn = 180;  // Reduce to 60 for faster preview, increase to 180+ to for final render
 
 // Horizontal hole configuration
-horizontal_through_hole_both_sides = false;  // If true, rod hole goes through both sides; if false, only extends in positive X direction
+horizontal_through_hole_both_sides = true;  // If true, rod hole goes through both sides; if false, only extends in positive X direction
+
+printing_base_trim_enabled = true; // If true, use partial sweep to save material; if false, keep base fully round
 
 // Rod specifications
 rod_diameter = 19.05;        // 3/4" aluminum rod = 19.05mm
@@ -49,6 +51,8 @@ printing_base_height = 9;      // Height of the flat base part
 printing_base_taper_height = 15; // Vertical distance of the concave curve
 printing_base_neck_height = 6;  // Height of the straight top section
 printing_base_round_radius = 4; // Radius for rounding edges of curved base
+printing_base_sweep_angle = 145; // Degrees of base footprint to keep (trim full circle to reduce waste)
+printing_base_sweep_rotation = 198; // Rotational alignment of sweep so footprint supports both leg tubes
 printing_base_total_height = printing_base_height + printing_base_taper_height + printing_base_neck_height; // Total height of the curved base
 
 // Set screw dimensions
@@ -127,7 +131,34 @@ module curved_printing_base() {
         (i == 0 || i == 1 || i == 13 || i == 14) ? 0 : printing_base_round_radius]; // Sharp corners at bottom and top
     
     rounded_profile = round_corners(profile_path, radius=radii);
-    rotate_sweep(rounded_profile, angle=360);
+    if (printing_base_trim_enabled)
+        rotate([0, 0, printing_base_sweep_rotation])
+            rotate_sweep(rounded_profile, angle=printing_base_sweep_angle);
+    else
+        rotate_sweep(rounded_profile, angle=360);
+}
+
+module main_tube_to_base_bottom() {
+    // Continuation of the main tube wall down to the curved base bottom
+    drop_height = printing_base_radius - (tube_outer_diameter / 2);
+    support_length = tube_outer_diameter;
+    support_x = (printing_base_cutoff + printing_base_offset);
+
+    difference() {
+        // Outer skin: same axis as horizontal tube (X-axis)
+        hull() {
+            rotate([0, 90, 0])
+                translate([0, 0, support_x])
+                cylinder(d = tube_outer_diameter, h = support_length, center = false);
+        }
+
+        // Inner bore continuation
+        hull() {
+            rotate([0, 90, 0])
+                translate([0, 0, support_x + tube_wall_thickness])
+                cylinder(d = tube_inner_diameter, h = support_length + 0.2, center = false);
+        }
+    }
 }
 
 module filter_base() {
@@ -145,6 +176,9 @@ module filter_base() {
                     rod_tube(printing_base_total_height);
                 else
                     cylinder(d = tube_outer_diameter, h = printing_base_total_height, center = false);
+
+            // Continue main tube structure down to the bottom of the printing base
+            main_tube_to_base_bottom();
             
             // Bearing lip with curved flare extending into horizontal tube
             rotate([0, 90, 0])
@@ -229,9 +263,12 @@ module filter_base() {
             rotate([-90, 0, 0])
             cylinder(d = set_screw_diameter, h = set_screw_depth, center = false);
         
-        // Flat printing base - cuts off back side for stable printing on build plate
-        translate([printing_base_cutoff - 55, 0, 0])
-            cube([100, 200, 200], center = true);
+        // Flat printing base cutout, but preserve the main-tube downward continuation
+        difference() {
+            translate([printing_base_cutoff - 55, 0, 0])
+                cube([100, 200, 200], center = true);
+            main_tube_to_base_bottom();
+        }
     }
     
     // Add curved printing base with hole through it
