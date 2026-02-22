@@ -8,6 +8,9 @@ include <BOSL2/std.scad>
 
 $fn = 60;  // Reduce to 60 for faster preview, increase to 180+ to for final render
 
+// Tube holding hole configuration
+horizontal_through_hole_both_sides = false;  // If true, rod hole goes through both sides; if false, only extends in positive X direction
+
 // Rod specifications
 rod_diameter = 19.05;        // 3/4" aluminum rod = 19.05mm
 rod_clearance = 0.5;         // Clearance for easy insertion
@@ -34,9 +37,6 @@ bearing_lip_od = tube_inner_diameter + (bearing_lip_thickness * 2);  // Outer di
 bearing_lip_id = bearing_lip_od - (bearing_lip_thickness * 2);  // Inner diameter for rod clearance
 bearing_lip_flare_length = 1; // Length of the curved flare section
 bearing_lip_flare_amount = 1; // How much it flares outward (mm added to radius)
-
-// Horizontal hole configuration
-horizontal_through_hole_both_sides = true;  // If true, rod hole goes through both sides; if false, only extends in positive X direction
 
 // Printing base configuration
 printing_base_cutoff = -18;     // Where to cut (negative X) - adjusts how much is flat
@@ -213,7 +213,10 @@ module filter_base() {
             // This allows a quick and dirty/easy way to apply a "difference" to cut the rod hole through the curved base without affecting the horizontal tube.
             rotate([0, 90, 0])
                 translate([0, 0, -printing_base_total_height])
-                rod_tube(printing_base_total_height);
+                if (horizontal_through_hole_both_sides)
+                    rod_tube(printing_base_total_height);
+                else
+                    cylinder(d = tube_outer_diameter, h = printing_base_total_height, center = false);
             
             // Bearing lip with curved flare extending into horizontal tube
             rotate([0, 90, 0])
@@ -236,10 +239,14 @@ module filter_base() {
             translate([0, 0, horizontal_tube_length - 0.1])
             cylinder(d = bearing_lip_id, h = bearing_lip_extension + bearing_lip_flare_length + 1, center = false);
 
-        // Horizontal rod hole - extends all the way through base and tube
+        // Horizontal rod hole - either through both sides, or only in positive X direction
         rotate([0, 90, 0])
-            translate([0, 0, -(printing_base_height + printing_base_taper_height + printing_base_neck_height + 5)])
-            cylinder(d = tube_inner_diameter, h = horizontal_tube_length + printing_base_height + printing_base_taper_height + printing_base_neck_height + 20, center = false);
+            if (horizontal_through_hole_both_sides)
+                translate([0, 0, -(printing_base_height + printing_base_taper_height + printing_base_neck_height + 5)])
+                cylinder(d = tube_inner_diameter, h = horizontal_tube_length + printing_base_height + printing_base_taper_height + printing_base_neck_height + 20, center = false);
+            else
+                translate([0, 0, -0.1])
+                cylinder(d = tube_inner_diameter, h = horizontal_tube_length + 0.2, center = false);
         
         // Leg holes and set screws for both leg pairs
         for (pair_rotation = [0, 180]) {
@@ -264,10 +271,14 @@ module filter_base() {
             rotate([0, 90, 0])
             curved_printing_base();
         
-        // Cut horizontal rod hole through the curved base
-        rotate([0, 90, 0])
-            translate([0, 0, -(printing_base_height + printing_base_taper_height + printing_base_neck_height + 5)])
-            cylinder(d = tube_inner_diameter, h = printing_base_height + printing_base_taper_height + printing_base_neck_height + 20, center = false);
+        // Cut horizontal rod hole through the curved base only when through-hole is enabled
+        if (horizontal_through_hole_both_sides)
+            rotate([0, 90, 0])
+                translate([0, 0, -(printing_base_height + printing_base_taper_height + printing_base_neck_height + 5)])
+                cylinder(d = tube_inner_diameter, h = printing_base_height + printing_base_taper_height + printing_base_neck_height + 20, center = false);
+        else
+            rotate([0, 90, 0])
+                cylinder(d = tube_inner_diameter, h = printing_base_height + printing_base_taper_height + printing_base_neck_height, center = false);
         
         // Cut leg clearances for both leg pairs through the base neck
         for (pair_rotation = [0, 180]) {
