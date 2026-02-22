@@ -11,6 +11,8 @@ $fn = 180;  // Reduce to 60 for faster preview, increase to 180+ to for final re
 // Horizontal hole configuration
 horizontal_through_hole_both_sides = true;  // If true, rod hole goes through both sides; if false, only extends in positive X direction
 
+printing_base_trim_enabled = true; // If true, use partial sweep to save material; if false, keep base fully round
+
 // Rod specifications
 rod_diameter = 19.05;        // 3/4" aluminum rod = 19.05mm
 rod_clearance = 0.5;         // Clearance for easy insertion
@@ -129,8 +131,11 @@ module curved_printing_base() {
         (i == 0 || i == 1 || i == 13 || i == 14) ? 0 : printing_base_round_radius]; // Sharp corners at bottom and top
     
     rounded_profile = round_corners(profile_path, radius=radii);
-    rotate([0, 0, printing_base_sweep_rotation])
-        rotate_sweep(rounded_profile, angle=printing_base_sweep_angle);
+    if (printing_base_trim_enabled)
+        rotate([0, 0, printing_base_sweep_rotation])
+            rotate_sweep(rounded_profile, angle=printing_base_sweep_angle);
+    else
+        rotate_sweep(rounded_profile, angle=360);
 }
 
 module main_tube_to_base_bottom() {
