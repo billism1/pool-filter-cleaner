@@ -8,12 +8,15 @@ A 3D-printable pool filter cleaning system designed to efficiently clean cylindr
 
 | Component | SCAD File | STL Location | Quantity Needed |
 |-----------|-----------|--------------|-----------------|
-| **Filter Holder (Core Set)** | `filter_holder/filter_holder.scad` | `STLs/filter_holder.stl` | 2 |
-| **Leg Base (2-leg, Core Set)** | `leg_base/leg_base_2_legs.scad` | `STLs/leg_base.stl` (+ second export for opposite through-hole setting) | 2 |
+| **Filter Holder (Core Set, Standard)** | `filter_holder/filter_holder.scad` | `STLs/filter_holder.stl` | 2 |
+| **Leg Base (2-leg, Core Set)** | `leg_base/leg_base_2_legs.scad` | `STLs/leg_base_2_legs-through_hole.stl` and `STLs/leg_base_2_legs-closed_end.stl` | 2 |
+| **Leg Base (4-leg, Alternative)** | `leg_base/leg_base_4_legs.scad` | `STLs/leg_base_4_legs.stl` | 2 (alternative setup) |
 | **Leg Foot (Core Set)** | `leg_foot/leg_foot.scad` | `STLs/leg_foot.stl` | 2 |
 | **Garden Hose Nozzle (Optional)** | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | `STLs/garden_hose_nozzle-5-prong-fan-out.stl` | 1 |
 
-**Leg base STL note:** For `leg_base/leg_base_2_legs.scad`, export two STL variants by toggling `horizontal_through_hole_both_sides` (`true` and `false`).
+**Leg base STL note:** For `leg_base/leg_base_2_legs.scad`, the included exports are:
+- `STLs/leg_base_2_legs-through_hole.stl` (`horizontal_through_hole_both_sides = true`)
+- `STLs/leg_base_2_legs-closed_end.stl` (`horizontal_through_hole_both_sides = false`)
 
 **Core solution note:** `filter_holder` + `leg_base` + `leg_foot` are an atomic set and are intended to be used together. The nozzle is optional/experimental; any effective high-force nozzle stream can be used.
 
@@ -43,6 +46,8 @@ This project provides a complete solution for cleaning cylindrical pool filters 
 **STL Output:** `STLs/filter_holder.stl`  
 **Additional variants in `STLs/`:** `filter_holder_double_bearing.stl`, `filter_holder_double_bearing_with_gear.stl`
 
+**WIP note:** `filter_holder_double_bearing.stl` and `filter_holder_double_bearing_with_gear.stl` are work in progress and not recommended for active use at this time.
+
 The filter holder attaches to the pool filter cartridge and provides the mounting point for the support rod. This component includes an integrated bearing holder for smooth rotation.
 
 **Key Features:**
@@ -67,7 +72,7 @@ The filter holder attaches to the pool filter cartridge and provides the mountin
 
 **Primary file:** `leg_base/leg_base_2_legs.scad`  
 **Alternative file:** `leg_base/leg_base_4_legs.scad`  
-**STL Output:** `STLs/leg_base.stl` (2-leg export)
+**STL Outputs:** `STLs/leg_base_2_legs-through_hole.stl`, `STLs/leg_base_2_legs-closed_end.stl`, `STLs/leg_base_4_legs.stl`
 
 A leg-base connector that forms the base of the rotating support system. Supports both 2-leg and 4-leg stand configurations.
 
@@ -181,23 +186,26 @@ The complete cleaning system consists of:
    
 2. **Two 3D-printed leg bases** (`leg_base/leg_base_2_legs.scad`)
    - Position one at each end of the horizontal support rod
+
+3. **Two 3D-printed leg feet** (`leg_foot/leg_foot.scad`)
+   - Install on the ends of the inserted leg rods
    
-3. **One 3D-printed garden hose nozzle** (`nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad`)
-   - Connects to standard garden hose
+4. **Optional 3D-printed garden hose nozzle** (`nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad`)
+   - Optional experimental nozzle; any nozzle with an adequately forceful stream works
    
-4. **Two S6904ZZ stainless steel ball bearings**
+5. **Two S6904ZZ stainless steel ball bearings**
    - 37mm OD × 20mm ID × 9mm thick
    - One for each filter holder
    
-5. **One horizontal 3/4" (19.05mm) aluminum rod**
+6. **One horizontal 3/4" (19.05mm) aluminum rod**
    - Length varies based on filter size (typically 36-40" for standard filters)
    - Passes through bearing holders and leg bases
    
-6. **Four 3/4" (19.05mm) aluminum rod legs**
+7. **Four 3/4" (19.05mm) aluminum rod legs**
    - Two legs per base (four total for both ends)
    - Length depends on desired working height (typically 24-36")
    
-7. **Optional set screws** (M4 or #8-32)
+8. **Optional set screws** (M4 or #8-32)
    - Holes are already included in the printed models if you want to secure rods in filter holders and leg bases
    - Up to six screws total (one per tube connection)
 
@@ -227,9 +235,9 @@ The complete cleaning system consists of:
    - Adjust leg extension for desired working height
    - Optional: tighten set screws to secure legs
    
-6. **Connect nozzle:**
-   - Attach the 5-prong nozzle to your garden hose
-   - Hand-tighten using the hex grip ring
+6. **Connect nozzle (optional):**
+   - Attach the included 5-prong nozzle or any suitable high-force nozzle to your garden hose
+   - Hand-tighten using the hex grip ring (if using the included model)
    
 7. **Operation:**
    - Position the assembly on level ground
@@ -260,7 +268,6 @@ The bearings allow the filter to spin freely on the stationary aluminum rod whil
 #### Leg Base
 - **Orientation:** Print with curved base on build plate (already optimized for this orientation)
 - **Supports:** None required - design includes integrated printing base that gets cut off
-- **Critical:** Ensure good bed adhesion due to small base footprint
 - **Post-Processing:** May need to drill set screw holes to final size depending on printer precision
 
 #### Garden Hose Nozzle
@@ -289,7 +296,7 @@ The bearings allow the filter to spin freely on the stationary aluminum rod whil
 7. **Level the assembly** on flat ground, adjust leg heights if needed
 
 ### Cleaning Operation
-1. **Connect nozzle** to garden hose with good water pressure (30-50 PSI recommended)
+1. **Connect nozzle** (included optional model or any suitable high-force nozzle) to garden hose with good water pressure (30-50 PSI recommended)
 2. **Position nozzle** 6-12 inches from filter surface
 3. **Turn on water** - the five jets will spray concentrated streams across the filter
 4. **Rotate the filter** manually or allow water pressure to spin it on the bearings
@@ -368,7 +375,7 @@ Each file has its `$fn` parameter clearly marked at the top for easy adjustment.
   - Ring cutout for proper bearing clearance
   
 - **Leg base / Support stand** - Fully designed and ready for printing
-  - 3-way tube connector with angled legs
+   - 2-leg and 4-leg connector variants available
   - Curved printing base for stability
   - Bearing lip for smooth rotation interface
   - Set screw holes for secure rod retention
