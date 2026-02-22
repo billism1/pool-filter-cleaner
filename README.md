@@ -8,10 +8,14 @@ A 3D-printable pool filter cleaning system designed to efficiently clean cylindr
 
 | Component | SCAD File | STL Location | Quantity Needed |
 |-----------|-----------|--------------|-----------------|
-| **Filter Holder** | `filter_holder/filter_holder.scad` | `STLs/filter_holder.stl` | 2 |
-| **Leg Base** | `leg_base/leg_base.scad` | `STLs/leg_base.stl` | 2 |
-| **Leg Foot** | `leg_foot/leg_foot.scad` | `STLs/leg_foot.stl` | 2 |
-| **Garden Hose Nozzle** | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | `STLs/garden_hose_nozzle-5-prong-fan-out - rev4.stl` | 1 |
+| **Filter Holder (Core Set)** | `filter_holder/filter_holder.scad` | `STLs/filter_holder.stl` | 2 |
+| **Leg Base (2-leg, Core Set)** | `leg_base/leg_base_2_legs.scad` | `STLs/leg_base.stl` (+ second export for opposite through-hole setting) | 2 |
+| **Leg Foot (Core Set)** | `leg_foot/leg_foot.scad` | `STLs/leg_foot.stl` | 2 |
+| **Garden Hose Nozzle (Optional)** | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | `STLs/garden_hose_nozzle-5-prong-fan-out.stl` | 1 |
+
+**Leg base STL note:** For `leg_base/leg_base_2_legs.scad`, export two STL variants by toggling `horizontal_through_hole_both_sides` (`true` and `false`).
+
+**Core solution note:** `filter_holder` + `leg_base` + `leg_foot` are an atomic set and are intended to be used together. The nozzle is optional/experimental; any effective high-force nozzle stream can be used.
 
 **Additional Hardware Needed:**
 - 2× S6904ZZ ball bearings (37mm × 20mm × 9mm)
@@ -21,51 +25,23 @@ A 3D-printable pool filter cleaning system designed to efficiently clean cylindr
 
 ## Overview
 
-This project provides a complete solution for cleaning cylindrical pool filters (typically 3 feet long × 9 inches diameter). The system consists of a specialized multi-nozzle spray attachment and a rotating support assembly that spins the filter during cleaning.
+This project provides a complete solution for cleaning cylindrical pool filters (typically 3 feet long × 9 inches diameter). The core system is a rotating support assembly (`filter_holder` + `leg_base` + `leg_foot`) that spins the filter during cleaning. The included nozzle model is optional and experimental.
 
 ### Key Features
 
-- **High-pressure multi-nozzle design** - Delivers focused water jets to clean filter pleats
+- **Optional nozzle support** - Included nozzle is experimental; any strong, focused nozzle stream works
 - **Rotating support system** - Allows filter to spin freely during cleaning
 - **Modular aluminum rod construction** - Accommodates various filter lengths
-- **Stable tripod base design** - Provides secure support during operation
+- **Stable leg-base support design** - Provides secure support during operation
 - **Standard garden hose compatibility** - 3/4" GHT threading
 
 ## Components & Design Files
 
-### 1. Garden Hose Nozzle
-
-#### Main Design File
-**File:** `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad`  
-**STL Output:** `STLs/garden_hose_nozzle-5-prong-fan-out - rev4.stl`
-
-A custom 5-prong fan-out nozzle that connects to a standard garden hose. Each prong delivers a concentrated water stream designed to penetrate and clean filter pleats effectively.
-
-**Specifications:**
-- 3/4" female garden hose threading (GHT)
-- 5 outlet nozzles with 1.72mm diameter openings
-- Total outlet area: 11.69 mm²
-- Hex grip ring for easy tightening (toggleable)
-- Smooth hydrodynamic internal transitions for optimal water distribution
-- Multi-stage hull transitions from cylinder to individual cone nozzles
-
-**Dependencies:**
-- `nozzle/nozzle/Threading.scad` - Library for generating 3/4" GHT female threads
-- `nozzle/nozzle/Naca_sweep.scad` - Sweep and extrusion library for complex geometry
-
-#### Alternative Test Designs
-**Circular variant:** `nozzle/testing/circular-nozzle/garden_hose_nozzle-5-prong-circular.scad`
-- Alternative nozzle configuration with prongs arranged in a circular pattern
-- Test design for different spray patterns
-
-**Alternative fan-out (nozzle2):** `nozzle/testing/nozzle2/garden_hose_nozzle-5-prong-fan-out-2.scad`
-- Experimental design with modified geometry
-- Includes its own copies of required libraries (Threading.scad, Naca_sweep.scad)
-
-### 2. Filter Holder
+### 1. Filter Holder
 
 **File:** `filter_holder/filter_holder.scad`  
-**STL Output:** Generate using OpenSCAD (File > Export > Export as STL)
+**STL Output:** `STLs/filter_holder.stl`  
+**Additional variants in `STLs/`:** `filter_holder_double_bearing.stl`, `filter_holder_double_bearing_with_gear.stl`
 
 The filter holder attaches to the pool filter cartridge and provides the mounting point for the support rod. This component includes an integrated bearing holder for smooth rotation.
 
@@ -87,12 +63,13 @@ The filter holder attaches to the pool filter cartridge and provides the mountin
 
 **Important:** Print TWO of these holders - one for each end of the filter.
 
-### 3. Leg Base / Tripod Support
+### 2. Leg Base / Support Stand
 
-**File:** `leg_base/leg_base.scad`  
-**STL Output:** `STLs/leg_base.stl`
+**Primary file:** `leg_base/leg_base_2_legs.scad`  
+**Alternative file:** `leg_base/leg_base_4_legs.scad`  
+**STL Output:** `STLs/leg_base.stl` (2-leg export)
 
-A 3-way tube connector that forms the base of the rotating support system. This creates a stable tripod configuration for holding the filter assembly.
+A leg-base connector that forms the base of the rotating support system. Supports both 2-leg and 4-leg stand configurations.
 
 **Specifications:**
 - Designed for 3/4" (19.05mm) aluminum rods
@@ -107,6 +84,14 @@ A 3-way tube connector that forms the base of the rotating support system. This 
 - Rod holes extend 35mm deep into leg tubes
 - Requires BOSL2 library for advanced geometry operations
 
+**2-leg export variants:**
+- Export one STL with `horizontal_through_hole_both_sides = true`
+- Export a second STL with `horizontal_through_hole_both_sides = false`
+
+**4-leg vertical stand note:**
+- `leg_base/leg_base_4_legs.scad` can also be used in a vertical stand setup similar to the referenced MakerWorld project: https://makerworld.com/en/models/1333859-pool-filter-washing-stand
+- For best results in that vertical configuration, pair it with the MakerWorld project's bottom piece so a bearing contacts the top lip of the leg holder.
+
 **Dependencies:**
 - BOSL2 library (https://github.com/BelfrySCAD/BOSL2) - Advanced geometry and rounding functions
 
@@ -115,6 +100,40 @@ A 3-way tube connector that forms the base of the rotating support system. This 
 - `leg_base/testing/curved_base.scad` - Development file for curved base design
 
 **Important:** Print TWO of these bases - one for each end of the horizontal filter rod.
+
+### 3. Leg Foot
+
+**File:** `leg_foot/leg_foot.scad`  
+**STL Output:** `STLs/leg_foot.stl`
+
+Leg feet pair with the leg-base tubes and are part of the core support set.
+
+**Important:** Print TWO leg feet and use them with the matching holder/base set.
+
+### 4. Garden Hose Nozzle (Optional / Experimental)
+
+#### Main Design File
+**File:** `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad`  
+**STL Output:** `STLs/garden_hose_nozzle-5-prong-fan-out.stl`
+
+This nozzle design is optional and experimental. You can use any nozzle that provides an adequately forceful stream for cleaning.
+
+**Recommended print/process for watertightness:**
+- Print the nozzle in ABS or ASA (recommended)
+- Acetone vapor smooth both the inside and outside surfaces after printing
+- This helps eliminate layer-line seepage; in ASA testing, small water beads/leaks through print lines stopped after vapor smoothing
+
+**Specifications:**
+- 3/4" female garden hose threading (GHT)
+- 5 outlet nozzles with 1.72mm diameter openings
+- Total outlet area: 11.69 mm²
+- Hex grip ring for easy tightening (toggleable)
+- Smooth hydrodynamic internal transitions for optimal water distribution
+- Multi-stage hull transitions from cylinder to individual cone nozzles
+
+**Dependencies:**
+- `nozzle/nozzle/Threading.scad` - Library for generating 3/4" GHT female threads
+- `nozzle/nozzle/Naca_sweep.scad` - Sweep and extrusion library for complex geometry
 
 ### Library Files
 
@@ -160,7 +179,7 @@ The complete cleaning system consists of:
 1. **Two 3D-printed filter holders** (`filter_holder/filter_holder.scad`)
    - Install one on each end of the filter cartridge
    
-2. **Two 3D-printed leg bases** (`leg_base/leg_base.scad`)
+2. **Two 3D-printed leg bases** (`leg_base/leg_base_2_legs.scad`)
    - Position one at each end of the horizontal support rod
    
 3. **One 3D-printed garden hose nozzle** (`nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad`)
@@ -236,22 +255,20 @@ The bearings allow the filter to spin freely on the stationary aluminum rod whil
 #### Filter Holder
 - **Orientation:** Print with flange side down (largest flat surface on build plate)
 - **Supports:** None required - bearing holder and drain holes designed to print without supports
-- **Print Time:** ~8-12 hours depending on settings
 - **Post-Processing:** Clean any stringing from drain holes and bearing holder
 
 #### Leg Base
 - **Orientation:** Print with curved base on build plate (already optimized for this orientation)
 - **Supports:** None required - design includes integrated printing base that gets cut off
-- **Print Time:** ~10-15 hours depending on settings
 - **Critical:** Ensure good bed adhesion due to small base footprint
 - **Post-Processing:** May need to drill set screw holes to final size depending on printer precision
 
 #### Garden Hose Nozzle
 - **Orientation:** Print with threaded end down (flat surface on build plate)
 - **Supports:** Minimal supports may be needed for underside of hex grip ring
-- **Print Time:** ~6-10 hours depending on settings
 - **Thread Quality:** Ensure $fn is set to 180 or higher for smooth threads
-- **Post-Processing:** Test thread fit with garden hose, may need minor cleanup with tap or file
+- **Material Recommendation:** ABS or ASA for best water sealing performance
+- **Post-Processing:** Use acetone vapor smoothing on both inside and outside surfaces to reduce/close layer-line seepage, then test thread fit with garden hose
 
 ### Quality Tips
 1. **First Layer:** Critical for all parts - ensure proper bed leveling and adhesion
@@ -259,12 +276,6 @@ The bearings allow the filter to spin freely on the stationary aluminum rod whil
 3. **Bearing Fit:** Filter holder bearing pocket should be snug - may need light sanding for perfect fit
 4. **Rod Holes:** Should allow smooth sliding of 3/4" aluminum rod - sand lightly if too tight
 5. **Layer Adhesion:** Important for water-tight performance of nozzle - avoid drafts and temperature fluctuations
-
-### Filament Requirements
-- **Filter Holder:** ~150-200g
-- **Leg Base:** ~200-250g  
-- **Nozzle:** ~100-150g
-- **Complete System (2 holders, 2 bases, 1 nozzle):** ~800-1000g total
 
 ## Usage & Operation
 
@@ -308,13 +319,13 @@ All components are designed in **OpenSCAD** (parametric 3D CAD modeler), allowin
 
 ### Required Libraries
 
-#### BOSL2 (for leg_base.scad only)
+#### BOSL2 (for leg base SCAD files)
 **Repository:** https://github.com/BelfrySCAD/BOSL2  
 **Purpose:** Advanced geometric operations, rounding, and shape manipulation  
 **Installation:** 
 1. Download or clone the BOSL2 repository
 2. Place in OpenSCAD's library path or in the project directory
-3. The leg_base.scad file uses `include <BOSL2/std.scad>`
+3. The leg base files use `include <BOSL2/std.scad>`
 
 #### Threading.scad (included)
 **Location:** `nozzle/nozzle/Threading.scad`  
@@ -345,10 +356,10 @@ Each file has its `$fn` parameter clearly marked at the top for easy adjustment.
 ## Project Status
 
 ### Completed Components ✅
-- **Garden hose nozzle** - Production-ready design with multiple tested revisions
+- **Garden hose nozzle** - Optional experimental add-on
   - 5-prong fan-out configuration optimized for filter cleaning
   - GHT threading with hex grip for easy installation
-  - Alternative designs available for testing different spray patterns
+   - Any adequately forceful nozzle stream can be used instead
   
 - **Filter holder** - Complete design with bearing integration
   - Tapered plug fits standard 3" pool filter openings
@@ -356,7 +367,7 @@ Each file has its `$fn` parameter clearly marked at the top for easy adjustment.
   - Drainage holes for water flow
   - Ring cutout for proper bearing clearance
   
-- **Leg base / Tripod support** - Fully designed and ready for printing
+- **Leg base / Support stand** - Fully designed and ready for printing
   - 3-way tube connector with angled legs
   - Curved printing base for stability
   - Bearing lip for smooth rotation interface
