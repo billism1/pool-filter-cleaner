@@ -10,9 +10,9 @@ A 3D-printable pool filter cleaning system designed to efficiently clean cylindr
 |-----------|-----------|--------------|-----------------|
 | **Filter Holder (Core Set, Standard)** | `filter_holder/filter_holder.scad` | `STLs/filter_holder.stl` | 2 |
 | **Leg Base (2-leg, Core Set)** | `leg_base/leg_base_2_legs.scad` | `STLs/leg_base_2_legs-through_hole.stl` and `STLs/leg_base_2_legs-closed_end.stl` | 2 |
-| **Leg Base (4-leg, Alternative)** | `leg_base/leg_base_4_legs.scad` | `STLs/leg_base_4_legs.stl` | 2 (alternative setup) |
-| **Leg Foot (Core Set)** | `leg_foot/leg_foot.scad` | `STLs/leg_foot.stl` | 2 |
-| **Garden Hose Nozzle (Optional)** | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | `STLs/garden_hose_nozzle-5-prong-fan-out.stl` | 1 |
+| **Leg Base (4-leg, Alternative)** | `leg_base/leg_base_4_legs.scad` | `STLs/leg_base_4_legs.stl` | 2 (alternative vertical setup) |
+| **Leg Foot (Core Set)** | `leg_foot/leg_foot.scad` | `STLs/leg_foot.stl` | 4 |
+| **Garden Hose Nozzle (Optional)** | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | `STLs/garden_hose_nozzle-5-prong-fan-out.stl` | 1 (Optional) |
 
 **Leg base STL note:** For `leg_base/leg_base_2_legs.scad`, the included exports are:
 - `STLs/leg_base_2_legs-through_hole.stl` (`horizontal_through_hole_both_sides = true`)
