@@ -6,7 +6,7 @@
 include <BOSL2/std.scad>
 // https://github.com/BelfrySCAD/BOSL2
 
-$fn = 180;  // Reduce to 60 for faster preview, increase to 180+ to for final render
+$fn = 60;  // Reduce to 60 for faster preview, increase to 180+ to for final render
 
 // Rod specifications
 rod_diameter = 19.05;        // 3/4" aluminum rod = 19.05mm
