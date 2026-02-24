@@ -19,8 +19,11 @@ build_pool_filter_holder = true; // Whether to build the main filter holder part
 build_connecting_gear = true; // Whether to build the gear that meshes with the flange gear
 build_compound_gear = true; // Whether to build the compound gear (same size gear + smaller gear for ratio change)
 
-place_bearing_at_interior = false;
-place_bearing_at_exterior = true;
+place_bearing_at_holder_interior = false;
+place_bearing_at_holder_exterior = true;
+
+place_bearing_at_simple_gear_base = true;   // Whether to place a bearing pocket at the base of the simple gear
+place_bearing_at_compound_gear_base = true; // Whether to place a bearing pocket at the base of the compound gear
 
 // Plug that fits inside the filter
 plug_major_diameter = 76.2; // Tapers from this diameter (76.2 mm == 3.0 inches)
@@ -101,7 +104,9 @@ module simple_gear(mod, num_teeth, thickness) {
     set_screw_depth = tube_outer_diameter / 2 + 2; // Depth of screw hole
     
     // Material saving parameters - create hollow center with spokes
-    hub_diameter = tube_outer_diameter + 8;  // Solid hub around the tube for strength
+    //hub_diameter = tube_outer_diameter + 8;  // Solid hub around the tube for strength
+    hub_diameter = bearing_outer_diameter + thickness * 1.2;
+
     gear_pitch_diameter = (mod * num_teeth) - 5;  // Calculated pitch diameter of the gear
     spoke_width = 10;  // Width of spokes connecting hub to gear teeth
     num_spokes = 6;   // Number of spokes for support
@@ -166,6 +171,21 @@ module simple_gear(mod, num_teeth, thickness) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
         }
+        
+        if (place_bearing_at_simple_gear_base) {
+            // Bearing pocket recessed into the base of the gear (same as holder exterior placement)
+            translate([0, 0, -0.1]) {
+                cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
+            }
+            
+            // Ring cutout for bearing area (gap between bearing inner race and gear body)
+            translate([0, 0, bearing_tube_height - 1]) {
+                difference() {
+                    cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false);
+                    cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false);
+                }
+            }
+        }
     }
 }
 
@@ -178,7 +198,9 @@ module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, smal
     set_screw_depth = tube_outer_diameter / 2 + 2; // Depth of screw hole
     
     // Material saving parameters - create hollow center with spokes
-    hub_diameter = small_mod * (small_num_teeth + 2) + 2;  // Extends to the outer diameter of the small gear teeth
+    //hub_diameter = small_mod * (small_num_teeth + 2) + 2;  // Extends to the outer diameter of the small gear teeth
+    hub_diameter = bearing_outer_diameter + thickness * 1.2;
+    
     gear_pitch_diameter = (mod * num_teeth) - 5;  // Calculated pitch diameter of the gear
     spoke_width = 10;  // Width of spokes connecting hub to gear teeth
     num_spokes = 6;   // Number of spokes for support
@@ -256,6 +278,21 @@ module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, smal
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
         }
+        
+        if (place_bearing_at_compound_gear_base) {
+            // Bearing pocket recessed into the base of the gear (same as holder exterior placement)
+            translate([0, 0, -0.1]) {
+                cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
+            }
+            
+            // Ring cutout for bearing area (gap between bearing inner race and gear body)
+            translate([0, 0, bearing_tube_height - 1]) {
+                difference() {
+                    cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false);
+                    cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false);
+                }
+            }
+        }
     }
 }
 
@@ -277,7 +314,7 @@ module filter_holder() {
                 cylinder(h = plug_length, d1 = plug_minor_diameter, d2 = plug_major_diameter, center = false);
             }
             
-            if (place_bearing_at_interior) {
+            if (place_bearing_at_holder_interior) {
                 // 3. Bearing holder tube extension at the end of the plug
                 translate([0, 0, flange_thickness + plug_length]) {
                     cylinder(h = bearing_tube_height, d = bearing_tube_outer_diameter, center = false);
@@ -292,14 +329,14 @@ module filter_holder() {
             cylinder(h = flange_thickness + plug_length + 2, d = rod_hole_diameter, center = false);
         }
         
-        if (place_bearing_at_interior) {
+        if (place_bearing_at_holder_interior) {
             // 5. Bearing pocket at the top of the extension tube (open at top for bearing insertion)
             translate([0, 0, flange_thickness + plug_length]) {
                 cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
             }
         }
         
-        if (place_bearing_at_exterior) {
+        if (place_bearing_at_holder_exterior) {
             // 5b. Bottom bearing pocket - recessed into bottom of flange, flush with bottom surface
             // Pocket goes UP into the flange from the bottom
             translate([0, 0, -0.1]) {
@@ -307,7 +344,7 @@ module filter_holder() {
             }
         }
         
-        if (place_bearing_at_interior) {
+        if (place_bearing_at_holder_interior) {
             // 6. Ring cutout inside bearing area (gap between bearing inner race and plug)
             translate([0, 0, flange_thickness + plug_length - ring_cutout_depth]) {
                 difference() {
@@ -317,7 +354,7 @@ module filter_holder() {
             }
         }
         
-        if (place_bearing_at_exterior) {
+        if (place_bearing_at_holder_exterior) {
             // 6b. Ring cutout for bottom bearing area (gap between bearing inner race and flange)
             translate([0, 0, bearing_tube_height - 1]) { // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
                 difference() {
