@@ -15,6 +15,9 @@ $fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60
 
 //--- Part Dimensions (in mm)
 
+build_pool_filter_holder = true; // Whether to build the main filter holder part
+build_connecting_gear = true; // Whether to build the gear that meshes with the flange gear
+
 place_bearing_at_interior = false;
 place_bearing_at_exterior = true;
 
@@ -253,14 +256,19 @@ module filter_holder() {
     }
 }
 
-//--- Render the parts
-// Original filter holder with gear
-filter_holder();
+if (build_pool_filter_holder) {
+    //--- Render the parts
+    // Original filter holder with gear
+    filter_holder();
+}
 
-// Larger gear (2.25x size) positioned next to the filter holder
-// For proper meshing, both gears must have the same module (mod)
-//connecting_gear_teeth = gear_num_teeth * 2.25;  // 90 teeth
-connecting_gear_teeth = gear_num_teeth;
-connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;  // mod * teeth = pitch diameter
-translate([flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15, 0, 0])
-    simple_gear(gear_mod, connecting_gear_teeth, gear_thickness);
+if (build_connecting_gear) {
+    // Larger gear (2.25x size) positioned next to the filter holder
+    // For proper meshing, both gears must have the same module (mod)
+    //connecting_gear_teeth = gear_num_teeth * 2.25;  // 90 teeth
+    connecting_gear_teeth = gear_num_teeth;
+    connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;  // mod * teeth = pitch diameter
+    translate([flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15, 0, 0])
+        simple_gear(gear_mod, connecting_gear_teeth, gear_thickness);
+
+}
