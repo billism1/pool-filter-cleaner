@@ -17,6 +17,7 @@ $fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60
 
 build_pool_filter_holder = true; // Whether to build the main filter holder part
 build_connecting_gear = true; // Whether to build the gear that meshes with the flange gear
+build_compound_gear = true; // Whether to build the compound gear (same size gear + smaller gear for ratio change)
 
 place_bearing_at_interior = false;
 place_bearing_at_exterior = true;
@@ -168,6 +169,96 @@ module simple_gear(mod, num_teeth, thickness) {
     }
 }
 
+// Module to create a compound gear: same-size gear on top with a smaller gear
+// around the shaft below for driving another gear at a different ratio.
+module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, small_thickness) {
+    // Parameters for the rod holding tube
+    tube_outer_diameter = gear_rod_hole_diameter + (6 * 2);  // Outer diameter of tube
+    tube_height = 30;          // Height of the tube
+    set_screw_depth = tube_outer_diameter / 2 + 2; // Depth of screw hole
+    
+    // Material saving parameters - create hollow center with spokes
+    hub_diameter = small_mod * (small_num_teeth + 2) + 2;  // Extends to the outer diameter of the small gear teeth
+    gear_pitch_diameter = (mod * num_teeth) - 5;  // Calculated pitch diameter of the gear
+    spoke_width = 10;  // Width of spokes connecting hub to gear teeth
+    num_spokes = 6;   // Number of spokes for support
+    
+    // Small gear parameters
+    small_pitch_diameter = small_mod * small_num_teeth;
+    
+    difference() {
+        union() {
+            // Main gear (same as simple_gear) using BOSL2
+            spur_gear(
+                mod=mod,
+                teeth=num_teeth,
+                thickness=thickness,
+                pressure_angle=gear_pressure_angle,
+                clearance=gear_clearance,
+                backlash=0.1,
+                shaft_diam=0,
+                anchor=BOT
+            );
+            
+            // Smaller gear around the shaft, positioned below the main gear
+            translate([0, 0, thickness])
+                spur_gear(
+                    mod=small_mod,
+                    teeth=small_num_teeth,
+                    thickness=small_thickness,
+                    pressure_angle=gear_pressure_angle,
+                    clearance=gear_clearance,
+                    backlash=0.1,
+                    shaft_diam=0,
+                    anchor=BOT
+                );
+            
+            // Rod holding tube extending from center above the small gear
+            translate([0, 0, thickness + small_thickness])
+                cylinder(h = tube_height, d = tube_outer_diameter, center = false);
+        }
+        
+        // Remove material between hub and main gear teeth (leaving spokes)
+        if (gear_pitch_diameter > hub_diameter + 20) {
+            cutout_outer_radius = (gear_pitch_diameter / 2) * 0.85;
+            
+            difference() {
+                translate([0, 0, -0.5])
+                    linear_extrude(height = thickness + 1)
+                        difference() {
+                            circle(d = cutout_outer_radius * 2);
+                            circle(d = hub_diameter);
+                        }
+                
+                // Add back spokes
+                for (i = [0:num_spokes-1]) {
+                    rotate([0, 0, i * 360 / num_spokes])
+                        translate([-spoke_width/2, 0, -1])
+                            cube([spoke_width, cutout_outer_radius, thickness + 3]);
+                }
+            }
+        }
+        
+        // Central hole for the rod (goes all the way through)
+        translate([0, 0, -1])
+            cylinder(h = thickness + small_thickness + tube_height + 2, d = gear_rod_hole_diameter, center = false);
+        
+        // Set screw hole 1 (at 0 degrees) - in the tube section
+        translate([0, 0, thickness + small_thickness + tube_height / 2]) {
+            rotate([0, 90, 0]) {
+                cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
+            }
+        }
+        
+        // Set screw hole 2 (at 180 degrees) - in the tube section
+        translate([0, 0, thickness + small_thickness + tube_height / 2]) {
+            rotate([0, -90, 0]) {
+                cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
+            }
+        }
+    }
+}
+
 // Module to create the part
 module filter_holder() {
     // Use difference() to create the central hole by subtracting a cylinder
@@ -270,4 +361,24 @@ if (build_connecting_gear) {
     connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;  // mod * teeth = pitch diameter
     translate([flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15, 0, 0])
         simple_gear(gear_mod, connecting_gear_teeth, gear_thickness);
+}
+
+if (build_compound_gear) {
+    // Compound gear: same-size main gear + smaller gear on shaft for ratio change
+    // Positioned offset from the simple_gear along the X axis
+    compound_small_num_teeth = 14;        // Fewer teeth for speed increase ratio
+    compound_small_mod = gear_mod;         // Same module so it can mesh with standard gears
+    compound_small_thickness = gear_thickness + 3; // Same thickness as main gear
+    
+    connecting_gear_teeth = gear_num_teeth;
+    connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;
+    compound_small_pitch_diameter = compound_small_mod * compound_small_num_teeth;
+    
+    // Position: offset from the simple_gear by the sum of pitch radii + clearance
+    simple_gear_x = flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
+    compound_gear_x = simple_gear_x + connecting_gear_pitch_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
+    
+    translate([compound_gear_x, 0, 0])
+        compound_gear(gear_mod, connecting_gear_teeth, gear_thickness,
+                      compound_small_num_teeth, compound_small_mod, compound_small_thickness);
 }
