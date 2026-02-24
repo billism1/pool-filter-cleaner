@@ -270,5 +270,4 @@ if (build_connecting_gear) {
     connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;  // mod * teeth = pitch diameter
     translate([flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15, 0, 0])
         simple_gear(gear_mod, connecting_gear_teeth, gear_thickness);
-
 }
