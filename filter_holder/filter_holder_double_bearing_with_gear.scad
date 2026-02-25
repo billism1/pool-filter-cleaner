@@ -206,7 +206,7 @@ module simple_gear(mod, num_teeth, thickness) {
 module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, bevel_mate_teeth) {
     // Parameters for the rod holding tube
     tube_outer_diameter = gear_rod_hole_diameter + (6 * 2);  // Outer diameter of tube
-    tube_height = 20;          // Height of the tube
+    tube_height = 15;          // Height of the tube
     set_screw_depth = tube_outer_diameter / 2 + 2; // Depth of screw hole
     
     // Material saving parameters - create hollow center with spokes
@@ -345,7 +345,7 @@ module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, beve
 module mating_bevel_gear(mod, num_teeth, mate_teeth, pinion_face_width) {
     // Parameters for the rod holding tube
     tube_outer_diameter = gear_rod_hole_diameter + (6 * 2);  // Same tube spec as other gears
-    tube_height = 20;
+    tube_height = 15;
     set_screw_depth = tube_outer_diameter / 2 + 2;
     
     // --- Bevel gear geometry ---
