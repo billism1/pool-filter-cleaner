@@ -80,7 +80,7 @@ gear_outer_diameter = gear_mod * (gear_num_teeth + 2); // Outer/tip diameter of 
 // 1. Gear section: has gear teeth, diameter = flange_diameter, thickness = gear_thickness
 // 2. Plain section: smooth disc, diameter = gear_outer_diameter, thickness = flange_thickness
 //    The bottom outer edge is chamfered (inverted cone) so it prints without support.
-flange_chamfer_angle = 22.5; // Angle from horizontal for support-free 3D printing
+flange_chamfer_angle = 30; // Angle from horizontal for support-free 3D printing
 flange_overhang_radius = (gear_outer_diameter - flange_diameter) / 2; // Radial overhang distance
 flange_chamfer_height = flange_overhang_radius * tan(flange_chamfer_angle); // Height of chamfer cone
 flange_total_thickness = gear_thickness + flange_thickness; // Combined height of both flange sections
