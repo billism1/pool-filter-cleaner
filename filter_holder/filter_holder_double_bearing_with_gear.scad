@@ -11,16 +11,16 @@ include <BOSL2/gears.scad>
 
 // Parameters
 
-$fn = 180; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
+$fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
 
 //--- Part Dimensions (in mm)
 
 build_pool_filter_holder = true; // Whether to build the main filter holder part
-build_connecting_gear = true; // Whether to build the gear that meshes with the flange gear
-build_compound_gear = true; // Whether to build the compound gear (same size gear + smaller gear for ratio change)
+build_connecting_gear = false; // Whether to build the gear that meshes with the flange gear
+build_compound_gear = false; // Whether to build the compound gear (same size gear + smaller gear for ratio change)
 
-place_bearing_at_holder_interior = false;
-place_bearing_at_holder_exterior = true;
+place_bearing_at_holder_interior = true;
+place_bearing_at_holder_exterior = false;
 
 place_bearing_at_simple_gear_base = true;   // Whether to place a bearing pocket at the base of the simple gear
 place_bearing_at_compound_gear_base = true; // Whether to place a bearing pocket at the base of the compound gear
@@ -38,15 +38,14 @@ flange_thickness = 10;
 rod_diameter = 19.05;   // (19.05 mm == 0.75 inches)
 rod_clearance = 2.55;   // Small clearance so bearing inner diameter contacts rod, not this holder assembly
 rod_hole_diameter = rod_diameter + rod_clearance;
-total_length = plug_length + flange_thickness; // Total length of the piece
 
 // Rod specifications for simple gear
 gear_rod_clearance = 0.5;         // Clearance for easy insertion
 gear_rod_hole_diameter = rod_diameter + gear_rod_clearance;
 
 // Drain holes around the flange
-drain_hole_diameter = 17;
-drain_hole_count = 7; // Number of holes around the flange
+drain_hole_diameter = 20;
+drain_hole_count = 6; // Number of holes around the flange
 drain_hole_circle_radius = plug_major_diameter / 2; // Centers on the outside diameter of the plug
 
 // Bearing holder at the end of the plug
@@ -75,6 +74,13 @@ gear_pressure_angle = 20;     // Standard pressure angle for involute gears
 gear_thickness = 10; // Thickness of the gear teeth (same as flange thickness for a flush fit)
 gear_clearance = 0.2;         // Clearance for gear meshing
 // Calculated: pitch_diameter = mod * teeth = 2.8 * 40 = 112mm
+gear_outer_diameter = gear_mod * (gear_num_teeth + 2); // Outer/tip diameter of gear teeth = 117.6mm
+
+// The flange is split into two sections (bottom to top):
+// 1. Gear section: has gear teeth, diameter = flange_diameter, thickness = gear_thickness
+// 2. Plain section: smooth disc, diameter = gear_outer_diameter, thickness = flange_thickness
+flange_total_thickness = gear_thickness + flange_thickness; // Combined height of both flange sections
+total_length = plug_length + flange_total_thickness; // Total length of the piece (both flange sections + plug)
 
 // Module to create gear teeth ring using BOSL2 involute gears
 module gear_teeth_ring(mod, teeth, thickness, bore_diameter) {
@@ -302,21 +308,26 @@ module filter_holder() {
     difference() {
         // Main body of the piece
         union() {
-            // 1. The outer flange (a flat disc)
-            cylinder(h = flange_thickness, d = flange_diameter, center = false);
+            // 1a. Bottom flange section with gear teeth (Z=0 to gear_thickness)
+            cylinder(h = gear_thickness, d = flange_diameter, center = false);
             
-            // 1b. Involute gear teeth on the exterior edge (using BOSL2)
+            // 1b. Involute gear teeth on the bottom section (using BOSL2)
             gear_teeth_ring(gear_mod, gear_num_teeth, gear_thickness, flange_diameter);
 
+            // 1c. Upper plain flange section - diameter extends to gear tooth tips
+            translate([0, 0, gear_thickness]) {
+                cylinder(h = flange_thickness, d = gear_outer_diameter, center = false);
+            }
+
             // 2. The tapered plug that goes into the filter
-            // It's positioned on top of the flange
-            translate([0, 0, flange_thickness]) {
+            // It's positioned on top of both flange sections
+            translate([0, 0, flange_total_thickness]) {
                 cylinder(h = plug_length, d1 = plug_minor_diameter, d2 = plug_major_diameter, center = false);
             }
             
             if (place_bearing_at_holder_interior) {
                 // 3. Bearing holder tube extension at the end of the plug
-                translate([0, 0, flange_thickness + plug_length]) {
+                translate([0, 0, flange_total_thickness + plug_length]) {
                     cylinder(h = bearing_tube_height, d = bearing_tube_outer_diameter, center = false);
                 }
             }
@@ -326,12 +337,12 @@ module filter_holder() {
         // This cylinder is slightly taller to ensure a clean cut through the entire piece
         // It's translated down slightly to start before the main body begins
         translate([0, 0, -1]) {
-            cylinder(h = flange_thickness + plug_length + 2, d = rod_hole_diameter, center = false);
+            cylinder(h = flange_total_thickness + plug_length + 2, d = rod_hole_diameter, center = false);
         }
         
         if (place_bearing_at_holder_interior) {
             // 5. Bearing pocket at the top of the extension tube (open at top for bearing insertion)
-            translate([0, 0, flange_thickness + plug_length]) {
+            translate([0, 0, flange_total_thickness + plug_length]) {
                 cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
             }
         }
@@ -346,7 +357,7 @@ module filter_holder() {
         
         if (place_bearing_at_holder_interior) {
             // 6. Ring cutout inside bearing area (gap between bearing inner race and plug)
-            translate([0, 0, flange_thickness + plug_length - ring_cutout_depth]) {
+            translate([0, 0, flange_total_thickness + plug_length - ring_cutout_depth]) {
                 difference() {
                     cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false); // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
                     cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false); // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
@@ -376,7 +387,7 @@ module filter_holder() {
         }
         
         // 8. Screw holes through bearing holder walls
-        translate([0, 0, flange_thickness + plug_length + bearing_tube_height / 2]) {
+        translate([0, 0, flange_total_thickness + plug_length + bearing_tube_height / 2]) {
             rotate([0, 90, 0]) {
                 cylinder(h = bearing_tube_outer_diameter + 2, d = bearing_tube_screw_hole_diameter, center = true);
             }
