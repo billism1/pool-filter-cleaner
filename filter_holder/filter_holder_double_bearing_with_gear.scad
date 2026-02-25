@@ -11,11 +11,11 @@ include <BOSL2/gears.scad>
 
 // Parameters
 
-$fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
+$fn = 180; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
 
 //--- Part Dimensions (in mm)
 
-build_pool_filter_holder = false; // Whether to build the main filter holder part
+build_pool_filter_holder = true; // Whether to build the main filter holder part
 build_connecting_gear = false; // Whether to build the gear that meshes with the flange gear
 build_compound_gear = true; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
 build_mating_bevel_gear = true; // Whether to build the larger mating bevel gear (90° axis change)
@@ -370,46 +370,68 @@ module mating_bevel_gear(mod, num_teeth, mate_teeth, pinion_face_width) {
              " pitch_angle=", bevel_pitch_angle, "°"));
     echo(str("  big-end OD=", 2*bevel_outer_radius, "mm  root D=", 2*bevel_root_radius, "mm"));
     echo(str("  small-end tip D=", small_end_tip_diameter, "mm  root D=", small_end_root_diameter, "mm"));
+    // Flange at the big end to house the bearing pocket (same thickness as other gear flanges)
+    flange_height = gear_thickness;  // Match the spur gear / flange thickness used elsewhere
+    flange_diameter = 2 * bevel_root_radius + 5;  // Match the big-end root circle of the bevel gear
+    
     echo(str("  face_width=", bevel_face_width, "mm  axial height=", bevel_height, "mm"));
     echo(str("  cone_distance=", bevel_cone_distance, "mm"));
+    echo(str("  flange_height=", flange_height, "mm  flange_diameter=", flange_diameter, "mm"));
     
     difference() {
         union() {
-            // Straight bevel gear body
-            bevel_gear(
-                mod=mod,
-                teeth=num_teeth,
-                mate_teeth=mate_teeth,
-                face_width=bevel_face_width,
-                pressure_angle=gear_pressure_angle,
-                clearance=gear_clearance,
-                backlash=0.1,
-                spiral=0,
-                cutter_radius=0,
-                shaft_diam=0,
-                anchor=BOT
-            );
+            // Solid flange disc at the big end (bottom) – provides material for bearing pocket
+            cylinder(h = flange_height, d = flange_diameter, center = false);
+            
+            // Straight bevel gear body sitting on top of the flange
+            translate([0, 0, flange_height])
+                bevel_gear(
+                    mod=mod,
+                    teeth=num_teeth,
+                    mate_teeth=mate_teeth,
+                    face_width=bevel_face_width,
+                    pressure_angle=gear_pressure_angle,
+                    clearance=gear_clearance,
+                    backlash=0.1,
+                    spiral=0,
+                    cutter_radius=0,
+                    shaft_diam=0,
+                    anchor=BOT
+                );
             
             // Rod holding tube extending from the small end (top)
-            translate([0, 0, bevel_height])
+            translate([0, 0, flange_height + bevel_height])
                 cylinder(h = tube_height, d = tube_outer_diameter, center = false);
         }
         
         // Central hole for the rod (all the way through)
         translate([0, 0, -1])
-            cylinder(h = bevel_height + tube_height + 2, d = gear_rod_hole_diameter, center = false);
+            cylinder(h = flange_height + bevel_height + tube_height + 2, d = gear_rod_hole_diameter, center = false);
         
         // Set screw hole 1 (at 0 degrees) - in the tube section
-        translate([0, 0, bevel_height + tube_height / 2]) {
+        translate([0, 0, flange_height + bevel_height + tube_height / 2]) {
             rotate([0, 90, 0]) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
         }
         
         // Set screw hole 2 (at 180 degrees) - in the tube section
-        translate([0, 0, bevel_height + tube_height / 2]) {
+        translate([0, 0, flange_height + bevel_height + tube_height / 2]) {
             rotate([0, -90, 0]) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
+            }
+        }
+        
+        // Bearing pocket recessed into the big-end (bottom) face of the bevel gear
+        translate([0, 0, -0.1]) {
+            cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
+        }
+        
+        // Ring cutout for bearing area (gap between bearing inner race and gear body)
+        translate([0, 0, bearing_tube_height - 1]) {
+            difference() {
+                cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false);
+                cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false);
             }
         }
     }
@@ -531,63 +553,67 @@ if (build_connecting_gear) {
         simple_gear(gear_mod, connecting_gear_teeth, gear_thickness);
 }
 
+compound_small_num_teeth = 18;         // Teeth on the bevel pinion (needs enough teeth so root radius >> tube radius)
+compound_bevel_mate_teeth = 40;        // Teeth on the mating (larger) bevel gear
+compound_small_mod = gear_mod;          // Same module so teeth mesh properly
+
+connecting_gear_teeth = gear_num_teeth;
+connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;
+
+// Position: offset from the simple_gear by the sum of pitch radii + clearance
+simple_gear_x = flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
+compound_gear_x = simple_gear_x + connecting_gear_pitch_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
+
 if (build_compound_gear) {
     // Compound gear: spur gear on bottom + straight bevel gear on top for 90° direction change
     // The bevel pinion meshes with a larger mating bevel gear whose axis is perpendicular.
     // Positioned offset from the simple_gear along the X axis
-    compound_small_num_teeth = 18;         // Teeth on the bevel pinion (needs enough teeth so root radius >> tube radius)
-    compound_bevel_mate_teeth = 40;        // Teeth on the mating (larger) bevel gear
-    compound_small_mod = gear_mod;          // Same module so teeth mesh properly
-    
-    connecting_gear_teeth = gear_num_teeth;
-    connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;
-    
-    // Position: offset from the simple_gear by the sum of pitch radii + clearance
-    simple_gear_x = flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
-    compound_gear_x = simple_gear_x + connecting_gear_pitch_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
     
     translate([compound_gear_x, 0, 0])
         compound_gear(gear_mod, connecting_gear_teeth, gear_thickness,
                       compound_small_num_teeth, compound_small_mod, compound_bevel_mate_teeth);
+}
+
+if (build_mating_bevel_gear) {
+    // --- Calculate meshing position for the mating bevel gear ---
+    // Pinion bevel parameters (must match compound_gear calculations)
+    pinion_pitch_angle = atan2(compound_small_num_teeth, compound_bevel_mate_teeth);
+    pinion_pitch_radius = compound_small_mod * compound_small_num_teeth / 2;
+    pinion_root_radius = compound_small_mod * (compound_small_num_teeth - 2.5) / 2;
+    pinion_cone_distance = pinion_pitch_radius / sin(pinion_pitch_angle);
+    pinion_face_width = pinion_cone_distance * (1 - ((gear_rod_hole_diameter + 12) / 2) / pinion_root_radius);
+    pinion_height = pinion_face_width * cos(pinion_pitch_angle);
     
-    if (build_mating_bevel_gear) {
-        // --- Calculate meshing position for the mating bevel gear ---
-        // Pinion bevel parameters (must match compound_gear calculations)
-        pinion_pitch_angle = atan2(compound_small_num_teeth, compound_bevel_mate_teeth);
-        pinion_pitch_radius = compound_small_mod * compound_small_num_teeth / 2;
-        pinion_root_radius = compound_small_mod * (compound_small_num_teeth - 2.5) / 2;
-        pinion_cone_distance = pinion_pitch_radius / sin(pinion_pitch_angle);
-        pinion_face_width = pinion_cone_distance * (1 - ((gear_rod_hole_diameter + 12) / 2) / pinion_root_radius);
-        pinion_height = pinion_face_width * cos(pinion_pitch_angle);
-        
-        // Mating gear pitch parameters
-        mate_pitch_angle = atan2(compound_bevel_mate_teeth, compound_small_num_teeth);
-        mate_pitch_radius = compound_small_mod * compound_bevel_mate_teeth / 2;
-        
-        // The bevel pinion sits at Z = gear_thickness on the compound gear.
-        // Its big end is at the bottom (Z = gear_thickness), small end at top.
-        // The pitch cone apex for both gears is at the same point.
-        // Apex is at Z = gear_thickness + pinion_pitch_radius / tan(pinion_pitch_angle)
-        //            = gear_thickness + pinion_cone_distance * cos(pinion_pitch_angle)
-        apex_z = gear_thickness + pinion_cone_distance * cos(pinion_pitch_angle);
-        
-        // The mating gear's axis is perpendicular (along Y).
-        // Its big end faces toward the compound gear, apex at the same point.
-        // After rotate([90,0,0]) the gear's local Z axis becomes world -Y,
-        // so the gear extends in the -Y direction from its origin.
-        // We need to offset in +Y so the mating gear's apex coincides with
-        // the pinion's apex. The mating gear's axial height from big-end to
-        // apex is: mate_cone_distance * cos(mate_pitch_angle).
-        mate_cone_distance = mate_pitch_radius / sin(mate_pitch_angle);
-        mate_axial_height = mate_cone_distance * cos(mate_pitch_angle);
-        
-        // Add pitchoff correction: BOSL2 anchor=BOT includes the dedendum offset
-        // from the pitch cone, so the gear origin is slightly below the pitch base.
-        mate_pitchoff = (mate_pitch_radius - compound_small_mod * (compound_bevel_mate_teeth - 2.5) / 2) * sin(mate_pitch_angle);
-        
-        translate([compound_gear_x, mate_axial_height + mate_pitchoff, apex_z])
-            rotate([90, 0, 0])  // Rotate so mating gear axis points along -Y
-                mating_bevel_gear(compound_small_mod, compound_bevel_mate_teeth,
-                                  compound_small_num_teeth, pinion_face_width);
-    }
+    // Mating gear pitch parameters
+    mate_pitch_angle = atan2(compound_bevel_mate_teeth, compound_small_num_teeth);
+    mate_pitch_radius = compound_small_mod * compound_bevel_mate_teeth / 2;
+    
+    // The bevel pinion sits at Z = gear_thickness on the compound gear.
+    // Its big end is at the bottom (Z = gear_thickness), small end at top.
+    // The pitch cone apex for both gears is at the same point.
+    // Apex is at Z = gear_thickness + pinion_pitch_radius / tan(pinion_pitch_angle)
+    //            = gear_thickness + pinion_cone_distance * cos(pinion_pitch_angle)
+    apex_z = gear_thickness + pinion_cone_distance * cos(pinion_pitch_angle);
+    
+    // The mating gear's axis is perpendicular (along Y).
+    // Its big end faces toward the compound gear, apex at the same point.
+    // After rotate([90,0,0]) the gear's local Z axis becomes world -Y,
+    // so the gear extends in the -Y direction from its origin.
+    // We need to offset in +Y so the mating gear's apex coincides with
+    // the pinion's apex. The mating gear's axial height from big-end to
+    // apex is: mate_cone_distance * cos(mate_pitch_angle).
+    mate_cone_distance = mate_pitch_radius / sin(mate_pitch_angle);
+    mate_axial_height = mate_cone_distance * cos(mate_pitch_angle);
+    
+    // Add pitchoff correction: BOSL2 anchor=BOT includes the dedendum offset
+    // from the pitch cone, so the gear origin is slightly below the pitch base.
+    mate_pitchoff = (mate_pitch_radius - compound_small_mod * (compound_bevel_mate_teeth - 2.5) / 2) * sin(mate_pitch_angle);
+    
+    // Account for the flange added below the bevel gear (same as gear_thickness)
+    mate_flange_height = gear_thickness;
+    
+    translate([compound_gear_x, mate_axial_height + mate_pitchoff + mate_flange_height, apex_z])
+        rotate([90, 0, 0])  // Rotate so mating gear axis points along -Y
+            mating_bevel_gear(compound_small_mod, compound_bevel_mate_teeth,
+                                compound_small_num_teeth, pinion_face_width);
 }
