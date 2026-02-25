@@ -79,6 +79,10 @@ gear_outer_diameter = gear_mod * (gear_num_teeth + 2); // Outer/tip diameter of 
 // The flange is split into two sections (bottom to top):
 // 1. Gear section: has gear teeth, diameter = flange_diameter, thickness = gear_thickness
 // 2. Plain section: smooth disc, diameter = gear_outer_diameter, thickness = flange_thickness
+//    The bottom outer edge is chamfered (inverted cone) so it prints without support.
+flange_chamfer_angle = 22.5; // Angle from horizontal for support-free 3D printing
+flange_overhang_radius = (gear_outer_diameter - flange_diameter) / 2; // Radial overhang distance
+flange_chamfer_height = flange_overhang_radius * tan(flange_chamfer_angle); // Height of chamfer cone
 flange_total_thickness = gear_thickness + flange_thickness; // Combined height of both flange sections
 total_length = plug_length + flange_total_thickness; // Total length of the piece (both flange sections + plug)
 
@@ -312,11 +316,18 @@ module filter_holder() {
             cylinder(h = gear_thickness, d = flange_diameter, center = false);
             
             // 1b. Involute gear teeth on the bottom section (using BOSL2)
-            gear_teeth_ring(gear_mod, gear_num_teeth, gear_thickness, flange_diameter);
+            // Teeth extend up into the chamfer zone so their tops aren't exposed
+            gear_teeth_ring(gear_mod, gear_num_teeth, gear_thickness + flange_chamfer_height, flange_diameter);
 
             // 1c. Upper plain flange section - diameter extends to gear tooth tips
+            // Bottom outer edge is chamfered at 22.5° for support-free 3D printing
             translate([0, 0, gear_thickness]) {
-                cylinder(h = flange_thickness, d = gear_outer_diameter, center = false);
+                // Chamfer cone at bottom (transitions from flange_diameter up to gear_outer_diameter)
+                cylinder(h = flange_chamfer_height, d1 = flange_diameter, d2 = gear_outer_diameter, center = false);
+                // Remaining straight cylinder above chamfer
+                translate([0, 0, flange_chamfer_height]) {
+                    cylinder(h = flange_thickness - flange_chamfer_height, d = gear_outer_diameter, center = false);
+                }
             }
 
             // 2. The tapered plug that goes into the filter
