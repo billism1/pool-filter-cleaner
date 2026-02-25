@@ -17,7 +17,7 @@ $fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60
 
 build_pool_filter_holder = true; // Whether to build the main filter holder part
 build_connecting_gear = false; // Whether to build the gear that meshes with the flange gear
-build_compound_gear = false; // Whether to build the compound gear (same size gear + smaller gear for ratio change)
+build_compound_gear = true; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
 
 place_bearing_at_holder_interior = true;
 place_bearing_at_holder_exterior = false;
@@ -199,28 +199,55 @@ module simple_gear(mod, num_teeth, thickness) {
     }
 }
 
-// Module to create a compound gear: same-size gear on top with a smaller gear
-// around the shaft below for driving another gear at a different ratio.
-module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, small_thickness) {
+// Module to create a compound gear: same-size spur gear on the bottom with a straight
+// bevel gear on top for 90-degree direction change.  The small (top) end of the bevel
+// gear is sized to transition smoothly into the rod-holding tube.
+module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, bevel_mate_teeth) {
     // Parameters for the rod holding tube
     tube_outer_diameter = gear_rod_hole_diameter + (6 * 2);  // Outer diameter of tube
     tube_height = 30;          // Height of the tube
     set_screw_depth = tube_outer_diameter / 2 + 2; // Depth of screw hole
     
     // Material saving parameters - create hollow center with spokes
-    //hub_diameter = small_mod * (small_num_teeth + 2) + 2;  // Extends to the outer diameter of the small gear teeth
     hub_diameter = bearing_outer_diameter + thickness * 1.2;
     
     gear_pitch_diameter = (mod * num_teeth) - 5;  // Calculated pitch diameter of the gear
     spoke_width = 10;  // Width of spokes connecting hub to gear teeth
     num_spokes = 6;   // Number of spokes for support
     
-    // Small gear parameters
-    small_pitch_diameter = small_mod * small_num_teeth;
+    // --- Straight bevel gear calculations ---
+    // pitch_angle is determined by the tooth ratio so the two bevel gears mesh at 90°
+    bevel_pitch_angle = atan2(small_num_teeth, bevel_mate_teeth);
+    bevel_outer_radius = small_mod * (small_num_teeth + 2) / 2; // Outer (tip) radius at big end
+    bevel_root_radius = small_mod * (small_num_teeth - 2.5) / 2; // Root (trough) radius at big end (dedendum = 1.25*mod)
+    bevel_pitch_radius = small_mod * small_num_teeth / 2;       // Pitch radius at big end
+    bevel_cone_distance = bevel_pitch_radius / sin(bevel_pitch_angle); // Slant distance to cone apex
+    
+    // Calculate face_width so the small-end ROOT (trough) diameter equals the tube outer diameter
+    // This way the tooth troughs at the top of the bevel gear meet the tube OD for a smooth transition.
+    // small_end_root_radius = bevel_root_radius * (1 - face_width / cone_distance)
+    // Solving for face_width:
+    bevel_face_width = bevel_cone_distance * (1 - (tube_outer_diameter / 2) / bevel_root_radius);
+    
+    // Axial height of the bevel gear (projection of face_width onto the gear axis)
+    bevel_height = bevel_face_width * cos(bevel_pitch_angle);
+    
+    // Small-end tip diameter (for debug output)
+    small_end_tip_diameter = 2 * bevel_outer_radius * (1 - bevel_face_width / bevel_cone_distance);
+    small_end_root_diameter = 2 * bevel_root_radius * (1 - bevel_face_width / bevel_cone_distance);
+    
+    echo(str("Bevel gear: teeth=", small_num_teeth, " mate_teeth=", bevel_mate_teeth,
+             " pitch_angle=", bevel_pitch_angle, "°"));
+    echo(str("  big-end OD=", 2*bevel_outer_radius, "mm  big-end root D=", 2*bevel_root_radius, "mm"));
+    echo(str("  small-end tip D=", small_end_tip_diameter, "mm  small-end root D≈", small_end_root_diameter, "mm"));
+    echo(str("  tube OD=", tube_outer_diameter, "mm"));
+    echo(str("  face_width=", bevel_face_width, "mm  axial height=", bevel_height, "mm"));
+    echo(str("  cone_distance=", bevel_cone_distance, "mm  face/cone ratio=",
+             bevel_face_width/bevel_cone_distance));
     
     difference() {
         union() {
-            // Main gear (same as simple_gear) using BOSL2
+            // Main spur gear (bottom) using BOSL2
             spur_gear(
                 mod=mod,
                 teeth=num_teeth,
@@ -232,25 +259,30 @@ module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, smal
                 anchor=BOT
             );
             
-            // Smaller gear around the shaft, positioned below the main gear
+            // Straight bevel gear on top of the spur gear
+            // Big end (wider) sits on the spur gear; small end (narrower) faces up
             translate([0, 0, thickness])
-                spur_gear(
+                bevel_gear(
                     mod=small_mod,
                     teeth=small_num_teeth,
-                    thickness=small_thickness,
+                    mate_teeth=bevel_mate_teeth,
+                    face_width=bevel_face_width,
                     pressure_angle=gear_pressure_angle,
                     clearance=gear_clearance,
                     backlash=0.1,
+                    spiral=0,         // STRAIGHT bevel – no spiral or hypoid
+                    cutter_radius=0,  // Must be 0 for truly straight teeth
                     shaft_diam=0,
                     anchor=BOT
                 );
             
-            // Rod holding tube extending from center above the small gear
-            translate([0, 0, thickness + small_thickness])
+            // Rod holding tube extending from center above the bevel gear
+            // Starts where the small end of the bevel gear ends – diameters match
+            translate([0, 0, thickness + bevel_height])
                 cylinder(h = tube_height, d = tube_outer_diameter, center = false);
         }
         
-        // Remove material between hub and main gear teeth (leaving spokes)
+        // Remove material between hub and main spur gear teeth (leaving spokes)
         if (gear_pitch_diameter > hub_diameter + 20) {
             cutout_outer_radius = (gear_pitch_diameter / 2) * 0.85;
             
@@ -273,17 +305,17 @@ module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, smal
         
         // Central hole for the rod (goes all the way through)
         translate([0, 0, -1])
-            cylinder(h = thickness + small_thickness + tube_height + 2, d = gear_rod_hole_diameter, center = false);
+            cylinder(h = thickness + bevel_height + tube_height + 2, d = gear_rod_hole_diameter, center = false);
         
         // Set screw hole 1 (at 0 degrees) - in the tube section
-        translate([0, 0, thickness + small_thickness + tube_height / 2]) {
+        translate([0, 0, thickness + bevel_height + tube_height / 2]) {
             rotate([0, 90, 0]) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
         }
         
         // Set screw hole 2 (at 180 degrees) - in the tube section
-        translate([0, 0, thickness + small_thickness + tube_height / 2]) {
+        translate([0, 0, thickness + bevel_height + tube_height / 2]) {
             rotate([0, -90, 0]) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
@@ -423,15 +455,15 @@ if (build_connecting_gear) {
 }
 
 if (build_compound_gear) {
-    // Compound gear: same-size main gear + smaller gear on shaft for ratio change
+    // Compound gear: spur gear on bottom + straight bevel gear on top for 90° direction change
+    // The bevel pinion meshes with a larger mating bevel gear whose axis is perpendicular.
     // Positioned offset from the simple_gear along the X axis
-    compound_small_num_teeth = 14;        // Fewer teeth for speed increase ratio
-    compound_small_mod = gear_mod;         // Same module so it can mesh with standard gears
-    compound_small_thickness = gear_thickness + 3; // Same thickness as main gear
+    compound_small_num_teeth = 18;         // Teeth on the bevel pinion (needs enough teeth so root radius >> tube radius)
+    compound_bevel_mate_teeth = 40;        // Teeth on the mating (larger) bevel gear
+    compound_small_mod = gear_mod;          // Same module so teeth mesh properly
     
     connecting_gear_teeth = gear_num_teeth;
     connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;
-    compound_small_pitch_diameter = compound_small_mod * compound_small_num_teeth;
     
     // Position: offset from the simple_gear by the sum of pitch radii + clearance
     simple_gear_x = flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
@@ -439,5 +471,5 @@ if (build_compound_gear) {
     
     translate([compound_gear_x, 0, 0])
         compound_gear(gear_mod, connecting_gear_teeth, gear_thickness,
-                      compound_small_num_teeth, compound_small_mod, compound_small_thickness);
+                      compound_small_num_teeth, compound_small_mod, compound_bevel_mate_teeth);
 }
