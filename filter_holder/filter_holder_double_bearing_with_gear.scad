@@ -581,7 +581,11 @@ if (build_compound_gear) {
         mate_cone_distance = mate_pitch_radius / sin(mate_pitch_angle);
         mate_axial_height = mate_cone_distance * cos(mate_pitch_angle);
         
-        translate([compound_gear_x, mate_axial_height, apex_z])
+        // Add pitchoff correction: BOSL2 anchor=BOT includes the dedendum offset
+        // from the pitch cone, so the gear origin is slightly below the pitch base.
+        mate_pitchoff = (mate_pitch_radius - compound_small_mod * (compound_bevel_mate_teeth - 2.5) / 2) * sin(mate_pitch_angle);
+        
+        translate([compound_gear_x, mate_axial_height + mate_pitchoff, apex_z])
             rotate([90, 0, 0])  // Rotate so mating gear axis points along -Y
                 mating_bevel_gear(compound_small_mod, compound_bevel_mate_teeth,
                                   compound_small_num_teeth, pinion_face_width);
