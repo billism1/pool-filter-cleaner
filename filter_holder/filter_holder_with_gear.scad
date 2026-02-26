@@ -11,7 +11,7 @@ include <BOSL2/gears.scad>
 
 // Parameters
 
-$fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
+$fn = 180; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
 
 //--- Part Dimensions (in mm)
 
