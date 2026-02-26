@@ -6,7 +6,7 @@
 include <BOSL2/std.scad>
 // https://github.com/BelfrySCAD/BOSL2
 
-$fn = 180;  // Reduce to 60 for faster preview, increase to 180+ to for final render
+$fn = 60;  // Reduce to 60 for faster preview, increase to 180+ to for final render
 
 // Horizontal hole configuration
 horizontal_through_hole_both_sides = true;  // If true, rod hole goes through both sides; if false, only extends in positive X direction
