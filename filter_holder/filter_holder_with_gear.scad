@@ -17,8 +17,8 @@ $fn = 180; // Number of facets for smoothness. Use 180+ for final renders, but 6
 
 build_pool_filter_holder = true; // Whether to build the main filter holder part
 build_connecting_gear = false; // Whether to build the gear that meshes with the flange gear
-build_compound_gear = false; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
-build_mating_bevel_gear = false; // Whether to build the larger mating bevel gear (90° axis change)
+build_compound_gear = true; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
+build_mating_bevel_gear = true; // Whether to build the larger mating bevel gear (90° axis change)
 
 place_bearing_at_holder_interior = false;
 place_bearing_at_holder_exterior = true;
@@ -437,6 +437,16 @@ module mating_bevel_gear(mod, num_teeth, mate_teeth, pinion_face_width) {
         //         cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false);
         //     }
         // }
+        
+        // "Drain" holes (same layout/offsets as main filter holder plug geometry)
+        for (i = [0:drain_hole_count-1]) {
+            angle = i * 360 / drain_hole_count;
+            rotate([0, 0, angle]) {
+                translate([drain_hole_circle_radius, 0, -1]) {
+                    cylinder(h = flange_height + bevel_height + tube_height + 2, d = drain_hole_diameter, center = false);
+                }
+            }
+        }
     }
 }
 
