@@ -11,14 +11,14 @@ include <BOSL2/gears.scad>
 
 // Parameters
 
-$fn = 180; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
+$fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
 
 //--- Part Dimensions (in mm)
 
 build_pool_filter_holder = true; // Whether to build the main filter holder part
 build_connecting_gear = false; // Whether to build the gear that meshes with the flange gear
-build_compound_gear = false; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
-build_mating_bevel_gear = false; // Whether to build the larger mating bevel gear (90° axis change)
+build_compound_gear = true; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
+build_mating_bevel_gear = true; // Whether to build the larger mating bevel gear (90° axis change)
 
 place_bearing_at_holder_interior = false;
 place_bearing_at_holder_exterior = true;
@@ -32,7 +32,7 @@ plug_minor_diameter = 76.2; // To this diameter for a snug fit (76.2 mm == 3.0 i
 plug_length = 16; // How far it goes into the filter
 
 // Flange that stays outside the filter
-flange_diameter = 105;
+flange_diameter = 135;
 flange_thickness = 10;
 
 // Central hole for the support rod
@@ -69,7 +69,7 @@ ring_cutout_inner_diameter = rod_hole_diameter_loose + 2 * ring_cutout_gap_from_
 ring_cutout_outer_diameter = ring_cutout_inner_diameter + 2 * ring_cutout_radial_thickness; // Outer diameter of ring cutout
 
 // Gear teeth parameters (using BOSL2 involute gears)
-gear_num_teeth = 40;          // Number of teeth around the flange
+gear_num_teeth = 50;          // Number of teeth around the flange
 gear_mod = 2.8;               // Gear module (controls tooth size) - mod = pitch_diameter / teeth
 gear_pressure_angle = 20;     // Standard pressure angle for involute gears
 gear_thickness = 10; // Thickness of the gear teeth (same as flange thickness for a flush fit)
@@ -556,16 +556,17 @@ if (build_connecting_gear) {
         simple_gear(gear_mod, connecting_gear_teeth, gear_thickness);
 }
 
-compound_small_num_teeth = 18;         // Teeth on the bevel pinion (needs enough teeth so root radius >> tube radius)
-compound_bevel_mate_teeth = 40;        // Teeth on the mating (larger) bevel gear
-compound_small_mod = gear_mod;          // Same module so teeth mesh properly
+compound_small_num_teeth = 18;                  // Teeth on the bevel pinion (needs enough teeth so root radius >> tube radius)
+compound_bevel_mate_teeth = gear_num_teeth;     // Teeth on the mating (larger) bevel gear
+compound_small_mod = gear_mod;                  // Same module so teeth mesh properly
 
 connecting_gear_teeth = gear_num_teeth;
 connecting_gear_pitch_diameter = gear_mod * connecting_gear_teeth;
 
 // Position: offset from the simple_gear by the sum of pitch radii + clearance
 simple_gear_x = flange_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
-compound_gear_x = simple_gear_x + connecting_gear_pitch_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
+//compound_gear_x = simple_gear_x + connecting_gear_pitch_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
+compound_gear_x = connecting_gear_pitch_diameter/2 + connecting_gear_pitch_diameter/2 + 15;
 
 if (build_compound_gear) {
     // Compound gear: spur gear on bottom + straight bevel gear on top for 90° direction change
