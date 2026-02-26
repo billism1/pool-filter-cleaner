@@ -11,12 +11,12 @@ include <BOSL2/gears.scad>
 
 // Parameters
 
-$fn = 180; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
+$fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
 
 //--- Part Dimensions (in mm)
 
 build_pool_filter_holder = true; // Whether to build the main filter holder part
-build_connecting_gear = false; // Whether to build the gear that meshes with the flange gear
+build_connecting_gear = true; // Whether to build the gear that meshes with the flange gear
 build_compound_gear = true; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
 build_mating_bevel_gear = true; // Whether to build the larger mating bevel gear (90° axis change)
 
@@ -38,11 +38,11 @@ flange_thickness = 10;
 // Central hole for the support rod
 rod_diameter = 19.05;   // (19.05 mm == 0.75 inches)
 rod_clearance = 2.55;   // Small clearance so bearing inner diameter contacts rod, not this holder assembly
-rod_hole_diameter = rod_diameter + rod_clearance;
+rod_hole_diameter_loose = rod_diameter + rod_clearance;
 
-// Rod specifications for simple gear
+// Rod specifications for gears that have a snug fitting tube for the rod (like the mating bevel gear)
 gear_rod_clearance = 0.5;         // Clearance for easy insertion
-gear_rod_hole_diameter = rod_diameter + gear_rod_clearance;
+gear_rod_hole_diameter_snug = rod_diameter + gear_rod_clearance;
 
 // Drain holes around the flange
 drain_hole_diameter = 20;
@@ -65,7 +65,7 @@ bearing_tube_screw_hole_diameter = 3.4;    // Diameter of set screw holes. 3.4mm
 ring_cutout_gap_from_rod_hole = 0.633; // Gap between rod hole edge and ring cutout inner edge
 ring_cutout_radial_thickness = 2.5; // Radial thickness of the ring cutout
 ring_cutout_depth = 2; // How deep the cutout extends into the plug from bearing area
-ring_cutout_inner_diameter = rod_hole_diameter + 2 * ring_cutout_gap_from_rod_hole; // Inner diameter of ring cutout
+ring_cutout_inner_diameter = rod_hole_diameter_loose + 2 * ring_cutout_gap_from_rod_hole; // Inner diameter of ring cutout
 ring_cutout_outer_diameter = ring_cutout_inner_diameter + 2 * ring_cutout_radial_thickness; // Outer diameter of ring cutout
 
 // Gear teeth parameters (using BOSL2 involute gears)
@@ -110,7 +110,7 @@ module gear_teeth_ring(mod, teeth, thickness, bore_diameter) {
 // Module to create a complete gear with hub using BOSL2 involute gears
 module simple_gear(mod, num_teeth, thickness) {
     // Parameters for the rod holding tube
-    tube_outer_diameter = gear_rod_hole_diameter + (6 * 2);  // Outer diameter of tube // TODO: Parameterize wall thickness
+    tube_outer_diameter = gear_rod_hole_diameter_snug + (6 * 2);  // Outer diameter of tube // TODO: Parameterize wall thickness
     tube_height = 30;          // Height of the tube
     set_screw_depth = tube_outer_diameter / 2 + 2; // Depth of screw hole
     
@@ -167,7 +167,7 @@ module simple_gear(mod, num_teeth, thickness) {
         
         // Central hole for the rod (goes all the way through)
         translate([0, 0, -1])
-            cylinder(h = thickness + tube_height + 2, d = gear_rod_hole_diameter, center = false);
+            cylinder(h = thickness + tube_height + 2, d = gear_rod_hole_diameter_snug, center = false);
         
         // Set screw hole 1 (at 0 degrees)
         translate([0, 0, thickness + tube_height / 2]) {
@@ -205,9 +205,10 @@ module simple_gear(mod, num_teeth, thickness) {
 // gear is sized to transition smoothly into the rod-holding tube.
 module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, bevel_mate_teeth) {
     // Parameters for the rod holding tube
-    tube_outer_diameter = gear_rod_hole_diameter + (6 * 2);  // Outer diameter of tube
-    tube_height = 15;          // Height of the tube
-    set_screw_depth = tube_outer_diameter / 2 + 2; // Depth of screw hole
+    tube_outer_diameter = gear_rod_hole_diameter_snug + (6 * 2);  // Outer diameter of tube
+    tube_height = 0;          // Height of the tube
+    //set_screw_depth = tube_outer_diameter / 2 + 2; // Depth of screw hole
+    set_screw_depth = tube_outer_diameter / 2 + 15 ; // Depth of screw hole. Make deeper for set screw location in hub.
     
     // Material saving parameters - create hollow center with spokes
     hub_diameter = bearing_outer_diameter + thickness * 1.5;
@@ -306,17 +307,19 @@ module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, beve
         
         // Central hole for the rod (goes all the way through)
         translate([0, 0, -1])
-            cylinder(h = thickness + bevel_height + tube_height + 2, d = gear_rod_hole_diameter, center = false);
+            cylinder(h = thickness + bevel_height + tube_height + 2, d = rod_hole_diameter_loose, center = false); // Loose to allow easy rotation arround the rod (with help of bearing)
         
         // Set screw hole 1 (at 0 degrees) - in the tube section
-        translate([0, 0, thickness + bevel_height + tube_height / 2]) {
+        //translate([0, 0, thickness + bevel_height + tube_height / 2]) { set screw location in extruding tube.
+        translate([0, 0, thickness / 2]) { // set screw location in hub.
             rotate([0, 90, 0]) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
         }
         
         // Set screw hole 2 (at 180 degrees) - in the tube section
-        translate([0, 0, thickness + bevel_height + tube_height / 2]) {
+        //translate([0, 0, thickness + bevel_height + tube_height / 2]) { set screw location in extruding tube.
+        translate([0, 0, thickness / 2]) { // set screw location in hub.
             rotate([0, -90, 0]) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
@@ -344,8 +347,8 @@ module compound_gear(mod, num_teeth, thickness, small_num_teeth, small_mod, beve
 // set screws, and optional bearing pocket.
 module mating_bevel_gear(mod, num_teeth, mate_teeth, pinion_face_width) {
     // Parameters for the rod holding tube
-    tube_outer_diameter = gear_rod_hole_diameter + (6 * 2);  // Same tube spec as other gears
-    tube_height = 15;
+    tube_outer_diameter = gear_rod_hole_diameter_snug + (6 * 2);  // Same tube spec as other gears
+    tube_height = 10;
     set_screw_depth = tube_outer_diameter / 2 + 2;
     
     // --- Bevel gear geometry ---
@@ -371,7 +374,7 @@ module mating_bevel_gear(mod, num_teeth, mate_teeth, pinion_face_width) {
     echo(str("  big-end OD=", 2*bevel_outer_radius, "mm  root D=", 2*bevel_root_radius, "mm"));
     echo(str("  small-end tip D=", small_end_tip_diameter, "mm  root D=", small_end_root_diameter, "mm"));
     // Flange at the big end to house the bearing pocket (same thickness as other gear flanges)
-    flange_height = gear_thickness;  // Match the spur gear / flange thickness used elsewhere
+    flange_height = gear_thickness / 1.5;  // Match the spur gear / flange thickness used elsewhere
     flange_diameter = 2 * bevel_root_radius + 5;  // Match the big-end root circle of the bevel gear
     
     echo(str("  face_width=", bevel_face_width, "mm  axial height=", bevel_height, "mm"));
@@ -406,34 +409,34 @@ module mating_bevel_gear(mod, num_teeth, mate_teeth, pinion_face_width) {
         
         // Central hole for the rod (all the way through)
         translate([0, 0, -1])
-            cylinder(h = flange_height + bevel_height + tube_height + 2, d = gear_rod_hole_diameter, center = false);
+            cylinder(h = flange_height + bevel_height + tube_height + 2, d = gear_rod_hole_diameter_snug, center = false);
         
         // Set screw hole 1 (at 0 degrees) - in the tube section
-        translate([0, 0, flange_height + bevel_height + tube_height / 2]) {
+        translate([0, 0, flange_height + bevel_height + (tube_height / 2) + 1]) {
             rotate([0, 90, 0]) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
         }
         
         // Set screw hole 2 (at 180 degrees) - in the tube section
-        translate([0, 0, flange_height + bevel_height + tube_height / 2]) {
+        translate([0, 0, flange_height + bevel_height + (tube_height / 2) + 1]) {
             rotate([0, -90, 0]) {
                 cylinder(h = set_screw_depth, d = bearing_tube_screw_hole_diameter, center = false);
             }
         }
         
-        // Bearing pocket recessed into the big-end (bottom) face of the bevel gear
-        translate([0, 0, -0.1]) {
-            cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
-        }
+        // // Bearing pocket recessed into the big-end (bottom) face of the bevel gear
+        // translate([0, 0, -0.1]) {
+        //     cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
+        // }
         
-        // Ring cutout for bearing area (gap between bearing inner race and gear body)
-        translate([0, 0, bearing_tube_height - 1]) {
-            difference() {
-                cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false);
-                cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false);
-            }
-        }
+        // // Ring cutout for bearing area (gap between bearing inner race and gear body)
+        // translate([0, 0, bearing_tube_height - 1]) {
+        //     difference() {
+        //         cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false);
+        //         cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false);
+        //     }
+        // }
     }
 }
 
@@ -461,7 +464,7 @@ module filter_holder() {
                 }
             }
 
-            // 2. The tapered plug that goes into the filter
+            // 2. The slightly tapered plug that goes into the filter
             // It's positioned on top of both flange sections
             translate([0, 0, flange_total_thickness]) {
                 cylinder(h = plug_length, d1 = plug_minor_diameter, d2 = plug_major_diameter, center = false);
@@ -479,7 +482,7 @@ module filter_holder() {
         // This cylinder is slightly taller to ensure a clean cut through the entire piece
         // It's translated down slightly to start before the main body begins
         translate([0, 0, -1]) {
-            cylinder(h = flange_total_thickness + plug_length + 2, d = rod_hole_diameter, center = false);
+            cylinder(h = flange_total_thickness + plug_length + 2, d = rod_hole_diameter_loose, center = false);
         }
         
         if (place_bearing_at_holder_interior) {
@@ -581,7 +584,7 @@ if (build_mating_bevel_gear) {
     pinion_pitch_radius = compound_small_mod * compound_small_num_teeth / 2;
     pinion_root_radius = compound_small_mod * (compound_small_num_teeth - 2.5) / 2;
     pinion_cone_distance = pinion_pitch_radius / sin(pinion_pitch_angle);
-    pinion_face_width = pinion_cone_distance * (1 - ((gear_rod_hole_diameter + 12) / 2) / pinion_root_radius);
+    pinion_face_width = pinion_cone_distance * (1 - ((gear_rod_hole_diameter_snug + 12) / 2) / pinion_root_radius);
     pinion_height = pinion_face_width * cos(pinion_pitch_angle);
     
     // Mating gear pitch parameters
@@ -610,7 +613,7 @@ if (build_mating_bevel_gear) {
     mate_pitchoff = (mate_pitch_radius - compound_small_mod * (compound_bevel_mate_teeth - 2.5) / 2) * sin(mate_pitch_angle);
     
     // Account for the flange added below the bevel gear (same as gear_thickness)
-    mate_flange_height = gear_thickness;
+    mate_flange_height = gear_thickness / 1.5; // Match the flange height used in the mating bevel gear
     
     translate([compound_gear_x, mate_axial_height + mate_pitchoff + mate_flange_height, apex_z])
         rotate([90, 0, 0])  // Rotate so mating gear axis points along -Y
