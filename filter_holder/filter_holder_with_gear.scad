@@ -11,14 +11,14 @@ include <BOSL2/gears.scad>
 
 // Parameters
 
-$fn = 60; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
+$fn = 180; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
 
 //--- Part Dimensions (in mm)
 
 build_pool_filter_holder = true; // Whether to build the main filter holder part
 build_connecting_gear = false; // Whether to build the gear that meshes with the flange gear
-build_compound_gear = true; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
-build_mating_bevel_gear = true; // Whether to build the larger mating bevel gear (90° axis change)
+build_compound_gear = false; // Whether to build the compound gear (spur gear + straight bevel gear for 90° direction change)
+build_mating_bevel_gear = false; // Whether to build the larger mating bevel gear (90° axis change)
 
 place_bearing_at_holder_interior = false;
 place_bearing_at_holder_exterior = true;
