@@ -4,18 +4,43 @@ A 3D-printable pool filter cleaning system designed to efficiently clean cylindr
 
 **Attribution / Inspiration:** This horizontal pool filter cleaner was inspired by the vertical pool filter cleaner on MakerWorld: https://makerworld.com/en/models/1333859-pool-filter-washing-stand. I based some parts in this project on that design and used OpenSCAD to create all 3D models for the horizontal stand in this repository.
 
+> **Important — Gear-driven nozzle system is a work in progress.**  
+> This project offers two configurations: a **fully working non-gear version** (manual nozzle operation) and an **experimental gear-driven version** that will eventually automate reciprocating nozzle motion. **Only the non-gear configuration is complete and recommended for use at this time.** The gear components (`filter_holder_single_bearing_exterior_with_gear.stl`, `compound_bevel_gear.stl`, `compound_bevel_gear_mate.stl`) are provided for early testing, but the full gear-driven assembly — including the rotary-to-reciprocating actuator mechanism — has not been designed or validated yet.
+
 ## Quick Reference
+
+### Non-Gear Version (Fully Working — Recommended)
+
+Manual nozzle operation. This is the complete, tested configuration.
 
 | Component | SCAD File | STL Location | Quantity Needed |
 |-----------|-----------|--------------|-----------------|
-| **Filter Holder (Core Set, Standard)** | `filter_holder/filter_holder.scad` | `STLs/filter_holder.stl` | 2 |
-| **Leg Base (2-leg, Core Set)** | `leg_base/leg_base_2_legs.scad` | `STLs/leg_base_2_legs-through_hole.stl` and `STLs/leg_base_2_legs-closed_end.stl` | 2 |
-| **Leg Base (4-leg, Alternative)** | `leg_base/leg_base_4_legs.scad` | `STLs/leg_base_4_legs.stl` | 2 (alternative vertical setup) |
-| **Leg Foot (Core Set)** | `leg_foot/leg_foot.scad` | `STLs/leg_foot.stl` | 4 |
+| **Filter Holder** | `filter_holder/filter_holder.scad` | `STLs/filter_holder_single_bearing_exterior.stl` | 2 (1 for each end of the filter) |
+| **Leg Base (2-leg)** | `leg_base/leg_base_2_legs.scad` | `STLs/leg_base_2_legs-through_hole.stl` | 2 (1 for each end) |
+| **Leg Foot** | `leg_foot/leg_foot.scad` | `STLs/leg_foot.stl` | 4 (2 for each end) |
 | **Garden Hose Nozzle (Optional)** | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | `STLs/garden_hose_nozzle-5-prong-fan-out.stl` | 1 (Optional) |
 
-**Leg base STL note:** For `leg_base/leg_base_2_legs.scad`, the included exports are:
-- `STLs/leg_base_2_legs-through_hole.stl` (`horizontal_through_hole_both_sides = true`)
+### Gear-Driven Version (Work in Progress — Not Yet Fully Assembled)
+
+Automates reciprocating nozzle motion via a gear train. **The gear components are printable but the full gear-driven assembly (including the rotary-to-reciprocating actuator mechanism) has not been designed or validated yet.** For a fully working solution today, use the non-gear version above.
+
+| Component | SCAD File | STL Location | Quantity Needed |
+|-----------|-----------|--------------|-----------------|
+| **Filter Holder (non-gear end)** | `filter_holder/filter_holder.scad` | `STLs/filter_holder_single_bearing_exterior.stl` | 1 (end without gear) |
+| **Filter Holder with Gear (gear end)** | `filter_holder/filter_holder_with_gear.scad` | `STLs/filter_holder_single_bearing_exterior_with_gear.stl` | 1 (end where gear is used) |
+| **Compound Bevel Gear** | `filter_holder/filter_holder_with_gear.scad` | `STLs/compound_bevel_gear.stl` | 1 (meshes with filter holder gear) |
+| **Compound Bevel Gear Mate** | `filter_holder/filter_holder_with_gear.scad` | `STLs/compound_bevel_gear_mate.stl` | 1 (meshes with compound bevel gear) |
+| **Leg Base (2-leg)** | `leg_base/leg_base_2_legs.scad` | `STLs/leg_base_2_legs-through_hole.stl` | 2 (1 for each end) |
+| **Leg Foot** | `leg_foot/leg_foot.scad` | `STLs/leg_foot.stl` | 4 (2 for each end) |
+| **Garden Hose Nozzle (Optional)** | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | `STLs/garden_hose_nozzle-5-prong-fan-out.stl` | 1 (Optional) |
+
+**Gear-driven version notes:**
+- The `compound_bevel_gear_mate.stl` has a snug-fit inside diameter for the 3/4" aluminum tube, so the gear and tube spin together.
+- The aluminum tube inserted into the compound bevel gear mate is intended to connect at its other end to a rotary-to-reciprocating actuator mechanism, which will move the garden hose nozzle back and forth in approximately 6-inch strokes.
+- The actuator mechanism design is not yet complete — this is the primary remaining work item for the gear-driven version.
+
+**Leg base STL note:** For `leg_base/leg_base_2_legs.scad`, additional export variants are available:
+- `STLs/leg_base_2_legs-through_hole.stl` (`horizontal_through_hole_both_sides = true`) — recommended
 - `STLs/leg_base_2_legs-closed_end.stl` (`horizontal_through_hole_both_sides = false`)
 
 **Core solution note:** `filter_holder` + `leg_base` + `leg_foot` are an atomic set and are intended to be used together. The nozzle is optional/experimental; any effective high-force nozzle stream can be used.
@@ -25,6 +50,7 @@ A 3D-printable pool filter cleaning system designed to efficiently clean cylindr
 - 1× Horizontal 3/4" aluminum rod (36-40" length)
 - 4× Leg support 3/4" aluminum rods (24-36" length each)
 - Optional: up to 6× M4 set screws (holes are already included in the models if you want to use them)
+- *Gear version only:* 1× additional 3/4" aluminum rod for the compound bevel gear mate (connects to actuator mechanism)
 
 ## Overview
 
@@ -43,18 +69,19 @@ This project provides a complete solution for cleaning cylindrical pool filters 
 ### 1. Filter Holder
 
 **File:** `filter_holder/filter_holder.scad`  
-**STL Output:** `STLs/filter_holder.stl`  
-**Additional variants in `STLs/`:** `filter_holder_double_bearing.stl`, `filter_holder_double_bearing_with_gear.stl`
+**STL Output:** `STLs/filter_holder_single_bearing_exterior.stl`
 
-**WIP note:** `filter_holder_double_bearing.stl` and `filter_holder_double_bearing_with_gear.stl` are work in progress and not recommended for active use at this time.
+The filter holder attaches to the pool filter cartridge and provides the mounting point for the support rod. The bearing pocket is recessed into the exterior (bottom) face of the flange for smooth rotation.
 
-The filter holder attaches to the pool filter cartridge and provides the mounting point for the support rod. This component includes an integrated bearing holder for smooth rotation.
+**SCAD export settings for `filter_holder_single_bearing_exterior.stl`:**
+- `place_bearing_at_holder_interior = false`
+- `place_bearing_at_holder_exterior = true`
 
 **Key Features:**
 - Tapered plug (76.2mm diameter) that fits snugly into the 3" filter opening
-- Large flange (140mm diameter) that sits outside the filter
-- Six 1-inch (25.4mm) drainage holes evenly spaced around the flange
-- Bearing holder tube extension for S6904ZZ bearing (37mm OD × 20mm ID × 9mm thick)
+- Large flange (135mm diameter) that sits outside the filter
+- Six 1-inch (20mm) drainage holes evenly spaced around the flange
+- Exterior bearing pocket for S6904ZZ bearing (37mm OD × 20mm ID × 9mm thick)
 - 4mm thick walls around bearing holder
 - Ring cutout inside bearing area for clearance (starts 0.633mm from rod hole, 2.5mm thick, 2mm deep)
 - 3mm diameter screw hole through bearing holder walls for securing bearing
@@ -66,7 +93,62 @@ The filter holder attaches to the pool filter cartridge and provides the mountin
 - Dimensions: 37mm OD × 20mm ID × 9mm thick
 - Allows filter to spin freely on the stationary aluminum rod
 
-**Important:** Print TWO of these holders - one for each end of the filter.
+**Quantity:**
+- *Non-gear version:* Print TWO — one for each end of the filter.
+- *Gear version:* Print ONE (for the non-gear end). The gear end uses `filter_holder_single_bearing_exterior_with_gear.stl` instead.
+
+### 1b. Filter Holder with Gear (Gear Version Only — WIP)
+
+**File:** `filter_holder/filter_holder_with_gear.scad`  
+**STL Output:** `STLs/filter_holder_single_bearing_exterior_with_gear.stl`
+
+> **Work in progress.** This component is part of the gear-driven nozzle system, which is not yet fully assembled or validated. See the note at the top of this README.
+
+Same as the standard filter holder but with an integrated spur gear ring on the flange. The gear meshes with the compound bevel gear to transfer rotation from the filter to a perpendicular rod that drives a reciprocating nozzle mechanism.
+
+**SCAD export settings for `filter_holder_single_bearing_exterior_with_gear.stl`:**
+- `build_pool_filter_holder = true`
+- `build_connecting_gear = false`
+- `build_compound_gear = false`
+- `build_mating_bevel_gear = false`
+- `place_bearing_at_holder_interior = false`
+- `place_bearing_at_holder_exterior = true`
+
+**Quantity:** Print ONE — for the gear end of the filter.
+
+### 1c. Compound Bevel Gear (Gear Version Only — WIP)
+
+**File:** `filter_holder/filter_holder_with_gear.scad`  
+**STL Output:** `STLs/compound_bevel_gear.stl`
+
+> **Work in progress.** Part of the gear-driven nozzle system.
+
+A compound gear consisting of a spur gear on the bottom (meshes with the filter holder's flange gear) and a straight bevel gear on top for a 90° direction change. This transfers the filter's rotation axis to a perpendicular axis.
+
+**SCAD export settings for `compound_bevel_gear.stl`:**
+- `build_pool_filter_holder = false`
+- `build_connecting_gear = false`
+- `build_compound_gear = true`
+- `build_mating_bevel_gear = false`
+
+**Quantity:** Print ONE.
+
+### 1d. Compound Bevel Gear Mate (Gear Version Only — WIP)
+
+**File:** `filter_holder/filter_holder_with_gear.scad`  
+**STL Output:** `STLs/compound_bevel_gear_mate.stl`
+
+> **Work in progress.** Part of the gear-driven nozzle system.
+
+The larger mating bevel gear that meshes with the compound bevel gear's bevel pinion at 90°. Its inside diameter is a snug fit for the 3/4" aluminum tube so the gear and tube rotate together. The aluminum tube inserted into this gear is intended to connect at its other end to a rotary-to-reciprocating actuator mechanism, which will move the garden hose nozzle back and forth in approximately 6-inch strokes.
+
+**SCAD export settings for `compound_bevel_gear_mate.stl`:**
+- `build_pool_filter_holder = false`
+- `build_connecting_gear = false`
+- `build_compound_gear = false`
+- `build_mating_bevel_gear = true`
+
+**Quantity:** Print ONE.
 
 ### 2. Leg Base / Support Stand
 
@@ -113,7 +195,7 @@ A leg-base connector that forms the base of the rotating support system. Support
 
 Leg feet pair with the leg-base tubes and are part of the core support set.
 
-**Important:** Print TWO leg feet and use them with the matching holder/base set.
+**Important:** Print FOUR leg feet (two for each end) and use them with the matching holder/base set.
 
 ### 4. Garden Hose Nozzle (Optional / Experimental)
 
@@ -181,16 +263,18 @@ Sweep and extrusion library by Rudolf Huttary (2015-2020) for creating complex 3
 The complete cleaning system consists of:
 
 ### Hardware Requirements
-1. **Two 3D-printed filter holders** (`filter_holder/filter_holder.scad`)
+
+#### Non-Gear Version (Recommended)
+1. **Two 3D-printed filter holders** — `STLs/filter_holder_single_bearing_exterior.stl`
    - Install one on each end of the filter cartridge
    
-2. **Two 3D-printed leg bases** (`leg_base/leg_base_2_legs.scad`)
+2. **Two 3D-printed leg bases** — `STLs/leg_base_2_legs-through_hole.stl`
    - Position one at each end of the horizontal support rod
 
-3. **Two 3D-printed leg feet** (`leg_foot/leg_foot.scad`)
-   - Install on the ends of the inserted leg rods
+3. **Four 3D-printed leg feet** — `STLs/leg_foot.stl`
+   - Install on the ends of the inserted leg rods (two per end)
    
-4. **Optional 3D-printed garden hose nozzle** (`nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad`)
+4. **Optional 3D-printed garden hose nozzle** — `STLs/garden_hose_nozzle-5-prong-fan-out.stl`
    - Optional experimental nozzle; any nozzle with an adequately forceful stream works
    
 5. **Two S6904ZZ stainless steel ball bearings**
@@ -208,6 +292,21 @@ The complete cleaning system consists of:
 8. **Optional set screws** (M4 or #8-32)
    - Holes are already included in the printed models if you want to secure rods in filter holders and leg bases
    - Up to six screws total (one per tube connection)
+
+#### Gear-Driven Version (WIP — additional parts)
+All of the above, except replace **one** of the two filter holders with the gear variant, and add the gear components:
+
+9. **One 3D-printed filter holder with gear** — `STLs/filter_holder_single_bearing_exterior_with_gear.stl`
+   - Replaces one standard filter holder at the gear end
+   
+10. **One 3D-printed compound bevel gear** — `STLs/compound_bevel_gear.stl`
+    - Meshes with the filter holder's flange gear
+    
+11. **One 3D-printed compound bevel gear mate** — `STLs/compound_bevel_gear_mate.stl`
+    - Meshes with the compound bevel gear at 90°; snug-fit bore for 3/4" aluminum tube
+    
+12. **One additional 3/4" aluminum rod** for the compound bevel gear mate
+    - Connects to a rotary-to-reciprocating actuator mechanism (not yet designed) that moves the nozzle back and forth in ~6-inch strokes
 
 ### Assembly Steps
 
@@ -363,22 +462,24 @@ Each file has its `$fn` parameter clearly marked at the top for easy adjustment.
 ## Project Status
 
 ### Completed Components ✅
+- **Non-gear horizontal filter cleaner** - Fully working
+  - Filter holder with exterior bearing pocket (`filter_holder_single_bearing_exterior.stl`)
+  - Leg base 2-leg connectors
+  - Leg feet
+  - Bearings allow the filter to spin freely during cleaning
+
 - **Garden hose nozzle** - Optional experimental add-on
   - 5-prong fan-out configuration optimized for filter cleaning
   - GHT threading with hex grip for easy installation
-   - Any adequately forceful nozzle stream can be used instead
-  
-- **Filter holder** - Complete design with bearing integration
-  - Tapered plug fits standard 3" pool filter openings
-  - Integrated S6904ZZ bearing holder with retention screw
-  - Drainage holes for water flow
-  - Ring cutout for proper bearing clearance
-  
-- **Leg base / Support stand** - Fully designed and ready for printing
-   - 2-leg and 4-leg connector variants available
-  - Curved printing base for stability
-  - Bearing lip for smooth rotation interface
-  - Set screw holes for secure rod retention
+  - Any adequately forceful nozzle stream can be used instead
+
+### In Progress 🚧
+- **Gear-driven reciprocating nozzle system** - Work in progress
+  - Filter holder with integrated flange gear (`filter_holder_single_bearing_exterior_with_gear.stl`) — printable
+  - Compound bevel gear (`compound_bevel_gear.stl`) — printable
+  - Compound bevel gear mate (`compound_bevel_gear_mate.stl`) — printable
+  - Rotary-to-reciprocating actuator mechanism — **not yet designed**
+  - Full assembly and validation — **pending**
 
 ### Documentation 📋
 - ✅ Component specifications documented
@@ -390,6 +491,7 @@ Each file has its `$fn` parameter clearly marked at the top for easy adjustment.
 - 🚧 Video demonstration - Pending
 
 ### Future Enhancements 💡
+- Complete gear-driven reciprocating nozzle assembly (actuator mechanism)
 - Extended reach nozzle variants for larger filters
 - Motorized rotation option
 - Alternative bearing holder designs for different bearing sizes
