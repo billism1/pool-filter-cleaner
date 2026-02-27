@@ -24,6 +24,7 @@ $fn = 80;  // High facet count for smooth curves.  Use 60 for fast previews.
 build_crank_wheel     = true;   // Render the crank wheel
 build_connecting_rod  = true;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
+build_carriage        = true;   // Render the sleigh / carriage
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -101,7 +102,7 @@ frame_thickness         = 12;
 frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
 frame_width             = 70;       // Y dimension of main plate
 frame_x_start           = -40;      // Left edge relative to wheel centre
-frame_x_end             = 320;      // Right edge (past max slider pos ≈ 276 mm)
+frame_x_end             = 330;      // Right edge (past max slider pos ≈ 276 mm)
 frame_length            = frame_x_end - frame_x_start;  // ≈ 360 mm
 
 // S6904ZZ bearing pocket (same bearing as filter holders)
@@ -124,11 +125,55 @@ guide_rod_clearance     = 0.3;
 guide_rod_hole_d        = guide_rod_diameter + guide_rod_clearance;   // 8.3 mm
 guide_rod_spacing       = 50;       // Y centre-to-centre between two parallel rods
 guide_wall_x1           = 100;      // Near wall X centre (clear of wheel edge ≈ 91.2 + margin)
-guide_wall_x2           = 300;      // Far wall X centre
+guide_wall_x2           = 325;      // Far wall X centre
 guide_wall_thick        = 10;       // Wall thickness in X direction
 guide_wall_height       = 16;       // Height above frame +Z face (top stays below con-rod socket at z=9)
 guide_rod_z_offset      = 10;       // Guide rod centre above frame +Z face
 frame_edge_radius       = 3;        // Fillet radius on vertical edges of plate & walls
+
+// --- Carriage / Sleigh ---------------------------------------
+//     Rides on two 8 mm guide rods via LM8UU linear bearings.
+//     Wrist pin connects to the connecting rod small end.
+//     PVC pipe clamp mounts on top.
+//
+//     3D Print: flat face (−Z) on bed; wrist pin and clamp
+//     extend upward.
+
+// LM8UU linear bearing (standard dimensions)
+lm8uu_bore              = 8;        // Inner diameter (matches guide rod)
+lm8uu_od                = 15;       // Outer diameter
+lm8uu_length            = 24;       // Length
+lm8uu_clearance         = 0.2;      // Press-fit tolerance on OD pocket
+
+// Carriage body
+carriage_wall           = 2;        // Wall thickness around bearing pockets
+carriage_bearing_spacing = 40;      // X spacing between bearing pair centres on each rod
+carriage_body_width     = guide_rod_spacing + lm8uu_od + 2 * carriage_wall;  // Y dimension
+carriage_body_length    = carriage_bearing_spacing + lm8uu_length + 2 * carriage_wall;  // X dimension
+carriage_body_height    = lm8uu_od + 2 * carriage_wall;   // Z dimension (around bearing OD, = 19 mm)
+
+// Con-rod socket clearance recess
+//     The carriage top extends ~2.5 mm above the con-rod socket bottom.
+//     A circular recess at the wrist-pin location lets the socket
+//     nest into the carriage top without collision.
+carriage_recess_d       = con_rod_small_od + 4;  // Clearance around 30.2 mm socket (≈34.2 mm)
+carriage_recess_depth   = 3;        // Removes top 3 mm at pin location (clears 2.5 mm overlap + gap)
+
+// Wrist pin (connects to con-rod small end via 608 bearing)
+wrist_pin_diameter      = 8;        // Matches 608 2RS bearing bore
+wrist_pin_height        = crank_pin_height;  // Same as crank pin
+wrist_pin_fillet_dia    = 14;
+wrist_pin_fillet_height = 2;
+
+// Guide rod centre Z in carriage-local coords
+// The carriage is built with its −Z face at z=0 (print bed).
+// Guide rod centres sit at z = carriage_body_height / 2
+carriage_rod_z          = carriage_body_height / 2;
+
+// PVC pipe clamp placeholder
+pvc_pipe_od             = 26.7;     // 3/4" PVC pipe OD (standard Schedule 40)
+pvc_clamp_clearance     = 0.5;
+pvc_clamp_wall          = 4;
 
 // Derived
 hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
@@ -175,6 +220,9 @@ echo(str("  Guide rods: ", guide_rod_diameter, " mm, spacing=",
          " & ", guide_wall_x2));
 echo(str("  Slider travel: x=", con_rod_length - crank_radius,
          " to x=", con_rod_length + crank_radius, " mm"));
+echo(str("Carriage: ", carriage_body_length, "×", carriage_body_width,
+         "×", carriage_body_height, " mm  LM8UU pockets: ",
+         lm8uu_od + lm8uu_clearance, " mm bore × ", lm8uu_length, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -267,7 +315,7 @@ module connecting_rod() {
             // Big-end gusset (toward small end, +X direction)
             translate([0, 0, 0])
                 hull() {
-                    translate([10, -con_rod_gusset_width / 2, 0])
+                    translate([5, -con_rod_gusset_width / 2, 0])
                         cube([0.01, con_rod_gusset_width, con_rod_socket_height]);
                     translate([con_rod_big_od / 2 + con_rod_gusset_length,
                                -con_rod_gusset_width / 2,
@@ -277,7 +325,7 @@ module connecting_rod() {
             // Small-end gusset (toward big end, −X direction)
             translate([con_rod_length, 0, 0])
                 hull() {
-                    translate([-10, -con_rod_gusset_width / 2, 0])
+                    translate([-5, -con_rod_gusset_width / 2, 0])
                         cube([0.01, con_rod_gusset_width, con_rod_socket_height]);
                     translate([-(con_rod_small_od / 2 + con_rod_gusset_length),
                                -con_rod_gusset_width / 2,
@@ -293,6 +341,64 @@ module connecting_rod() {
         // Small-end pin bore (through-hole for wrist/pivot pin)
         translate([con_rod_length, 0, -1])
             cylinder(h = total_h + 2, d = con_rod_small_bore);
+    }
+}
+
+// ============================================================
+//  Carriage / Sleigh Module
+// ============================================================
+// Built with −Z face at z = 0 (print bed).
+// Guide rod axes run along X at z = carriage_rod_z.
+// Wrist pin projects from +Z face, centred in X.
+// Origin is at the centre of the body in XY, bottom at z=0.
+module carriage() {
+    pocket_d = lm8uu_od + lm8uu_clearance;
+
+    difference() {
+        union() {
+            // ---- Main body (rounded vertical edges) ----
+            translate([-carriage_body_length / 2,
+                       -carriage_body_width / 2, 0])
+                rounded_rect([carriage_body_length,
+                              carriage_body_width,
+                              carriage_body_height],
+                             frame_edge_radius);
+
+            // ---- Wrist pin (on +Z face, starts from recess floor) ----
+            translate([0, 0, carriage_body_height - carriage_recess_depth]) {
+                cylinder(h = wrist_pin_fillet_height,
+                         d1 = wrist_pin_fillet_dia,
+                         d2 = wrist_pin_diameter);
+                cylinder(h = wrist_pin_height + wrist_pin_fillet_height,
+                         d = wrist_pin_diameter);
+            }
+        }
+
+        // ---- Con-rod socket clearance recess ----
+        //      Circular pocket at top centre so the con-rod small-end
+        //      socket can nest without colliding with the carriage body.
+        translate([0, 0, carriage_body_height - carriage_recess_depth - 0.01])
+            cylinder(h = carriage_recess_depth + 0.02, d = carriage_recess_d);
+
+        // ---- LM8UU bearing pockets (4 total: 2 per rod) ----
+        for (y_off = [-guide_rod_spacing / 2, guide_rod_spacing / 2]) {
+            for (x_off = [-carriage_bearing_spacing / 2,
+                           carriage_bearing_spacing / 2]) {
+                translate([x_off, y_off, carriage_rod_z])
+                    rotate([0, 90, 0])
+                        cylinder(h = lm8uu_length, d = pocket_d,
+                                 center = true);
+            }
+        }
+
+        // ---- Guide rod through-channels ----
+        //      Full-length slots so rods can pass through the body
+        for (y_off = [-guide_rod_spacing / 2, guide_rod_spacing / 2]) {
+            translate([-carriage_body_length / 2 - 1, y_off, carriage_rod_z])
+                rotate([0, 90, 0])
+                    cylinder(h = carriage_body_length + 2,
+                             d = guide_rod_hole_d);
+        }
     }
 }
 
@@ -404,3 +510,17 @@ translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         translate([0, 0, -(wheel_thickness / 2 + frame_gap)])
             frame_bracket();
+
+// ---- Carriage / Sleigh ----
+//      Slides along X at slider_x.  Guide rod centres in wheel-local
+//      coords are at z = -(wheel_thickness/2 + frame_gap) + guide_rod_z_offset.
+//      Carriage body centre aligns its rod pockets to the guide rods.
+carriage_z_local = -(wheel_thickness / 2 + frame_gap)
+                 + guide_rod_z_offset
+                 - carriage_rod_z;   // Shift so rod centres align
+
+if (build_carriage)
+translate([0, 0, wheel_diameter / 2])
+    rotate([90, 0, 0])
+        translate([slider_x, 0, carriage_z_local])
+            carriage();
