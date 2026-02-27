@@ -25,6 +25,10 @@ build_crank_wheel     = true;   // Render the crank wheel
 build_connecting_rod  = true;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
 
+// --- Crank position (rotation state) ------------------------
+//     0 = Top, 1 = Right, 2 = Bottom, 3 = Left
+crank_position = 3;
+
 // ============================================================
 //  Parameters
 // ============================================================
@@ -123,12 +127,35 @@ guide_rod_z_offset      = 10;       // Guide rod centre above frame +Z face
 // Derived
 hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
 
+// --- Crank position geometry (derived from crank_position) ---
+crank_angle = crank_position == 0 ?    0 :   // Top
+              crank_position == 1 ?  -90 :   // Right
+              crank_position == 2 ? -180 :   // Bottom
+              crank_position == 3 ? -270 : 0;// Left
+
+crank_pos_name = crank_position == 0 ? "Top" :
+                 crank_position == 1 ? "Right" :
+                 crank_position == 2 ? "Bottom" :
+                 crank_position == 3 ? "Left" : "Top";
+
+// Pin position in wheel-local XY after rotation
+pin_x = -crank_radius * sin(crank_angle);
+pin_y =  crank_radius * cos(crank_angle);
+
+// Slider axis is the X axis (Y = 0); small end stays on this line
+slider_x = pin_x + sqrt(con_rod_length * con_rod_length - pin_y * pin_y);
+
+// Connecting rod swing angle (from big end at pin toward small end on X axis)
+con_rod_swing = atan2(-pin_y, slider_x - pin_x);
+
 // ============================================================
 //  Echo key dimensions for verification
 // ============================================================
 echo(str("Crank wheel diameter: ", wheel_diameter, " mm"));
 echo(str("Crank radius (pin offset): ", crank_radius,
          " mm  →  stroke = ", stroke_length, " mm"));
+echo(str("Crank position: ", crank_pos_name, " (", crank_angle, "°)",
+         "  pin=(", pin_x, ", ", pin_y, ")  slider_x=", slider_x));
 echo(str("Tube bore diameter: ", rod_hole_diameter, " mm"));
 echo(str("Hub OD: ", hub_outer_diameter, " mm,  hub extension: ", hub_extension, " mm"));
 echo(str("Hub total height (disc + extension): ", hub_total_height, " mm"));
@@ -310,7 +337,8 @@ module frame_bracket() {
 if (build_crank_wheel)
 translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
-        crank_wheel_body();
+        rotate([0, 0, crank_angle])
+            crank_wheel_body();
 
 // ---- Connecting rod on the crank pin ----
 // Socket bottom (z=0 of module) sits just above the crank-pin fillet.
@@ -318,17 +346,10 @@ con_rod_base_z = wheel_thickness / 2
                + crank_pin_fillet_height
                + con_rod_pin_gap;
 
-// Inline slider-crank: slider axis is local X through the wheel centre.
-// At the default position (pin at top, [0, crank_radius]) the rod
-// angles down toward the slider at [sqrt(L²−R²), 0].
-con_rod_swing = atan2(-crank_radius,
-                      sqrt(con_rod_length * con_rod_length
-                           - crank_radius * crank_radius));
-
 if (build_connecting_rod)
 translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
-        translate([0, crank_radius, con_rod_base_z])
+        translate([pin_x, pin_y, con_rod_base_z])
             rotate([0, 0, con_rod_swing])
                 connecting_rod();
 
