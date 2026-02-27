@@ -524,3 +524,15 @@ translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         translate([slider_x, 0, carriage_z_local])
             carriage();
+
+// ---- Guide rods (visual reference, silver color) ----
+guide_rod_local_z = -(wheel_thickness / 2 + frame_gap) + guide_rod_z_offset;
+guide_rod_length  = guide_wall_x2 - guide_wall_x1 + guide_wall_thick;  // wall-to-wall span
+color("Silver")
+translate([0, 0, wheel_diameter / 2])
+    rotate([90, 0, 0])
+        for (y_off = [-guide_rod_spacing / 2, guide_rod_spacing / 2])
+            translate([guide_wall_x1 - guide_wall_thick / 2,
+                       y_off, guide_rod_local_z])
+                rotate([0, 90, 0])
+                    cylinder(h = guide_rod_length, d = guide_rod_diameter);
