@@ -65,20 +65,28 @@ The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot
 - **Bar thickness:** 10 mm, hull-tapered between the two boss diameters
 - **3D print orientation:** flat bar face (away-from-wheel side) on bed; sockets extend upward
 - **608 2RS bearings at both ends** for low-friction pivoting — bearing inner race rides on the pin, outer race press-fits into the socket
+- **Triangular gusset wedges** on the inside face of each socket (big-end toward small-end, small-end toward big-end). Gusset base penetrates into the socket cylinder so there's no visible seam. Parameters: `con_rod_gusset_length` = 20 mm, `con_rod_gusset_width` = 10 mm.
 - Assembly: rod is positioned on the crank pin at the correct swing angle for an inline slider-crank, with the socket bottom sitting 1 mm above the crank-pin fillet
+- A **4-state `crank_position` parameter** (0 = Top, 1 = Right, 2 = Bottom, 3 = Left) rotates the wheel and repositions the connecting rod so it stays attached to the crank pin at each position
 
 ---
 
-### Step 3 — Guide Rails / Linear Track ⬜ NOT STARTED
+### Step 3 — Frame / Mounting Bracket (with integrated guide rails) ✅ DONE
 
-Design the linear guide system that constrains the sleigh to move in a straight line.
+**File:** `rotary_to_linear_actuator/rotary_to_linear_actuator.scad` (same file, `frame_bracket()` module)
 
-**Requirements:**
-- Must support the **6-inch (152.4 mm) stroke** plus some overtravel margin
-- Consider using **two parallel round rails** (e.g. 8 mm steel rods) with printed rail mounts, or a **3D-printed slot/channel** with low friction (PTFE tape or lubricant)
-- The rail axis should be **perpendicular to the crank wheel's rotation axis** (i.e. the sleigh moves along the X axis while the wheel spins in the XZ plane)
-- Rail mounts need to be anchored to a **base plate or frame** that also supports the crank wheel's axle (the aluminum tube). This keeps everything aligned.
-- Consider how the guide rail assembly attaches to the existing leg-base / rod infrastructure of the pool-filter-cleaner frame
+The frame bracket is a stationary plate on the −Z side of the wheel that houses a bearing for the tube and provides guide-rod support walls for the sleigh.
+
+**What was built:**
+- **Main plate:** 360 × 70 × 12 mm (from x = −40 to x = 320), with 3 mm rounded vertical edges for a cleaner look
+- **S6904ZZ bearing pocket** recessed from the +Z face at the tube centre, with ring cutout below (same technique as `filter_holder.scad`) to prevent the rotating inner race from rubbing
+- **Tube through-hole** with 2 mm clearance (bearing provides alignment)
+- **Two guide-rod support walls** (10 mm thick × 16 mm tall) at x = 100 and x = 300, each with two 8.3 mm holes for 8 mm smooth steel rods at 50 mm Y spacing
+- **Guide rod centre** at 10 mm above frame +Z face
+- Frame sits with a 2 mm air gap below the wheel's −Z face
+- All edges (plate and walls) use `rounded_rect()` helper with `frame_edge_radius` = 3 mm
+- **3D print orientation:** −Z face (flat) on bed; walls print upward, no supports needed
+- **Render toggle:** `build_frame_bracket` boolean
 
 ---
 
@@ -96,20 +104,7 @@ Design the sleigh (slider) that rides on the guide rails and carries the nozzle.
 
 ---
 
-### Step 5 — Frame / Mounting Bracket ⬜ NOT STARTED
-
-Design the structural frame that ties the actuator to the pool-filter-cleaner stand.
-
-**Requirements:**
-- Support the crank wheel's tube (the 3/4" aluminum tube is the axle, supported by the existing leg-base system on one end and this frame on the other)
-- Mount the guide rails in proper alignment relative to the crank wheel
-- May need a bearing or bushing for the tube between the mating bevel gear and the crank wheel hub, to support the span and prevent sag
-- Must be rigid enough to resist the reaction forces from the nozzle spray (the spray pushes back on the sleigh, which pushes back through the con-rod into the wheel and frame)
-- Consider using the existing `leg_base` model or a variant as the mounting point, since it already has 3/4" tube pockets
-
----
-
-### Step 6 — Assembly & Validation ⬜ NOT STARTED
+### Step 5 — Assembly & Validation ⬜ NOT STARTED
 
 Create a combined assembly view and validate the design.
 
