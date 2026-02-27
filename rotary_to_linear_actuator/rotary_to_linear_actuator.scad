@@ -195,7 +195,9 @@ spacer_ring_od         = 24;       // Sized to contact only S6904ZZ inner race (
 spacer_ring_thickness  = frame_gap; // Fills the gap between wheel and bearing (2 mm)
 
 // Derived
-hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
+hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from −Z face
+guide_rod_length    = guide_wall_x2 - guide_wall_x1 + guide_wall_thick;  // wall-to-wall span
+guide_rod_local_z   = -(wheel_thickness / 2 + frame_gap) + guide_rod_z_offset;  // Z in wheel-local coords
 
 // --- Crank position geometry (derived from crank_position) ---
 crank_angle = crank_position == 0 ?    0 :   // Top
@@ -235,7 +237,8 @@ echo(str("Connecting rod: length=", con_rod_length, " mm  big bore=",
 echo(str("Frame: ", frame_length, "×", frame_width, "×", frame_thickness,
          " mm  bearing pocket OD=", frame_bearing_od, " mm"));
 echo(str("  Guide rods: ", guide_rod_diameter, " mm, spacing=",
-         guide_rod_spacing, " mm, walls at x=", guide_wall_x1,
+         guide_rod_spacing, " mm, length=", guide_rod_length,
+         " mm, walls at x=", guide_wall_x1,
          " & ", guide_wall_x2));
 echo(str("  Slider travel: x=", con_rod_length - crank_radius,
          " to x=", con_rod_length + crank_radius, " mm"));
@@ -672,8 +675,6 @@ if (show_aluminum_tube) {
 
 if (show_guide_rods) {
     // ---- Guide rods (visual reference, silver color) ----
-    guide_rod_local_z = -(wheel_thickness / 2 + frame_gap) + guide_rod_z_offset;
-    guide_rod_length  = guide_wall_x2 - guide_wall_x1 + guide_wall_thick;  // wall-to-wall span
     color("Silver")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
