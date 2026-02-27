@@ -486,16 +486,57 @@ module frame_bracket() {
                              frame_edge_radius);
 
             // ---- Guide support wall 1 (near end, just past wheel edge) ----
+            //      Rounded top edges in XZ plane; straight bottom where it meets frame.
             translate([guide_wall_x1 - guide_wall_thick / 2,
                        -frame_width / 2, 0])
-                rounded_rect([guide_wall_thick, frame_width, guide_wall_height],
-                             frame_edge_radius);
+                hull() {
+                    // Bottom slab (straight edge against frame)
+                    cube([guide_wall_thick, frame_width, 0.01]);
+                    // Top-left rounded edge (cylinder along Y)
+                    translate([frame_edge_radius, 0,
+                               guide_wall_height - frame_edge_radius])
+                        rotate([-90, 0, 0])
+                            cylinder(r = frame_edge_radius, h = frame_width);
+                    // Top-right rounded edge (cylinder along Y)
+                    translate([guide_wall_thick - frame_edge_radius, 0,
+                               guide_wall_height - frame_edge_radius])
+                        rotate([-90, 0, 0])
+                            cylinder(r = frame_edge_radius, h = frame_width);
+                }
 
             // ---- Guide support wall 2 (far end) ----
+            //      Near edge (inside, toward wheel): rounded top in XZ, straight bottom.
+            //      Far edge (at frame edge): vertical Y-corner rounding to match frame.
+            //      Built as intersection of two shapes so both roundings apply.
             translate([guide_wall_x2 - guide_wall_thick / 2,
                        -frame_width / 2, 0])
-                rounded_rect([guide_wall_thick, frame_width, guide_wall_height],
-                             frame_edge_radius);
+                intersection() {
+                    // Shape A: rounded top edges in XZ plane (straight Y corners)
+                    hull() {
+                        cube([guide_wall_thick, frame_width, 0.01]);
+                        translate([frame_edge_radius, 0,
+                                   guide_wall_height - frame_edge_radius])
+                            rotate([-90, 0, 0])
+                                cylinder(r = frame_edge_radius, h = frame_width);
+                        translate([guide_wall_thick - frame_edge_radius, 0,
+                                   guide_wall_height - frame_edge_radius])
+                            rotate([-90, 0, 0])
+                                cylinder(r = frame_edge_radius, h = frame_width);
+                    }
+                    // Shape B: vertical Y-corner rounding on far (+X) edge,
+                    //          square near edge
+                    hull() {
+                        cube([0.01, frame_width, guide_wall_height]);
+                        translate([guide_wall_thick - frame_edge_radius,
+                                   frame_edge_radius, 0])
+                            cylinder(r = frame_edge_radius,
+                                     h = guide_wall_height);
+                        translate([guide_wall_thick - frame_edge_radius,
+                                   frame_width - frame_edge_radius, 0])
+                            cylinder(r = frame_edge_radius,
+                                     h = guide_wall_height);
+                    }
+                }
 
             // ---- Gussets on inside faces of guide walls ----
             //      Narrow wedges that penetrate into the wall body
