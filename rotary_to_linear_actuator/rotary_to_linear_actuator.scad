@@ -62,12 +62,13 @@ lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2)
 
 // --- Connecting Rod ------------------------------------------
 con_rod_length         = 200;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
-con_rod_thickness      = 10;    // Flat-bar thickness
+con_rod_bar_thickness  = 10;    // Flat-bar section thickness
 con_rod_big_bore       = crank_pin_diameter + 0.5;   // 10.5 mm clearance around pin
 con_rod_big_od         = 24;    // Big-end boss outer diameter
 con_rod_small_bore     = 8;     // Wrist-pin bore at small end
 con_rod_small_od       = 16;    // Small-end boss outer diameter
-con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before rod sits
+con_rod_socket_height  = 12;    // Socket extension below rod body (clears hub)
+con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before socket sits
 
 // Derived
 hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
@@ -82,7 +83,8 @@ echo(str("Tube bore diameter: ", rod_hole_diameter, " mm"));
 echo(str("Hub OD: ", hub_outer_diameter, " mm,  hub extension: ", hub_extension, " mm"));
 echo(str("Hub total height (disc + extension): ", hub_total_height, " mm"));
 echo(str("Connecting rod: length=", con_rod_length, " mm  big bore=",
-         con_rod_big_bore, " mm  small bore=", con_rod_small_bore, " mm"));
+         con_rod_big_bore, " mm  small bore=", con_rod_small_bore,
+         " mm  socket height=", con_rod_socket_height, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -140,22 +142,43 @@ module crank_wheel_body() {
 // ============================================================
 //  Connecting Rod Module
 // ============================================================
-// Big end centred at origin, small end at [con_rod_length, 0, 0].
-// Bore axes along Z.  Flat bar tapers smoothly via hull().
+// Socket-style rod for hub clearance:
+//   • z = 0 is the bottom of the sockets (sits just above crank-pin fillet)
+//   • Socket bosses extend from z=0 to z=con_rod_socket_height
+//   • The flat bar body sits on top: z=con_rod_socket_height to
+//     z=con_rod_socket_height + con_rod_bar_thickness
+//   • Pin bores go through the full height so the rod slides onto the pin
+//
+// 3D Printing: print with the flat bar face (top, away-from-wheel side)
+//   on the bed; sockets extend upward from the bed.
 module connecting_rod() {
+    total_h = con_rod_socket_height + con_rod_bar_thickness;
+
     difference() {
-        hull() {
-            // Big-end boss (sits on crank pin)
-            cylinder(h = con_rod_thickness, d = con_rod_big_od, center = true);
-            // Small-end boss (connects to sleigh pivot)
+        union() {
+            // Big-end socket boss (full height)
+            cylinder(h = total_h, d = con_rod_big_od);
+
+            // Small-end socket boss (full height)
             translate([con_rod_length, 0, 0])
-                cylinder(h = con_rod_thickness, d = con_rod_small_od, center = true);
+                cylinder(h = total_h, d = con_rod_small_od);
+
+            // Rod body (elevated flat bar connecting both sockets)
+            translate([0, 0, con_rod_socket_height])
+                hull() {
+                    cylinder(h = con_rod_bar_thickness, d = con_rod_big_od);
+                    translate([con_rod_length, 0, 0])
+                        cylinder(h = con_rod_bar_thickness, d = con_rod_small_od);
+                }
         }
-        // Big-end bore (clearance hole around crank pin)
-        cylinder(h = con_rod_thickness + 2, d = con_rod_big_bore, center = true);
-        // Small-end bore (wrist pin / pivot pin)
-        translate([con_rod_length, 0, 0])
-            cylinder(h = con_rod_thickness + 2, d = con_rod_small_bore, center = true);
+
+        // Big-end pin bore (through-hole for crank pin)
+        translate([0, 0, -1])
+            cylinder(h = total_h + 2, d = con_rod_big_bore);
+
+        // Small-end pin bore (through-hole for wrist/pivot pin)
+        translate([con_rod_length, 0, -1])
+            cylinder(h = total_h + 2, d = con_rod_small_bore);
     }
 }
 
@@ -171,6 +194,11 @@ translate([0, 0, wheel_diameter / 2])
         crank_wheel_body();
 
 // ---- Connecting rod on the crank pin ----
+// Socket bottom (z=0 of module) sits just above the crank-pin fillet.
+con_rod_base_z = wheel_thickness / 2
+               + crank_pin_fillet_height
+               + con_rod_pin_gap;
+
 // Inline slider-crank: slider axis is local X through the wheel centre.
 // At the default position (pin at top, [0, crank_radius]) the rod
 // angles down toward the slider at [sqrt(L²−R²), 0].
@@ -178,14 +206,8 @@ con_rod_swing = atan2(-crank_radius,
                       sqrt(con_rod_length * con_rod_length
                            - crank_radius * crank_radius));
 
-// Z position on the pin shaft (above fillet + clearance gap)
-con_rod_z_on_pin = wheel_thickness / 2
-                 + crank_pin_fillet_height
-                 + con_rod_pin_gap
-                 + con_rod_thickness / 2;
-
 translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
-        translate([0, crank_radius, con_rod_z_on_pin])
+        translate([0, crank_radius, con_rod_base_z])
             rotate([0, 0, con_rod_swing])
                 connecting_rod();
