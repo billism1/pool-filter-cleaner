@@ -26,7 +26,6 @@ build_connecting_rod  = true;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
 build_carriage        = true;   // Render the sleigh / carriage
 build_spacer_ring     = true;   // Render the spacer ring (between wheel and frame bearing)
-
 show_aluminum_tube    = true;   // Render the aluminum tube as a visual reference (gray color)
 show_guide_rods       = true;   // Render guide rods as visual reference (silver color)
 
@@ -107,7 +106,10 @@ con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
 //     3D Print: lay flat with −Z face on bed; walls print upward.
 frame_thickness         = 12;
 frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
-frame_width             = 70;       // Y dimension of main plate
+frame_width             = 70;       // Y dimension of guide walls
+frame_plate_y_min       = -(wheel_diameter / 2 + 5);  // Plate extends to 5 mm below wheel bottom
+frame_plate_y_max       = frame_width / 2;             // Top edge stays at half wall width
+frame_plate_y_span      = frame_plate_y_max - frame_plate_y_min;  // Total Y span of plate
 frame_x_start           = -50;      // Left edge relative to wheel centre
 frame_x_end             = 385;      // Right edge (past max slider pos)
 frame_length            = frame_x_end - frame_x_start;  // ≈ 405 mm
@@ -234,8 +236,9 @@ echo(str("Hub total height (disc + extension): ", hub_total_height, " mm"));
 echo(str("Connecting rod: length=", con_rod_length, " mm  big bore=",
          con_rod_big_bore, " mm  small bore=", con_rod_small_bore,
          " mm  socket height=", con_rod_socket_height, " mm"));
-echo(str("Frame: ", frame_length, "×", frame_width, "×", frame_thickness,
-         " mm  bearing pocket OD=", frame_bearing_od, " mm"));
+echo(str("Frame: ", frame_length, "×", frame_plate_y_span, "×", frame_thickness,
+         " mm  (plate Y: ", frame_plate_y_min, " to ", frame_plate_y_max,
+         ")  bearing pocket OD=", frame_bearing_od, " mm"));
 echo(str("  Guide rods: ", guide_rod_diameter, " mm, spacing=",
          guide_rod_spacing, " mm, length=", guide_rod_length,
          " mm, walls at x=", guide_wall_x1,
@@ -484,8 +487,9 @@ module frame_bracket() {
     difference() {
         union() {
             // ---- Main plate (rounded vertical edges) ----
-            translate([frame_x_start, -frame_width / 2, -frame_thickness])
-                rounded_rect([frame_length, frame_width, frame_thickness],
+            //      Extended in −Y to reach 5 mm below the wheel bottom.
+            translate([frame_x_start, frame_plate_y_min, -frame_thickness])
+                rounded_rect([frame_length, frame_plate_y_span, frame_thickness],
                              frame_edge_radius);
 
             // ---- Guide support wall 1 (near end, just past wheel edge) ----
