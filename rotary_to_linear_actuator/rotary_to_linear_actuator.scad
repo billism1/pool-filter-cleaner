@@ -20,6 +20,11 @@
 
 $fn = 80;  // High facet count for smooth curves.  Use 60 for fast previews.
 
+// --- Render toggles ------------------------------------------
+build_crank_wheel     = true;   // Render the crank wheel
+build_connecting_rod  = true;   // Render the connecting rod
+build_frame_bracket   = true;   // Render the frame / mounting bracket
+
 // ============================================================
 //  Parameters
 // ============================================================
@@ -302,6 +307,7 @@ module frame_bracket() {
 //  translate up so bottom rim sits on Z = 0
 
 // ---- Crank wheel ----
+if (build_crank_wheel)
 translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         crank_wheel_body();
@@ -319,6 +325,7 @@ con_rod_swing = atan2(-crank_radius,
                       sqrt(con_rod_length * con_rod_length
                            - crank_radius * crank_radius));
 
+if (build_connecting_rod)
 translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         translate([0, crank_radius, con_rod_base_z])
@@ -327,6 +334,7 @@ translate([0, 0, wheel_diameter / 2])
 
 // ---- Frame bracket (stationary, on −Z side of wheel) ----
 //      +Z face of frame sits frame_gap below the wheel's −Z face.
+if (build_frame_bracket)
 translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         translate([0, 0, -(wheel_thickness / 2 + frame_gap)])
