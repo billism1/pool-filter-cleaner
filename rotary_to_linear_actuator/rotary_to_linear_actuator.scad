@@ -27,6 +27,7 @@ build_frame_bracket   = true;   // Render the frame / mounting bracket
 build_carriage        = true;   // Render the sleigh / carriage
 build_spacer_ring     = true;   // Render the spacer ring (between wheel and frame bearing)
 
+show_aluminum_tube    = true;   // Render the aluminum tube as a visual reference (gray color)
 show_guide_rods       = true;   // Render guide rods as visual reference (silver color)
 
 // --- Crank position (rotation state) ------------------------
@@ -606,6 +607,27 @@ translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         translate([slider_x, 0, carriage_z_local])
             carriage();
+
+if (show_aluminum_tube) {
+    // ---- Aluminum tube (visual reference, gray) ----
+    //      Runs along the wheel's rotation axis (Z in wheel-local coords).
+    //      Starts at the top of the hub extension, passes through the wheel,
+    //      spacer ring, and frame bearing, then extends 150 mm beyond the frame.
+    tube_visual_length = hub_total_height          // hub top to wheel −Z face
+                       + frame_gap                 // spacer ring / gap
+                       + frame_thickness           // through the frame
+                       + 150;                      // extension beyond frame
+    color("DimGray")
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            rotate([0, 0, crank_angle])
+                translate([0, 0, -wheel_thickness / 2 - frame_gap - frame_thickness - 150])
+                    difference() {
+                        cylinder(h = tube_visual_length, d = rod_diameter);
+                        translate([0, 0, -1])
+                            cylinder(h = tube_visual_length + 2, d = rod_diameter - 2 * 1.65);
+                    }
+}
 
 if (show_guide_rods) {
     // ---- Guide rods (visual reference, silver color) ----
