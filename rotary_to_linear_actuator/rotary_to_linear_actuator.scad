@@ -25,6 +25,7 @@ build_crank_wheel     = true;   // Render the crank wheel
 build_connecting_rod  = true;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
 build_carriage        = true;   // Render the sleigh / carriage
+show_guide_rods       = false;   // Render guide rods as visual reference (silver color)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -73,6 +74,8 @@ bearing_608_bore        = 8;    // Inner diameter
 bearing_608_od          = 22;   // Outer diameter
 bearing_608_width       = 7;    // Width / thickness
 bearing_608_clearance   = 0.2;  // Press-fit tolerance for OD pocket in socket
+bearing_608_shoulder_hole_d = 16; // Shoulder hole: clears inner race (~12 mm OD),
+                                  // outer race (22 mm OD) seats on remaining ring
 
 // --- Lightening holes (material saving, same style as mating_bevel_gear) ---
 lightening_hole_count           = 6;
@@ -285,7 +288,10 @@ module crank_wheel_body() {
 //   • Socket bosses extend from z=0 to z=con_rod_socket_height
 //   • The flat bar body sits on top: z=con_rod_socket_height to
 //     z=con_rod_socket_height + con_rod_bar_thickness
-//   • Pin bores go through the full height so the rod slides onto the pin
+//   • Pin bores are stepped: bearing pocket at full OD from the
+//     open end (z=0), then a shoulder with a smaller hole that
+//     clears the inner race but seats the outer race.  The smaller
+//     hole continues through to the print-bed side.
 //
 // 3D Printing: print with the flat bar face (top, away-from-wheel side)
 //   on the bed; sockets extend upward from the bed.
@@ -334,13 +340,21 @@ module connecting_rod() {
                 }
         }
 
-        // Big-end pin bore (through-hole for crank pin)
+        // Big-end bore (stepped: bearing pocket + shoulder hole)
+        //   Pocket: z=0 to bearing width, at bearing OD for press-fit
+        //   Shoulder hole: bearing width to total_h, clears inner race
         translate([0, 0, -1])
-            cylinder(h = total_h + 2, d = con_rod_big_bore);
+            cylinder(h = bearing_608_width + 1, d = con_rod_big_bore);
+        translate([0, 0, bearing_608_width])
+            cylinder(h = total_h - bearing_608_width + 1,
+                     d = bearing_608_shoulder_hole_d);
 
-        // Small-end pin bore (through-hole for wrist/pivot pin)
+        // Small-end bore (same stepped design)
         translate([con_rod_length, 0, -1])
-            cylinder(h = total_h + 2, d = con_rod_small_bore);
+            cylinder(h = bearing_608_width + 1, d = con_rod_small_bore);
+        translate([con_rod_length, 0, bearing_608_width])
+            cylinder(h = total_h - bearing_608_width + 1,
+                     d = bearing_608_shoulder_hole_d);
     }
 }
 
@@ -533,14 +547,16 @@ translate([0, 0, wheel_diameter / 2])
         translate([slider_x, 0, carriage_z_local])
             carriage();
 
-// ---- Guide rods (visual reference, silver color) ----
-guide_rod_local_z = -(wheel_thickness / 2 + frame_gap) + guide_rod_z_offset;
-guide_rod_length  = guide_wall_x2 - guide_wall_x1 + guide_wall_thick;  // wall-to-wall span
-color("Silver")
-translate([0, 0, wheel_diameter / 2])
-    rotate([90, 0, 0])
-        for (y_off = [-guide_rod_spacing / 2, guide_rod_spacing / 2])
-            translate([guide_wall_x1 - guide_wall_thick / 2,
-                       y_off, guide_rod_local_z])
-                rotate([0, 90, 0])
-                    cylinder(h = guide_rod_length, d = guide_rod_diameter);
+if (show_guide_rods) {
+    // ---- Guide rods (visual reference, silver color) ----
+    guide_rod_local_z = -(wheel_thickness / 2 + frame_gap) + guide_rod_z_offset;
+    guide_rod_length  = guide_wall_x2 - guide_wall_x1 + guide_wall_thick;  // wall-to-wall span
+    color("Silver")
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            for (y_off = [-guide_rod_spacing / 2, guide_rod_spacing / 2])
+                translate([guide_wall_x1 - guide_wall_thick / 2,
+                        y_off, guide_rod_local_z])
+                    rotate([0, 90, 0])
+                        cylinder(h = guide_rod_length, d = guide_rod_diameter);
+}
