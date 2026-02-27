@@ -41,25 +41,31 @@ The result: water pressure alone powers the entire system — spinning the filte
 The crank wheel connects to the 3/4" aluminum tube from the mating bevel gear and converts its rotation into crank motion via a pin offset from centre.
 
 **What was built:**
-- Spoked disc wheel, **~182.4 mm diameter**, 12 mm thick
-- Central hub (31.55 mm OD × 35 mm long) bored for 19.55 mm tube, extending beyond both wheel faces for tube support
-- Two **M4 set-screw holes** (180° apart) on the hub extension opposite the crank-pin face, for clamping the tube
-- **Crank pin**: 10 mm diameter × 20 mm tall, at 76.2 mm radius from centre, with an 18 mm tapered fillet base for stress relief
-- **6 circular lightening holes** (30 mm diameter each) evenly spaced around the disc (same style as mating bevel gear drain holes)
+- Disc wheel, **~182.4 mm diameter**, 12 mm thick
+- Central hub (31.55 mm OD) bored for 19.55 mm tube, extending **only on the +Z (crank-pin) side** by 10 mm for 3D-print-friendliness (−Z face is flat = print bed)
+- Two **M4 set-screw holes** (180° apart) on the +Z hub extension, for clamping the tube
+- **Crank pin**: 8 mm diameter (sized for 608 2RS bearing bore) × 20 mm tall, at 76.2 mm radius from centre, with a 14 mm tapered fillet base
+- **6 circular lightening holes** (35 mm diameter each) evenly spaced around the disc (same style as mating bevel gear drain holes)
 - **Orientation:** tube bore runs along **Y axis** (parallel to the XY bottom plane / ground); wheel disc stands vertically in XZ plane; bottom rim sits on Z = 0
 
 ---
 
-### Step 2 — Connecting Rod ⬜ NOT STARTED
+### Step 2 — Connecting Rod ✅ DONE
 
-Design the connecting rod (con-rod) that links the crank pin on the wheel to the sleigh/carriage.
+**File:** `rotary_to_linear_actuator/rotary_to_linear_actuator.scad` (same file as crank wheel)
 
-**Requirements:**
-- Big end: circular bearing/bushing around the **10 mm crank pin** (must swivel freely)
-- Small end: pivot pin or clevis that attaches to the sleigh
-- Length: must be long enough so the sleigh's linear motion closely approximates pure sinusoidal back-and-forth (minimal angular deviation). A con-rod at least **2–3× the crank radius** (≥150–230 mm centre-to-centre) is recommended to keep side-loading manageable on 3D-printed guide rails.
-- 3D-printable; consider adding bronze bushings or bearing inserts at the pivot points if wear is a concern
-- Should be parametric so rod length and pin diameters are adjustable
+The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot, converting rotary crank motion into push-pull force.
+
+**What was built:**
+- **Socket-style design** for hub clearance: cylindrical socket bosses at each end extend downward (toward the wheel face), with an elevated flat bar connecting them on top. This keeps the rod body clear of the hub tube as the wheel rotates.
+- **200 mm centre-to-centre** length (≈2.6× crank radius) — keeps slider motion close to sinusoidal with minimal side-loading
+- **Big end (crank pin):** 608 2RS bearing press-fit pocket — 22.2 mm bore (bearing OD + 0.2 mm tolerance), ~30.2 mm boss OD (4 mm wall), through-bore for sliding onto the 8 mm crank pin with bearing
+- **Small end (sleigh pivot):** identical 608 2RS bearing pocket — same 22.2 mm bore, ~30.2 mm boss OD. The sleigh’s pivot pin (8 mm) will pass through this bearing.
+- **Socket height:** 10 mm (bearing width 7 mm + 1.5 mm shoulder each side)
+- **Bar thickness:** 10 mm, hull-tapered between the two boss diameters
+- **3D print orientation:** flat bar face (away-from-wheel side) on bed; sockets extend upward
+- **608 2RS bearings at both ends** for low-friction pivoting — bearing inner race rides on the pin, outer race press-fits into the socket
+- Assembly: rod is positioned on the crank pin at the correct swing angle for an inline slider-crank, with the socket bottom sitting 1 mm above the crank-pin fillet
 
 ---
 
