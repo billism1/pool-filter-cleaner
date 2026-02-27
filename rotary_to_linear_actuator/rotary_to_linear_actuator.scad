@@ -87,6 +87,7 @@ lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2)
 // --- Connecting Rod ------------------------------------------
 con_rod_length         = 240;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
 con_rod_bar_thickness  = 10;    // Flat-bar section thickness
+con_rod_bar_width      = 25;    // Rod body width (narrower than socket OD)
 con_rod_big_bore       = bearing_608_od + bearing_608_clearance;  // Socket bore fits bearing OD (22.2 mm)
 con_rod_big_od         = con_rod_big_bore + 8;   // Wall around bearing (≈30.2 mm)
 con_rod_small_bore     = bearing_608_od + bearing_608_clearance;  // Same 608 bearing at small end too
@@ -326,9 +327,9 @@ module connecting_rod() {
             // Rod body (elevated flat bar connecting both sockets)
             translate([0, 0, con_rod_socket_height])
                 hull() {
-                    cylinder(h = con_rod_bar_thickness, d = con_rod_big_od);
+                    cylinder(h = con_rod_bar_thickness, d = con_rod_bar_width);
                     translate([con_rod_length, 0, 0])
-                        cylinder(h = con_rod_bar_thickness, d = con_rod_small_od);
+                        cylinder(h = con_rod_bar_thickness, d = con_rod_bar_width);
                 }
 
             // ---- Gusset wedges (inside face of each socket only) ----
