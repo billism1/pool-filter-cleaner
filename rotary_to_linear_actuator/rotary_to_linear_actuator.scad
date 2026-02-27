@@ -88,7 +88,7 @@ con_rod_small_bore     = bearing_608_od + bearing_608_clearance;  // Same 608 be
 con_rod_small_od       = con_rod_small_bore + 8; // Wall around bearing (≈30.2 mm)
 con_rod_socket_height  = bearing_608_width + 3;  // Bearing width + 1 mm shoulder each side (9 mm)
 con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before bearing sits
-con_rod_gusset_length  = 20;    // How far each wedge extends from socket edge along rod
+con_rod_gusset_length  = 10;    // How far each wedge extends from socket edge along rod
 con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
 
 // --- Frame / Mounting Bracket --------------------------------
@@ -127,8 +127,8 @@ guide_rod_spacing       = 50;       // Y centre-to-centre between two parallel r
 guide_wall_x1           = 100;      // Near wall X centre (clear of wheel edge ≈ 91.2 + margin)
 guide_wall_x2           = 340;      // Far wall X centre
 guide_wall_thick        = 10;       // Wall thickness in X direction
-guide_wall_height       = 16;       // Height above frame +Z face (top stays below con-rod socket at z=9)
-guide_rod_z_offset      = 10;       // Guide rod centre above frame +Z face
+guide_wall_height       = 25;       // Height above frame +Z face
+guide_rod_z_offset      = 12;       // Guide rod centre above frame +Z face
 frame_edge_radius       = 3;        // Fillet radius on vertical edges of plate & walls
 
 // --- Carriage / Sleigh ---------------------------------------
@@ -146,7 +146,7 @@ lm8uu_length            = 24;       // Length
 lm8uu_clearance         = 0.2;      // Press-fit tolerance on OD pocket
 
 // Carriage body
-carriage_wall           = 2;        // Wall thickness around bearing pockets
+carriage_wall           = 4;        // Wall thickness around bearing pockets
 carriage_bearing_spacing = 40;      // X spacing between bearing pair centres on each rod
 carriage_body_width     = guide_rod_spacing + lm8uu_od + 2 * carriage_wall;  // Y dimension
 carriage_body_length    = carriage_bearing_spacing + lm8uu_length + 2 * carriage_wall;  // X dimension
