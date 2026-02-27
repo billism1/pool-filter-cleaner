@@ -18,7 +18,7 @@
 //   • Crank pin projects in the −Y direction from the front face.
 //   • Bottom of wheel rim sits on the XY plane (Z = 0).
 
-$fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
+$fn = 80;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // ============================================================
 //  Parameters
