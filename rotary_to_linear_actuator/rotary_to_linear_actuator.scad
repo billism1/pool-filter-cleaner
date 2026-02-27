@@ -84,6 +84,8 @@ con_rod_small_bore     = bearing_608_od + bearing_608_clearance;  // Same 608 be
 con_rod_small_od       = con_rod_small_bore + 8; // Wall around bearing (≈30.2 mm)
 con_rod_socket_height  = bearing_608_width + 3;  // Bearing width + 1 mm shoulder each side (9 mm)
 con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before bearing sits
+con_rod_gusset_length  = 20;    // How far each wedge extends from socket edge along rod
+con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
 
 // --- Frame / Mounting Bracket --------------------------------
 //     Stationary bracket on the −Z side of the wheel (opposite
@@ -254,6 +256,30 @@ module connecting_rod() {
                     cylinder(h = con_rod_bar_thickness, d = con_rod_big_od);
                     translate([con_rod_length, 0, 0])
                         cylinder(h = con_rod_bar_thickness, d = con_rod_small_od);
+                }
+
+            // ---- Gusset wedges (inside face of each socket only) ----
+            //      Base penetrates into the socket cylinder so there's
+            //      no visible seam on the socket wall.
+            // Big-end gusset (toward small end, +X direction)
+            translate([0, 0, 0])
+                hull() {
+                    translate([10, -con_rod_gusset_width / 2, 0])
+                        cube([0.01, con_rod_gusset_width, con_rod_socket_height]);
+                    translate([con_rod_big_od / 2 + con_rod_gusset_length,
+                               -con_rod_gusset_width / 2,
+                               con_rod_socket_height - 0.01])
+                        cube([0.01, con_rod_gusset_width, 0.01]);
+                }
+            // Small-end gusset (toward big end, −X direction)
+            translate([con_rod_length, 0, 0])
+                hull() {
+                    translate([-10, -con_rod_gusset_width / 2, 0])
+                        cube([0.01, con_rod_gusset_width, con_rod_socket_height]);
+                    translate([-(con_rod_small_od / 2 + con_rod_gusset_length),
+                               -con_rod_gusset_width / 2,
+                               con_rod_socket_height - 0.01])
+                        cube([0.01, con_rod_gusset_width, 0.01]);
                 }
         }
 
