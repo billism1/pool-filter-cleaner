@@ -31,7 +31,7 @@ build_carriage        = true;   // Render the sleigh / carriage
 //     four extreme crank positions to verify clearances, stroke,
 //     and connecting-rod alignment.
 //     0 = Top, 1 = Right (max extension), 2 = Bottom, 3 = Left (max retraction)
-crank_position = 1;
+crank_position = 0;
 
 // ============================================================
 //  Parameters
@@ -80,7 +80,7 @@ lightening_hole_diameter         = 35;     // Diameter of each circular hole
 lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2) / 2;  // Midway between hub and rim
 
 // --- Connecting Rod ------------------------------------------
-con_rod_length         = 200;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
+con_rod_length         = 220;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
 con_rod_bar_thickness  = 10;    // Flat-bar section thickness
 con_rod_big_bore       = bearing_608_od + bearing_608_clearance;  // Socket bore fits bearing OD (22.2 mm)
 con_rod_big_od         = con_rod_big_bore + 8;   // Wall around bearing (≈30.2 mm)
@@ -102,7 +102,7 @@ frame_thickness         = 12;
 frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
 frame_width             = 70;       // Y dimension of main plate
 frame_x_start           = -40;      // Left edge relative to wheel centre
-frame_x_end             = 330;      // Right edge (past max slider pos ≈ 276 mm)
+frame_x_end             = 345;      // Right edge (past max slider pos ≈ 276 mm)
 frame_length            = frame_x_end - frame_x_start;  // ≈ 360 mm
 
 // S6904ZZ bearing pocket (same bearing as filter holders)
@@ -125,7 +125,7 @@ guide_rod_clearance     = 0.3;
 guide_rod_hole_d        = guide_rod_diameter + guide_rod_clearance;   // 8.3 mm
 guide_rod_spacing       = 50;       // Y centre-to-centre between two parallel rods
 guide_wall_x1           = 100;      // Near wall X centre (clear of wheel edge ≈ 91.2 + margin)
-guide_wall_x2           = 325;      // Far wall X centre
+guide_wall_x2           = 340;      // Far wall X centre
 guide_wall_thick        = 10;       // Wall thickness in X direction
 guide_wall_height       = 16;       // Height above frame +Z face (top stays below con-rod socket at z=9)
 guide_rod_z_offset      = 10;       // Guide rod centre above frame +Z face
