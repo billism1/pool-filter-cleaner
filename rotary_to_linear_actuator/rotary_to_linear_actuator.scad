@@ -114,7 +114,7 @@ guide_rod_diameter      = 8;        // Standard 8 mm smooth steel rod
 guide_rod_clearance     = 0.3;
 guide_rod_hole_d        = guide_rod_diameter + guide_rod_clearance;   // 8.3 mm
 guide_rod_spacing       = 50;       // Y centre-to-centre between two parallel rods
-guide_wall_x1           = 95;       // Near wall X centre (just past wheel edge ≈ 91.2)
+guide_wall_x1           = 110;      // Near wall X centre (clear of wheel edge ≈ 91.2 + margin)
 guide_wall_x2           = 285;      // Far wall X centre
 guide_wall_thick        = 10;       // Wall thickness in X direction
 guide_wall_height       = 16;       // Height above frame +Z face (top stays below con-rod socket at z=9)
