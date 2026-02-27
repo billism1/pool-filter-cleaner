@@ -25,14 +25,15 @@ build_crank_wheel     = true;   // Render the crank wheel
 build_connecting_rod  = true;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
 build_carriage        = true;   // Render the sleigh / carriage
-show_guide_rods       = false;   // Render guide rods as visual reference (silver color)
+
+show_guide_rods       = true;   // Render guide rods as visual reference (silver color)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
 //     four extreme crank positions to verify clearances, stroke,
 //     and connecting-rod alignment.
 //     0 = Top, 1 = Right (max extension), 2 = Bottom, 3 = Left (max retraction)
-crank_position = 0;
+crank_position = 1;
 
 // ============================================================
 //  Parameters
@@ -83,7 +84,7 @@ lightening_hole_diameter         = 35;     // Diameter of each circular hole
 lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2) / 2;  // Midway between hub and rim
 
 // --- Connecting Rod ------------------------------------------
-con_rod_length         = 220;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
+con_rod_length         = 240;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
 con_rod_bar_thickness  = 10;    // Flat-bar section thickness
 con_rod_big_bore       = bearing_608_od + bearing_608_clearance;  // Socket bore fits bearing OD (22.2 mm)
 con_rod_big_od         = con_rod_big_bore + 8;   // Wall around bearing (≈30.2 mm)
@@ -104,9 +105,9 @@ con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
 frame_thickness         = 12;
 frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
 frame_width             = 70;       // Y dimension of main plate
-frame_x_start           = -40;      // Left edge relative to wheel centre
-frame_x_end             = 345;      // Right edge (past max slider pos ≈ 276 mm)
-frame_length            = frame_x_end - frame_x_start;  // ≈ 360 mm
+frame_x_start           = -50;      // Left edge relative to wheel centre
+frame_x_end             = 385;      // Right edge (past max slider pos)
+frame_length            = frame_x_end - frame_x_start;  // ≈ 405 mm
 
 // S6904ZZ bearing pocket (same bearing as filter holders)
 frame_bearing_od_wiggle = 0.25;
@@ -128,11 +129,13 @@ guide_rod_clearance     = 0.3;
 guide_rod_hole_d        = guide_rod_diameter + guide_rod_clearance;   // 8.3 mm
 guide_rod_spacing       = 50;       // Y centre-to-centre between two parallel rods
 guide_wall_x1           = 100;      // Near wall X centre (clear of wheel edge ≈ 91.2 + margin)
-guide_wall_x2           = 340;      // Far wall X centre
+guide_wall_x2           = 380;      // Far wall X centre (near bracket end)
 guide_wall_thick        = 10;       // Wall thickness in X direction
 guide_wall_height       = 25;       // Height above frame +Z face
 guide_rod_z_offset      = 12;       // Guide rod centre above frame +Z face
 frame_edge_radius       = 3;        // Fillet radius on vertical edges of plate & walls
+frame_gusset_length     = 20;       // Triangular gusset length along plate on inside of each guide wall
+frame_gusset_width      = 10;       // Gusset Y width (narrow, like con-rod gussets)
 
 // --- Carriage / Sleigh ---------------------------------------
 //     Rides on two 8 mm guide rods via LM8UU linear bearings.
@@ -463,6 +466,24 @@ module frame_bracket() {
                        -frame_width / 2, 0])
                 rounded_rect([guide_wall_thick, frame_width, guide_wall_height],
                              frame_edge_radius);
+
+            // ---- Gussets on inside faces of guide walls ----
+            //      Narrow wedges that penetrate into the wall body
+            //      (base at wall centre, tip extends inward along plate).
+            // Wall 1 gusset (inside = +X side)
+            translate([guide_wall_x1, -frame_gusset_width / 2, 0])
+                hull() {
+                    cube([0.01, frame_gusset_width, guide_wall_height]);
+                    translate([guide_wall_thick / 2 + frame_gusset_length, 0, 0])
+                        cube([0.01, frame_gusset_width, 0.01]);
+                }
+            // Wall 2 gusset (inside = −X side)
+            translate([guide_wall_x2, -frame_gusset_width / 2, 0])
+                hull() {
+                    cube([0.01, frame_gusset_width, guide_wall_height]);
+                    translate([-(guide_wall_thick / 2 + frame_gusset_length), 0, 0])
+                        cube([0.01, frame_gusset_width, 0.01]);
+                }
         }
 
         // ---- S6904ZZ bearing pocket (recessed from +Z face) ----
