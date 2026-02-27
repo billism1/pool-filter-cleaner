@@ -25,6 +25,7 @@ build_crank_wheel     = true;   // Render the crank wheel
 build_connecting_rod  = true;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
 build_carriage        = true;   // Render the sleigh / carriage
+build_spacer_ring     = true;   // Render the spacer ring (between wheel and frame bearing)
 
 show_guide_rods       = true;   // Render guide rods as visual reference (silver color)
 
@@ -181,6 +182,16 @@ pvc_pipe_od             = 26.7;     // 3/4" PVC pipe OD (standard Schedule 40)
 pvc_clamp_clearance     = 0.5;
 pvc_clamp_wall          = 4;
 
+// --- Spacer Ring ---------------------------------------------
+//     Thin ring on the aluminum tube between the wheel's −Z face
+//     and the S6904ZZ bearing inner race in the frame bracket.
+//     Rotates with the tube/wheel.  Contacts only the bearing
+//     inner race (not outer race or balls), so the wheel never
+//     rubs against the stationary frame.
+spacer_ring_bore       = rod_hole_diameter;       // Snug fit on tube (19.55 mm)
+spacer_ring_od         = 24;       // Sized to contact only S6904ZZ inner race (OD ≈25 mm)
+spacer_ring_thickness  = frame_gap; // Fills the gap between wheel and bearing (2 mm)
+
 // Derived
 hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
 
@@ -229,6 +240,8 @@ echo(str("  Slider travel: x=", con_rod_length - crank_radius,
 echo(str("Carriage: ", carriage_body_length, "×", carriage_body_width,
          "×", carriage_body_height, " mm  LM8UU pockets: ",
          lm8uu_od + lm8uu_clearance, " mm bore × ", lm8uu_length, " mm"));
+echo(str("Spacer ring: bore=", spacer_ring_bore, " OD=", spacer_ring_od,
+         " thickness=", spacer_ring_thickness, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -430,6 +443,21 @@ module carriage() {
 }
 
 // ============================================================
+//  Spacer Ring Module
+// ============================================================
+// Thin ring that sits on the tube between wheel and frame bearing.
+// Printed flat (ring face on bed).
+module spacer_ring() {
+    difference() {
+        cylinder(h = spacer_ring_thickness, d = spacer_ring_od);
+
+        // Tube bore
+        translate([0, 0, -1])
+            cylinder(h = spacer_ring_thickness + 2, d = spacer_ring_bore);
+    }
+}
+
+// ============================================================
 //  Helper: cube with rounded vertical (XY) edges
 // ============================================================
 module rounded_rect(size, r) {
@@ -547,6 +575,14 @@ translate([0, 0, wheel_diameter / 2])
         translate([pin_x, pin_y, con_rod_base_z])
             rotate([0, 0, con_rod_swing])
                 connecting_rod();
+
+// ---- Spacer ring (rotates with tube, between wheel and frame bearing) ----
+if (build_spacer_ring)
+translate([0, 0, wheel_diameter / 2])
+    rotate([90, 0, 0])
+        rotate([0, 0, crank_angle])
+            translate([0, 0, -(wheel_thickness / 2 + spacer_ring_thickness)])
+                spacer_ring();
 
 // ---- Frame bracket (stationary, on −Z side of wheel) ----
 //      +Z face of frame sits frame_gap below the wheel's −Z face.
