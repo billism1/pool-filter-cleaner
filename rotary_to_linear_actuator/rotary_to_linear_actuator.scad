@@ -6,6 +6,11 @@
 // Converts rotary motion into linear (back-and-forth) motion via
 // a crank-slider mechanism with a 6-inch (152.4 mm) stroke.
 //
+// 3D Printing:
+//   • Designed to print on its side (−Z face down on print bed).
+//   • The −Z face of the wheel disc is flat (no protruding hub).
+//   • Hub tube and crank pin both extend from the +Z face only.
+//
 // Orientation in the designer:
 //   • Tube bore runs along the Y axis (horizontal / parallel to
 //     the XY bottom plane).
@@ -25,9 +30,11 @@ rod_clearance      = 0.5;     // Clearance for snug fit + set-screw clamping
 rod_hole_diameter  = rod_diameter + rod_clearance;   // 19.55 mm
 
 // --- Hub (cylindrical boss around the tube bore) -------------
+//     Only extends on the +Z (crank pin) side for 3D-print-friendliness.
+//     The −Z face is flat against the wheel disc (print bed side).
 hub_wall_thickness = 6;
 hub_outer_diameter = rod_hole_diameter + 2 * hub_wall_thickness;  // ≈31.55 mm
-hub_length         = 35;      // Total length along tube axis
+hub_extension      = 13;      // How far the hub extends beyond the +Z wheel face
 
 // --- Set Screws (M4 self-threading into plastic) -------------
 set_screw_diameter = 3.4;     // 85% of 4 mm nominal
@@ -54,7 +61,7 @@ lightening_hole_diameter         = 35;     // Diameter of each circular hole
 lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2) / 2;  // Midway between hub and rim
 
 // Derived
-hub_extension = (hub_length - wheel_thickness) / 2;  // Each side beyond disc face
+hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
 
 // ============================================================
 //  Echo key dimensions for verification
@@ -63,8 +70,8 @@ echo(str("Crank wheel diameter: ", wheel_diameter, " mm"));
 echo(str("Crank radius (pin offset): ", crank_radius,
          " mm  →  stroke = ", stroke_length, " mm"));
 echo(str("Tube bore diameter: ", rod_hole_diameter, " mm"));
-echo(str("Hub OD: ", hub_outer_diameter, " mm,  hub length: ", hub_length, " mm"));
-echo(str("Hub extension per side: ", hub_extension, " mm"));
+echo(str("Hub OD: ", hub_outer_diameter, " mm,  hub extension: ", hub_extension, " mm"));
+echo(str("Hub total height (disc + extension): ", hub_total_height, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -75,8 +82,9 @@ module crank_wheel_body() {
             // ---- Wheel disc (centred at origin) ----
             cylinder(h = wheel_thickness, d = wheel_diameter, center = true);
 
-            // ---- Hub (extends beyond both wheel faces) ----
-            cylinder(h = hub_length, d = hub_outer_diameter, center = true);
+            // ---- Hub (extends only on +Z / crank-pin side; flat on −Z / print-bed side) ----
+            translate([0, 0, -wheel_thickness / 2])
+                cylinder(h = hub_total_height, d = hub_outer_diameter);
 
             // ---- Crank pin on +Z face, at top of wheel ----
             translate([0, crank_radius, wheel_thickness / 2]) {
@@ -89,13 +97,13 @@ module crank_wheel_body() {
             }
         }
 
-        // ---- Tube bore (through entire hub) ----
-        cylinder(h = hub_length + 2, d = rod_hole_diameter, center = true);
+        // ---- Tube bore (through entire hub + disc) ----
+        translate([0, 0, -wheel_thickness / 2 - 1])
+            cylinder(h = hub_total_height + 2, d = rod_hole_diameter);
 
-        // ---- Set-screw holes (on −Z hub extension, 180° apart) ----
-        //      In final orientation these end up on the +Y side
-        //      (opposite the crank pin), fully accessible.
-        ss_z = -(wheel_thickness / 2 + hub_extension / 2);
+        // ---- Set-screw holes (on +Z hub extension, 180° apart) ----
+        //      Located on the crank-pin side of the hub, accessible from outside.
+        ss_z = wheel_thickness / 2 + hub_extension / 2;
 
         // Hole at 0° (along +X)
         translate([0, 0, ss_z])

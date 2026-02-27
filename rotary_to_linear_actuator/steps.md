@@ -1,5 +1,7 @@
 # Rotary-to-Linear Actuator — Design Plan
 
+> **All parts in this project are designed for 3D printing (FDM/FFF).** Print orientations are chosen to avoid supports where possible — see individual part notes for recommended print orientation.
+
 ## Broader Goal
 
 This actuator is part of the **gear-driven pool filter cleaner** system. The full system works as follows:
