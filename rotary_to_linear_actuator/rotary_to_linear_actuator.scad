@@ -60,6 +60,15 @@ lightening_hole_count           = 6;
 lightening_hole_diameter         = 35;     // Diameter of each circular hole
 lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2) / 2;  // Midway between hub and rim
 
+// --- Connecting Rod ------------------------------------------
+con_rod_length         = 200;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
+con_rod_thickness      = 10;    // Flat-bar thickness
+con_rod_big_bore       = crank_pin_diameter + 0.5;   // 10.5 mm clearance around pin
+con_rod_big_od         = 24;    // Big-end boss outer diameter
+con_rod_small_bore     = 8;     // Wrist-pin bore at small end
+con_rod_small_od       = 16;    // Small-end boss outer diameter
+con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before rod sits
+
 // Derived
 hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
 
@@ -72,6 +81,8 @@ echo(str("Crank radius (pin offset): ", crank_radius,
 echo(str("Tube bore diameter: ", rod_hole_diameter, " mm"));
 echo(str("Hub OD: ", hub_outer_diameter, " mm,  hub extension: ", hub_extension, " mm"));
 echo(str("Hub total height (disc + extension): ", hub_total_height, " mm"));
+echo(str("Connecting rod: length=", con_rod_length, " mm  big bore=",
+         con_rod_big_bore, " mm  small bore=", con_rod_small_bore, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -127,11 +138,54 @@ module crank_wheel_body() {
 }
 
 // ============================================================
-//  Place wheel in final orientation
+//  Connecting Rod Module
 // ============================================================
-//  rotate([90, 0, 0])  →  original Z becomes −Y  (tube runs along Y)
+// Big end centred at origin, small end at [con_rod_length, 0, 0].
+// Bore axes along Z.  Flat bar tapers smoothly via hull().
+module connecting_rod() {
+    difference() {
+        hull() {
+            // Big-end boss (sits on crank pin)
+            cylinder(h = con_rod_thickness, d = con_rod_big_od, center = true);
+            // Small-end boss (connects to sleigh pivot)
+            translate([con_rod_length, 0, 0])
+                cylinder(h = con_rod_thickness, d = con_rod_small_od, center = true);
+        }
+        // Big-end bore (clearance hole around crank pin)
+        cylinder(h = con_rod_thickness + 2, d = con_rod_big_bore, center = true);
+        // Small-end bore (wrist pin / pivot pin)
+        translate([con_rod_length, 0, 0])
+            cylinder(h = con_rod_thickness + 2, d = con_rod_small_bore, center = true);
+    }
+}
+
+// ============================================================
+//  Assembly — place parts in final orientation
+// ============================================================
+//  rotate([90, 0, 0])  →  local Z becomes world −Y  (tube runs along Y)
 //  translate up so bottom rim sits on Z = 0
 
+// ---- Crank wheel ----
 translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         crank_wheel_body();
+
+// ---- Connecting rod on the crank pin ----
+// Inline slider-crank: slider axis is local X through the wheel centre.
+// At the default position (pin at top, [0, crank_radius]) the rod
+// angles down toward the slider at [sqrt(L²−R²), 0].
+con_rod_swing = atan2(-crank_radius,
+                      sqrt(con_rod_length * con_rod_length
+                           - crank_radius * crank_radius));
+
+// Z position on the pin shaft (above fillet + clearance gap)
+con_rod_z_on_pin = wheel_thickness / 2
+                 + crank_pin_fillet_height
+                 + con_rod_pin_gap
+                 + con_rod_thickness / 2;
+
+translate([0, 0, wheel_diameter / 2])
+    rotate([90, 0, 0])
+        translate([0, crank_radius, con_rod_z_on_pin])
+            rotate([0, 0, con_rod_swing])
+                connecting_rod();
