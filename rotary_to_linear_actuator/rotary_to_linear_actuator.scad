@@ -76,6 +76,45 @@ con_rod_small_od       = con_rod_small_bore + 8; // Wall around bearing (≈30.2
 con_rod_socket_height  = bearing_608_width + 3;  // Bearing width + 1 mm shoulder each side (9 mm)
 con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before bearing sits
 
+// --- Frame / Mounting Bracket --------------------------------
+//     Stationary bracket on the −Z side of the wheel (opposite
+//     hub / set screws / crank pin).  Houses an S6904ZZ bearing
+//     for the aluminum tube and extends along the slider axis
+//     with two guide-rod support walls for the sleigh.
+//
+//     3D Print: lay flat with −Z face on bed; walls print upward.
+frame_thickness         = 12;
+frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
+frame_width             = 70;       // Y dimension of main plate
+frame_x_start           = -40;      // Left edge relative to wheel centre
+frame_x_end             = 300;      // Right edge (past max slider pos ≈ 276 mm)
+frame_length            = frame_x_end - frame_x_start;  // ≈ 340 mm
+
+// S6904ZZ bearing pocket (same bearing as filter holders)
+frame_bearing_od_wiggle = 0.25;
+frame_bearing_od        = 37 + frame_bearing_od_wiggle;  // 37.25 mm
+frame_bearing_width     = 9;        // = bearing thickness
+
+// Ring cutout below bearing (prevents rotating inner race from rubbing frame)
+frame_ring_gap          = 0.633;    // Gap between tube hole edge and cutout
+frame_ring_radial       = 2.5;      // Radial thickness of cutout
+frame_ring_depth        = 2;        // Axial depth into frame below bearing
+frame_tube_clearance    = 2.0;      // Loose fit — bearing provides alignment
+frame_tube_hole_d       = rod_diameter + frame_tube_clearance;  // ≈ 21 mm
+frame_ring_inner_d      = frame_tube_hole_d + 2 * frame_ring_gap;   // ≈ 22.3 mm
+frame_ring_outer_d      = frame_ring_inner_d + 2 * frame_ring_radial; // ≈ 27.3 mm
+
+// Guide rod support walls
+guide_rod_diameter      = 8;        // Standard 8 mm smooth steel rod
+guide_rod_clearance     = 0.3;
+guide_rod_hole_d        = guide_rod_diameter + guide_rod_clearance;   // 8.3 mm
+guide_rod_spacing       = 50;       // Y centre-to-centre between two parallel rods
+guide_wall_x1           = 95;       // Near wall X centre (just past wheel edge ≈ 91.2)
+guide_wall_x2           = 285;      // Far wall X centre
+guide_wall_thick        = 10;       // Wall thickness in X direction
+guide_wall_height       = 16;       // Height above frame +Z face (top stays below con-rod socket at z=9)
+guide_rod_z_offset      = 10;       // Guide rod centre above frame +Z face
+
 // Derived
 hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
 
@@ -91,6 +130,13 @@ echo(str("Hub total height (disc + extension): ", hub_total_height, " mm"));
 echo(str("Connecting rod: length=", con_rod_length, " mm  big bore=",
          con_rod_big_bore, " mm  small bore=", con_rod_small_bore,
          " mm  socket height=", con_rod_socket_height, " mm"));
+echo(str("Frame: ", frame_length, "×", frame_width, "×", frame_thickness,
+         " mm  bearing pocket OD=", frame_bearing_od, " mm"));
+echo(str("  Guide rods: ", guide_rod_diameter, " mm, spacing=",
+         guide_rod_spacing, " mm, walls at x=", guide_wall_x1,
+         " & ", guide_wall_x2));
+echo(str("  Slider travel: x=", con_rod_length - crank_radius,
+         " to x=", con_rod_length + crank_radius, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -189,6 +235,67 @@ module connecting_rod() {
 }
 
 // ============================================================
+//  Frame / Mounting Bracket Module
+// ============================================================
+// Built with +Z face at z = 0 (faces the wheel).
+// −Z face is the print-bed side.
+// Two guide-rod support walls rise from the +Z face at the
+// ends of the slider travel range.
+module frame_bracket() {
+    difference() {
+        union() {
+            // ---- Main plate ----
+            translate([frame_x_start, -frame_width / 2, -frame_thickness])
+                cube([frame_length, frame_width, frame_thickness]);
+
+            // ---- Guide support wall 1 (near end, just past wheel edge) ----
+            translate([guide_wall_x1 - guide_wall_thick / 2,
+                       -frame_width / 2, 0])
+                cube([guide_wall_thick, frame_width, guide_wall_height]);
+
+            // ---- Guide support wall 2 (far end) ----
+            translate([guide_wall_x2 - guide_wall_thick / 2,
+                       -frame_width / 2, 0])
+                cube([guide_wall_thick, frame_width, guide_wall_height]);
+        }
+
+        // ---- S6904ZZ bearing pocket (recessed from +Z face) ----
+        translate([0, 0, -frame_bearing_width])
+            cylinder(h = frame_bearing_width + 0.1, d = frame_bearing_od);
+
+        // ---- Ring cutout below bearing pocket ----
+        //      Prevents the rotating bearing inner race from rubbing
+        //      against the frame body (same technique as filter_holder).
+        translate([0, 0, -(frame_bearing_width + frame_ring_depth)]) {
+            difference() {
+                cylinder(h = frame_ring_depth + 1, d = frame_ring_outer_d);
+                cylinder(h = frame_ring_depth + 1, d = frame_ring_inner_d);
+            }
+        }
+
+        // ---- Tube through-hole (loose fit below bearing) ----
+        translate([0, 0, -frame_thickness - 1])
+            cylinder(h = frame_thickness + 2, d = frame_tube_hole_d);
+
+        // ---- Guide rod holes in wall 1 ----
+        for (y_off = [-guide_rod_spacing / 2, guide_rod_spacing / 2]) {
+            translate([guide_wall_x1 - guide_wall_thick / 2 - 1,
+                       y_off, guide_rod_z_offset])
+                rotate([0, 90, 0])
+                    cylinder(h = guide_wall_thick + 2, d = guide_rod_hole_d);
+        }
+
+        // ---- Guide rod holes in wall 2 ----
+        for (y_off = [-guide_rod_spacing / 2, guide_rod_spacing / 2]) {
+            translate([guide_wall_x2 - guide_wall_thick / 2 - 1,
+                       y_off, guide_rod_z_offset])
+                rotate([0, 90, 0])
+                    cylinder(h = guide_wall_thick + 2, d = guide_rod_hole_d);
+        }
+    }
+}
+
+// ============================================================
 //  Assembly — place parts in final orientation
 // ============================================================
 //  rotate([90, 0, 0])  →  local Z becomes world −Y  (tube runs along Y)
@@ -217,3 +324,10 @@ translate([0, 0, wheel_diameter / 2])
         translate([0, crank_radius, con_rod_base_z])
             rotate([0, 0, con_rod_swing])
                 connecting_rod();
+
+// ---- Frame bracket (stationary, on −Z side of wheel) ----
+//      +Z face of frame sits frame_gap below the wheel's −Z face.
+translate([0, 0, wheel_diameter / 2])
+    rotate([90, 0, 0])
+        translate([0, 0, -(wheel_thickness / 2 + frame_gap)])
+            frame_bracket();
