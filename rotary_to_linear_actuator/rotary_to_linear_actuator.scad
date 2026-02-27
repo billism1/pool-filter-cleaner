@@ -395,19 +395,21 @@ module carriage() {
             cylinder(h = carriage_recess_depth + 0.02, d = carriage_recess_d);
 
         // ---- LM8UU bearing pockets (4 total: 2 per rod) ----
-        //      Each pocket extends to the nearest X face of the carriage
-        //      so bearings can be inserted from the outside.
+        //      Each pocket extends from the bearing's inward edge
+        //      outward to the nearest carriage X face, so bearings
+        //      can be inserted from the outside.
         for (y_off = [-guide_rod_spacing / 2, guide_rod_spacing / 2]) {
-            // Outer pair — pocket extends to outer X face
             for (x_sign = [-1, 1]) {
                 x_centre = x_sign * carriage_bearing_spacing / 2;
-                // Pocket from bearing centre toward the nearest carriage edge
-                pocket_start = x_centre - lm8uu_length / 2;
-                pocket_end   = x_sign > 0
+                // Inner edge of bearing (toward carriage centre)
+                inner_edge = x_centre - x_sign * lm8uu_length / 2;
+                // Outer edge: carriage face
+                outer_edge = x_sign > 0
                     ? carriage_body_length / 2 + 1
                     : -(carriage_body_length / 2 + 1);
-                pocket_len = abs(pocket_end - pocket_start);
-                translate([min(pocket_start, pocket_end), y_off, carriage_rod_z])
+                pocket_x_min = min(inner_edge, outer_edge);
+                pocket_len   = abs(outer_edge - inner_edge);
+                translate([pocket_x_min, y_off, carriage_rod_z])
                     rotate([0, 90, 0])
                         cylinder(h = pocket_len, d = pocket_d);
             }
