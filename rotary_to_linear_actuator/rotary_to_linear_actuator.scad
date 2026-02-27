@@ -123,6 +123,7 @@ guide_wall_x2           = 300;      // Far wall X centre
 guide_wall_thick        = 10;       // Wall thickness in X direction
 guide_wall_height       = 16;       // Height above frame +Z face (top stays below con-rod socket at z=9)
 guide_rod_z_offset      = 10;       // Guide rod centre above frame +Z face
+frame_edge_radius       = 3;        // Fillet radius on vertical edges of plate & walls
 
 // Derived
 hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
@@ -267,6 +268,17 @@ module connecting_rod() {
 }
 
 // ============================================================
+//  Helper: cube with rounded vertical (XY) edges
+// ============================================================
+module rounded_rect(size, r) {
+    hull() {
+        for (x = [r, size.x - r], y = [r, size.y - r])
+            translate([x, y, 0])
+                cylinder(r = r, h = size.z);
+    }
+}
+
+// ============================================================
 //  Frame / Mounting Bracket Module
 // ============================================================
 // Built with +Z face at z = 0 (faces the wheel).
@@ -276,19 +288,22 @@ module connecting_rod() {
 module frame_bracket() {
     difference() {
         union() {
-            // ---- Main plate ----
+            // ---- Main plate (rounded vertical edges) ----
             translate([frame_x_start, -frame_width / 2, -frame_thickness])
-                cube([frame_length, frame_width, frame_thickness]);
+                rounded_rect([frame_length, frame_width, frame_thickness],
+                             frame_edge_radius);
 
             // ---- Guide support wall 1 (near end, just past wheel edge) ----
             translate([guide_wall_x1 - guide_wall_thick / 2,
                        -frame_width / 2, 0])
-                cube([guide_wall_thick, frame_width, guide_wall_height]);
+                rounded_rect([guide_wall_thick, frame_width, guide_wall_height],
+                             frame_edge_radius);
 
             // ---- Guide support wall 2 (far end) ----
             translate([guide_wall_x2 - guide_wall_thick / 2,
                        -frame_width / 2, 0])
-                cube([guide_wall_thick, frame_width, guide_wall_height]);
+                rounded_rect([guide_wall_thick, frame_width, guide_wall_height],
+                             frame_edge_radius);
         }
 
         // ---- S6904ZZ bearing pocket (recessed from +Z face) ----
