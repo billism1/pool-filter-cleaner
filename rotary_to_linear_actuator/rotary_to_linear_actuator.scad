@@ -34,7 +34,7 @@ rod_hole_diameter  = rod_diameter + rod_clearance;   // 19.55 mm
 //     The −Z face is flat against the wheel disc (print bed side).
 hub_wall_thickness = 6;
 hub_outer_diameter = rod_hole_diameter + 2 * hub_wall_thickness;  // ≈31.55 mm
-hub_extension      = 13;      // How far the hub extends beyond the +Z wheel face
+hub_extension      = 10;      // How far the hub extends beyond the +Z wheel face
 
 // --- Set Screws (M4 self-threading into plastic) -------------
 set_screw_diameter = 3.4;     // 85% of 4 mm nominal
@@ -53,7 +53,7 @@ wheel_thickness    = 12;      // Face-to-face thickness of disc
 crank_pin_diameter      = 8;    // Sized for 608 2RS bearing bore (8 mm)
 crank_pin_height        = 20;   // Exposed shaft for bearing + connecting-rod
 crank_pin_fillet_dia    = 14;   // Wider tapered base for stress relief
-crank_pin_fillet_height = 3;
+crank_pin_fillet_height = 2;
 
 // --- 608 2RS Bearing (on crank pin) --------------------------
 bearing_608_bore        = 8;    // Inner diameter
@@ -73,7 +73,7 @@ con_rod_big_bore       = bearing_608_od + bearing_608_clearance;  // Socket bore
 con_rod_big_od         = con_rod_big_bore + 8;   // Wall around bearing (≈30.2 mm)
 con_rod_small_bore     = bearing_608_od + bearing_608_clearance;  // Same 608 bearing at small end too
 con_rod_small_od       = con_rod_small_bore + 8; // Wall around bearing (≈30.2 mm)
-con_rod_socket_height  = bearing_608_width + 2;  // Bearing width + 1 mm shoulder each side (9 mm)
+con_rod_socket_height  = bearing_608_width + 3;  // Bearing width + 1 mm shoulder each side (9 mm)
 con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before bearing sits
 
 // Derived
