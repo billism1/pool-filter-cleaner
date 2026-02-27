@@ -50,10 +50,16 @@ wheel_diameter     = 2 * (crank_radius + wheel_rim_width);  // ≈182.4 mm
 wheel_thickness    = 12;      // Face-to-face thickness of disc
 
 // --- Crank Pin -----------------------------------------------
-crank_pin_diameter      = 10;
-crank_pin_height        = 20;  // Exposed shaft for connecting-rod
-crank_pin_fillet_dia    = 18;  // Wider tapered base for stress relief
-crank_pin_fillet_height = 4;
+crank_pin_diameter      = 8;    // Sized for 608 2RS bearing bore (8 mm)
+crank_pin_height        = 20;   // Exposed shaft for bearing + connecting-rod
+crank_pin_fillet_dia    = 14;   // Wider tapered base for stress relief
+crank_pin_fillet_height = 3;
+
+// --- 608 2RS Bearing (on crank pin) --------------------------
+bearing_608_bore        = 8;    // Inner diameter
+bearing_608_od          = 22;   // Outer diameter
+bearing_608_width       = 7;    // Width / thickness
+bearing_608_clearance   = 0.2;  // Press-fit tolerance for OD pocket in socket
 
 // --- Lightening holes (material saving, same style as mating_bevel_gear) ---
 lightening_hole_count           = 6;
@@ -63,12 +69,12 @@ lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2)
 // --- Connecting Rod ------------------------------------------
 con_rod_length         = 200;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
 con_rod_bar_thickness  = 10;    // Flat-bar section thickness
-con_rod_big_bore       = crank_pin_diameter + 0.5;   // 10.5 mm clearance around pin
-con_rod_big_od         = 24;    // Big-end boss outer diameter
-con_rod_small_bore     = 8;     // Wrist-pin bore at small end
-con_rod_small_od       = 16;    // Small-end boss outer diameter
-con_rod_socket_height  = 12;    // Socket extension below rod body (clears hub)
-con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before socket sits
+con_rod_big_bore       = bearing_608_od + bearing_608_clearance;  // Socket bore fits bearing OD (22.2 mm)
+con_rod_big_od         = con_rod_big_bore + 8;   // Wall around bearing (≈30.2 mm)
+con_rod_small_bore     = bearing_608_od + bearing_608_clearance;  // Same 608 bearing at small end too
+con_rod_small_od       = con_rod_small_bore + 8; // Wall around bearing (≈30.2 mm)
+con_rod_socket_height  = bearing_608_width + 2;  // Bearing width + 1 mm shoulder each side (9 mm)
+con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before bearing sits
 
 // Derived
 hub_total_height = wheel_thickness + hub_extension;  // Total hub height from −Z face
