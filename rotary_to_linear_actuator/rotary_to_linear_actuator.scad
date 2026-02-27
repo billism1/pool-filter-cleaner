@@ -26,7 +26,10 @@ build_connecting_rod  = true;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
 
 // --- Crank position (rotation state) ------------------------
-//     0 = Top, 1 = Right, 2 = Bottom, 3 = Left
+//     Allows visual inspection of the assembly at each of the
+//     four extreme crank positions to verify clearances, stroke,
+//     and connecting-rod alignment.
+//     0 = Top, 1 = Right (max extension), 2 = Bottom, 3 = Left (max retraction)
 crank_position = 1;
 
 // ============================================================

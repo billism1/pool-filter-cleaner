@@ -67,7 +67,7 @@ The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot
 - **608 2RS bearings at both ends** for low-friction pivoting — bearing inner race rides on the pin, outer race press-fits into the socket
 - **Triangular gusset wedges** on the inside face of each socket (big-end toward small-end, small-end toward big-end). Gusset base penetrates into the socket cylinder so there's no visible seam. Parameters: `con_rod_gusset_length` = 20 mm, `con_rod_gusset_width` = 10 mm.
 - Assembly: rod is positioned on the crank pin at the correct swing angle for an inline slider-crank, with the socket bottom sitting 1 mm above the crank-pin fillet
-- A **4-state `crank_position` parameter** (0 = Top, 1 = Right, 2 = Bottom, 3 = Left) rotates the wheel and repositions the connecting rod so it stays attached to the crank pin at each position
+- A **4-state `crank_position` parameter** (0 = Top, 1 = Right, 2 = Bottom, 3 = Left) rotates the wheel and repositions the connecting rod so it stays attached to the crank pin at each position. This is used for **visual inspection** at each extreme crank angle to verify clearances, stroke limits, and rod alignment before printing.
 
 ---
 
