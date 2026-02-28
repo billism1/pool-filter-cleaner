@@ -27,6 +27,7 @@ build_frame_bracket   = true;   // Render the frame / mounting bracket
 build_spacer_ring     = true;   // Render the spacer ring (between wheel and frame bearing)
 show_aluminum_tube    = true;   // Render the aluminum tube as a visual reference (gray color)
 show_spray_tube       = true;   // Render the spray pipe (parallel to connecting rod, gray)
+show_crank_pin        = true;   // Render the crank pin as a visual reference (metallic)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -65,10 +66,13 @@ wheel_diameter     = 2 * (crank_radius + wheel_rim_width);  // ≈182.4 mm
 wheel_thickness    = 12;      // Face-to-face thickness of disc
 
 // --- Crank Pin -----------------------------------------------
-crank_pin_diameter      = 8;    // Sized for 608 2RS bearing bore (8 mm)
-crank_pin_height        = 20;   // Exposed shaft for bearing + connecting-rod
-crank_pin_fillet_dia    = 14;   // Wider tapered base for stress relief
-crank_pin_fillet_height = 2;
+//     Now a separate metal pin (8 mm steel rod) inserted into
+//     a blind hole in the wheel.  No longer 3D-printed.
+crank_pin_diameter      = 8;    // 8 mm steel pin diameter (= 608 2RS bore)
+crank_pin_height        = 20;   // Exposed shaft above wheel +Z face for bearing + con-rod
+crank_pin_hole_depth    = 8;    // Depth of blind hole from +Z face (leaves 4 mm of material)
+crank_pin_fillet_dia    = 14;   // Wider tapered boss around hole for pin stabilisation
+crank_pin_fillet_height = 2;    // Height of fillet boss above +Z face
 
 // --- 608 2RS Bearing (on crank pin) --------------------------
 bearing_608_bore        = 8;    // Inner diameter
@@ -201,6 +205,10 @@ con_rod_swing = atan2(-pin_y, slider_x - pin_x);
 echo(str("Crank wheel diameter: ", wheel_diameter, " mm"));
 echo(str("Crank radius (pin offset): ", crank_radius,
          " mm  →  stroke = ", stroke_length, " mm"));
+echo(str("Crank pin: ", crank_pin_diameter, " mm dia × ",
+         crank_pin_hole_depth + crank_pin_height, " mm total  (hole depth=",
+         crank_pin_hole_depth, " mm, exposed=", crank_pin_height,
+         " mm, remaining wall=", wheel_thickness - crank_pin_hole_depth, " mm)"));
 echo(str("Crank position: ", crank_pos_name, " (", crank_angle, "°)",
          "  pin=(", pin_x, ", ", pin_y, ")  slider_x=", slider_x));
 echo(str("Tube bore diameter: ", rod_hole_diameter, " mm"));
@@ -233,20 +241,22 @@ module crank_wheel_body() {
             translate([0, 0, -wheel_thickness / 2])
                 cylinder(h = hub_total_height, d = hub_outer_diameter);
 
-            // ---- Crank pin on +Z face, at top of wheel ----
-            translate([0, crank_radius, wheel_thickness / 2]) {
-                // Tapered fillet at base
+            // (Crank pin is a separate metal pin — see show_crank_pin)
+
+            // ---- Fillet boss around pin hole (stabilises inserted pin) ----
+            translate([0, crank_radius, wheel_thickness / 2])
                 cylinder(h = crank_pin_fillet_height,
                          d1 = crank_pin_fillet_dia, d2 = crank_pin_diameter);
-                // Straight pin shaft (total height includes fillet)
-                cylinder(h = crank_pin_height + crank_pin_fillet_height,
-                         d = crank_pin_diameter);
-            }
         }
 
         // ---- Tube bore (through entire hub + disc) ----
         translate([0, 0, -wheel_thickness / 2 - 1])
             cylinder(h = hub_total_height + 2, d = rod_hole_diameter);
+
+        // ---- Crank pin hole (blind hole from +Z face for 8 mm metal pin) ----
+        //      Depth = crank_pin_hole_depth (8 mm); leaves 4 mm solid on −Z side.
+        translate([0, crank_radius, wheel_thickness / 2 - crank_pin_hole_depth])
+            cylinder(h = crank_pin_hole_depth + 1, d = crank_pin_diameter);
 
         // ---- Set-screw holes (on +Z hub extension, 180° apart) ----
         //      Located on the crank-pin side of the hub, accessible from outside.
@@ -470,6 +480,19 @@ translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         translate([0, 0, -(wheel_thickness / 2 + frame_gap)])
             frame_bracket();
+
+// ---- Crank pin (visual reference, metallic) ----
+//      8 mm steel pin inserted into the wheel's blind hole.
+//      Exposed portion extends crank_pin_height above the +Z face.
+if (show_crank_pin) {
+    color("Silver")
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            rotate([0, 0, crank_angle])
+                translate([0, crank_radius, wheel_thickness / 2 - crank_pin_hole_depth])
+                    cylinder(h = crank_pin_hole_depth + crank_pin_height,
+                             d = crank_pin_diameter);
+}
 
 if (show_aluminum_tube) {
     // ---- Aluminum tube (visual reference, gray) ----

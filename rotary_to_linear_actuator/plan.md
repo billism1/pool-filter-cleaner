@@ -44,7 +44,7 @@ The crank wheel connects to the 3/4" aluminum tube from the mating bevel gear an
 - Disc wheel, **~182.4 mm diameter**, 12 mm thick
 - Central hub (31.55 mm OD) bored for 19.55 mm tube, extending **only on the +Z (crank-pin) side** by 10 mm for 3D-print-friendliness (−Z face is flat = print bed)
 - Two **M4 set-screw holes** (180° apart) on the +Z hub extension, for clamping the tube
-- **Crank pin**: 8 mm diameter (sized for 608 2RS bearing bore) × 20 mm tall, at 76.2 mm radius from centre, with a 14 mm tapered fillet base
+- **Crank pin hole**: 8 mm diameter blind hole, 8 mm deep from +Z face, at 76.2 mm radius from centre. Accepts a separate 8 mm steel pin (not 3D-printed). Leaves 4 mm solid material on the −Z (print-bed) side. A visual reference pin (`show_crank_pin`) renders the metal pin in silver.
 - **6 circular lightening holes** (35 mm diameter each) evenly spaced around the disc (same style as mating bevel gear drain holes)
 - **Orientation:** tube bore runs along **Y axis** (parallel to the XY bottom plane / ground); wheel disc stands vertically in XZ plane; bottom rim sits on Z = 0
 
