@@ -22,12 +22,12 @@ $fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // --- Render toggles ------------------------------------------
 build_crank_wheel     = true;   // Render the crank wheel
-build_connecting_rod  = true;   // Render the connecting rod
+build_connecting_rod  = false;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
 build_spacer_ring     = true;   // Render the spacer ring (between wheel and frame bearing)
 show_aluminum_tube    = true;   // Render the aluminum tube as a visual reference (gray color)
 show_spray_tube       = true;   // Render the spray pipe (parallel to connecting rod, gray)
-show_crank_pin        = true;   // Render the crank pin as a visual reference (metallic)
+show_crank_pin        = false;   // Render the crank pin as a visual reference (metallic)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -256,7 +256,7 @@ module crank_wheel_body() {
         // ---- Crank pin hole (blind hole from +Z face for 8 mm metal pin) ----
         //      Depth = crank_pin_hole_depth (8 mm); leaves 4 mm solid on −Z side.
         translate([0, crank_radius, wheel_thickness / 2 - crank_pin_hole_depth])
-            cylinder(h = crank_pin_hole_depth + 1, d = crank_pin_diameter);
+            cylinder(h = crank_pin_hole_depth + crank_pin_fillet_height + 1, d = crank_pin_diameter);
 
         // ---- Set-screw holes (on +Z hub extension, 180° apart) ----
         //      Located on the crank-pin side of the hub, accessible from outside.
