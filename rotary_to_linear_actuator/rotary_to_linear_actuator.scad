@@ -86,13 +86,13 @@ lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2)
 
 // --- Connecting Rod ------------------------------------------
 con_rod_length         = 240;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
-con_rod_bar_thickness  = 10;    // Flat-bar section thickness
+con_rod_bar_thickness  = 8;    // Flat-bar section thickness
 con_rod_bar_width      = 25;    // Rod body width (narrower than socket OD)
 con_rod_big_bore       = bearing_608_od + bearing_608_clearance;  // Socket bore fits bearing OD (22.2 mm)
 con_rod_big_od         = con_rod_big_bore + 8;   // Wall around bearing (≈30.2 mm)
 con_rod_small_bore     = bearing_608_od + bearing_608_clearance;  // Same 608 bearing at small end too
 con_rod_small_od       = con_rod_small_bore + 8; // Wall around bearing (≈30.2 mm)
-con_rod_socket_height  = bearing_608_width + 3;  // Bearing width + 1 mm shoulder each side (9 mm)
+con_rod_socket_height  = bearing_608_width + 6;  // Bearing width + 1 mm shoulder each side (9 mm)
 con_rod_pin_gap        = 1;     // Clearance above crank-pin fillet before bearing sits
 con_rod_gusset_length  = 10;    // How far each wedge extends from socket edge along rod
 con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
