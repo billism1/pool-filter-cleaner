@@ -105,8 +105,8 @@ con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
 frame_thickness         = 12;
 frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
 frame_width             = 70;       // Y dimension of plate
-frame_plate_y_min       = -(wheel_diameter / 2 + 5);  // Plate extends to 5 mm below wheel bottom
-frame_plate_y_max       = frame_width / 2;             // Top edge stays at half wall width
+frame_plate_y_min       = -(wheel_diameter / 2 + 5);  // 5 mm beyond wheel bottom
+frame_plate_y_max       =  (wheel_diameter / 2 + 5);  // 5 mm beyond wheel top (symmetric)
 frame_plate_y_span      = frame_plate_y_max - frame_plate_y_min;  // Total Y span of plate
 frame_x_start           = -50;      // Left edge relative to wheel centre
 frame_x_end             = 125;      // Right edge (past max slider pos)
@@ -127,6 +127,22 @@ frame_ring_inner_d      = frame_tube_hole_d + 2 * frame_ring_gap;   // ≈ 22.3 
 frame_ring_outer_d      = frame_ring_inner_d + 2 * frame_ring_radial; // ≈ 27.3 mm
 
 frame_edge_radius       = 3;        // Fillet radius on vertical edges of plate
+
+// Frame lightening holes (circular, same style as wheel)
+frame_light_hole_diameter        = 30;   // Hole diameter (slightly smaller than wheel's 35 mm to suit plate)
+frame_light_hole_edge_margin     = 10;   // Minimum distance from hole edge to plate edge
+frame_light_hole_spacing         = 40;   // Centre-to-centre spacing (diameter + margin gap)
+frame_light_hole_bearing_margin  = 5;    // Minimum distance from hole edge to bearing pocket edge
+
+// Derived: centre the hole grid symmetrically on the plate
+frame_light_center_x  = (frame_x_start + frame_x_end) / 2;
+frame_light_center_y  = (frame_plate_y_min + frame_plate_y_max) / 2;
+frame_light_usable_x  = frame_length       - 2 * (frame_light_hole_edge_margin + frame_light_hole_diameter / 2);
+frame_light_usable_y  = frame_plate_y_span  - 2 * (frame_light_hole_edge_margin + frame_light_hole_diameter / 2);
+frame_light_nx        = floor(frame_light_usable_x / frame_light_hole_spacing) + 1;
+frame_light_ny        = floor(frame_light_usable_y / frame_light_hole_spacing) + 1;
+frame_light_x_start   = frame_light_center_x - (frame_light_nx - 1) / 2 * frame_light_hole_spacing;
+frame_light_y_start   = frame_light_center_y - (frame_light_ny - 1) / 2 * frame_light_hole_spacing;
 
 // --- Spacer Ring ---------------------------------------------
 //     Thin ring on the aluminum tube between the wheel's −Z face
@@ -396,6 +412,20 @@ module frame_bracket() {
         // ---- Tube through-hole (loose fit below bearing) ----
         translate([0, 0, -frame_thickness - 1])
             cylinder(h = frame_thickness + 2, d = frame_tube_hole_d);
+
+        // ---- Lightening holes (centred grid, skipping bearing area) ----
+        //      Grid is centred on the plate so holes are equidistant from
+        //      all four edges.  Any hole that would encroach on the bearing
+        //      pocket is automatically skipped.
+        for (ix = [0 : frame_light_nx - 1])
+            for (iy = [0 : frame_light_ny - 1]) {
+                hx = frame_light_x_start + ix * frame_light_hole_spacing;
+                hy = frame_light_y_start + iy * frame_light_hole_spacing;
+                if (sqrt(hx * hx + hy * hy) >
+                    frame_bearing_od / 2 + frame_light_hole_diameter / 2 + frame_light_hole_bearing_margin)
+                    translate([hx, hy, -frame_thickness - 1])
+                        cylinder(h = frame_thickness + 2, d = frame_light_hole_diameter);
+            }
 
     }
 }
