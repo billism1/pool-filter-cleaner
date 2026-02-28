@@ -26,6 +26,7 @@ build_connecting_rod  = true;   // Render the connecting rod
 build_frame_bracket   = true;   // Render the frame / mounting bracket
 build_spacer_ring     = true;   // Render the spacer ring (between wheel and frame bearing)
 show_aluminum_tube    = true;   // Render the aluminum tube as a visual reference (gray color)
+show_spray_tube       = true;   // Render the spray pipe (parallel to connecting rod, gray)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -108,7 +109,7 @@ frame_plate_y_min       = -(wheel_diameter / 2 + 5);  // Plate extends to 5 mm b
 frame_plate_y_max       = frame_width / 2;             // Top edge stays at half wall width
 frame_plate_y_span      = frame_plate_y_max - frame_plate_y_min;  // Total Y span of plate
 frame_x_start           = -50;      // Left edge relative to wheel centre
-frame_x_end             = 385;      // Right edge (past max slider pos)
+frame_x_end             = 125;      // Right edge (past max slider pos)
 frame_length            = frame_x_end - frame_x_start;  // ≈ 405 mm
 
 // S6904ZZ bearing pocket (same bearing as filter holders)
@@ -137,8 +138,25 @@ spacer_ring_bore       = rod_hole_diameter;       // Snug fit on tube (19.55 mm)
 spacer_ring_od         = 24;       // Sized to contact only S6904ZZ inner race (OD ≈25 mm)
 spacer_ring_thickness  = frame_gap; // Fills the gap between wheel and bearing (2 mm)
 
+// --- Spray Tube (visual reference) ---------------------------
+//     3/4″ aluminum tube running parallel to the connecting rod,
+//     offset 20 mm from it on the crank-pin side of the wheel.
+//     Extends 3 feet (914.4 mm) in the +X direction from the
+//     wheel centre.  Stationary — does not rotate with the wheel.
+spray_tube_length    = 914.4;   // 3 feet = 914.4 mm
+spray_tube_spacing   = 20;      // Edge-to-edge gap from connecting rod (mm)
+spray_tube_wall      = 1.65;    // Same wall thickness as main aluminum tube
+
 // Derived
 hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from −Z face
+
+// Spray tube Z position in wheel-local coords (perpendicular to wheel face)
+// Places the tube 20 mm past the connecting rod's outer surface on the
+// crank-pin (+Z) side, so it clears the rod at all crank angles.
+con_rod_total_h     = con_rod_socket_height + con_rod_bar_thickness;
+con_rod_base_z_val  = wheel_thickness / 2 + crank_pin_fillet_height + con_rod_pin_gap;
+spray_tube_z_local  = con_rod_base_z_val + con_rod_total_h
+                    + spray_tube_spacing + rod_diameter / 2;
 
 // --- Crank position geometry (derived from crank_position) ---
 crank_angle = crank_position == 0 ?    0 :   // Top
@@ -182,6 +200,9 @@ echo(str("  Slider travel: x=", con_rod_length - crank_radius,
          " to x=", con_rod_length + crank_radius, " mm"));
 echo(str("Spacer ring: bore=", spacer_ring_bore, " OD=", spacer_ring_od,
          " thickness=", spacer_ring_thickness, " mm"));
+echo(str("Spray tube: length=", spray_tube_length, " mm  OD=", rod_diameter,
+         " mm  spacing=", spray_tube_spacing, " mm  local Z=",
+         spray_tube_z_local, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -441,4 +462,23 @@ if (show_aluminum_tube) {
                     }
 }
 
+// ---- Spray tube (visual reference, gray) ----
+//      3/4″ aluminum tube running parallel to the connecting rod,
+//      20 mm past its outer surface on the crank-pin side.
+//      Runs from X = 0 (wheel centre) to X = 914.4 mm (3 ft).
+//      At world Z = wheel_diameter/2 (same height as the existing
+//      drive tube, i.e. the Z centre of that tube).
+if (show_spray_tube) {
+    color("DimGray")
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            translate([0, 0, spray_tube_z_local])
+                rotate([0, 90, 0])
+                    difference() {
+                        cylinder(h = spray_tube_length, d = rod_diameter);
+                        translate([0, 0, -1])
+                            cylinder(h = spray_tube_length + 2,
+                                     d = rod_diameter - 2 * spray_tube_wall);
+                    }
+}
 
