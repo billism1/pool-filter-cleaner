@@ -79,7 +79,9 @@ The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot
 The frame bracket is a stationary plate on the −Z side of the wheel that houses a bearing for the tube and provides guide-rod support walls for the sleigh.
 
 **What was built:**
-- **Main plate:** 435 × 70 × 12 mm (from x = −50 to x = 385), with 3 mm rounded vertical edges
+- **Main plate:** 435 mm long (x = −50 to x = 385) × 12 mm thick, with 3 mm rounded vertical edges
+- **Plate Y span:** asymmetric — extends from `frame_plate_y_min` = −96.2 mm (5 mm below wheel bottom) to `frame_plate_y_max` = +35 mm (half of `frame_width`), giving a total Y span of ~131.2 mm. This ensures the plate reaches the bottom edge of the wheel plus a 5 mm margin.
+- **Guide walls** remain at `frame_width` = 70 mm Y extent (centred on tube axis), independent of the wider plate
 - **S6904ZZ bearing pocket** recessed from the +Z face at the tube centre, with ring cutout below (same technique as `filter_holder.scad`) to prevent the rotating inner race from rubbing
 - **Tube through-hole** with 2 mm clearance (bearing provides alignment)
 - **Two guide-rod support walls** (10 mm thick × 23 mm tall) at x = 100 and x = 380, each with two 8.3 mm holes for 8 mm smooth steel rods at 50 mm Y spacing
@@ -165,11 +167,36 @@ All components are assembled **inline** in the same `.scad` file (no separate as
 
 ## Additional Notes for Copilot Agent
 
-- All models are **OpenSCAD** (`.scad`) and use the **BOSL2** library for gears and other advanced geometry (`include <BOSL2/std.scad>`, `include <BOSL2/gears.scad>`)
-- Use `$fn = 180` for final renders, `$fn = 60` for fast previews
+- All models are **OpenSCAD** (`.scad`) and use the **BOSL2** library for gears and other advanced geometry (`include <BOSL2/std.scad>`, `include <BOSL2/gears.scad>`) in the filter holder files. The actuator file does **not** currently use BOSL2.
+- Use `$fn = 80` for normal work (current setting), `$fn = 180` for final renders, `$fn = 60` for fast previews
 - All dimensions are in **millimetres**
 - The project convention is to use **set-screw holes** (M4 / 3.4 mm diameter, 85% of nominal for self-threading into plastic) to secure aluminum tubes in hubs
-- Bearings used elsewhere: **S6904ZZ** (37 mm OD × 20 mm ID × 9 mm thick) — consider the same or similar for the crank pin and sleigh pivots if plain bushings prove too lossy
+- Bearings used: **S6904ZZ** (37 mm OD × 20 mm ID × 9 mm thick) for tube support in frame and filter holders; **608 2RS** (22 mm OD × 8 mm bore × 7 mm width) for crank pin and wrist pin pivots; **LM8UU** (15 mm OD × 8 mm bore × 24 mm long) for carriage linear motion on guide rods
 - The **spray element is a PVC pipe** (not the fan-out nozzle in `nozzle/`). The pipe is mounted horizontally on the sleigh, parallel to the filter, with orifices drilled ~150 mm (~6") apart and a closed far end. The garden hose connects to the open end. The sleigh moves the pipe back and forth by one orifice spacing (~6") so the jets sweep the entire filter length.
 - The tube connecting the mating bevel gear to the crank wheel needs to be long enough to clear the filter cartridge and legs; typical filter length is ~3 ft (914 mm), so this tube may be 12–18 inches (300–450 mm)
 - Water pressure is the **sole power source** — the mechanism must have low enough friction that the torque transmitted through the gear train from the spinning filter is sufficient to drive the actuator
+
+---
+
+## Coordinate System Reference
+
+Understanding the coordinate transforms is critical when modifying the assembly:
+
+### Module-local coordinates (how parts are built)
+- **Crank wheel:** rotation axis = Z; disc centred at origin; −Z face flat (print bed)
+- **Connecting rod:** extends along +X; z=0 is socket bottom (bearing side)
+- **Frame bracket:** +Z face at z=0 (faces wheel); plate extends into −Z; walls extend into +Z
+- **Carriage:** −Z face at z=0 (print bed); guide rods at z = `carriage_rod_z`
+- **Spacer ring:** −Z face at z=0 (print bed)
+
+### Assembly transforms (module-local → world)
+All parts share a common prefix transform:
+```
+translate([0, 0, wheel_diameter/2])   // Lift so wheel bottom sits on Z=0
+    rotate([90, 0, 0])                // Local Z → world −Y (tube along Y axis)
+```
+This means:
+- Module-local **X** → world **X** (slider axis, horizontal)
+- Module-local **Y** → world **−Z** (used to be up, now points down after rotate)
+- Module-local **Z** → world **−Y** (was rotation axis, now depth/along tube)
+- Frame-local **Y** → world **Z** (vertical in world) after the transform
