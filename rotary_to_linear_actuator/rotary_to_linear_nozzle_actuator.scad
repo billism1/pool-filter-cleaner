@@ -28,6 +28,7 @@ build_spacer_ring                  = false;   // Render the spacer ring (between
 show_rotary_aluminum_tube          = true;   // Render the aluminum tube as a visual reference (gray color)
 show_nozzle_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
 show_crank_pin                     = true;   // Render the crank pin as a visual reference (metallic)
+build_support_sleeve               = true;   // Render the support sleeve (between frame and bevel gear)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -128,7 +129,7 @@ frame_bearing_width     = 9;        // = bearing thickness
 frame_ring_gap          = 0.633;    // Gap between tube hole edge and cutout
 frame_ring_radial       = 2.5;      // Radial thickness of cutout
 frame_ring_depth        = 2;        // Axial depth into frame below bearing
-frame_tube_clearance    = 5.0;      // Loose fit — bearing provides alignment
+frame_tube_clearance    = 6.5;      // Loose fit — bearing provides alignment
 frame_tube_hole_d       = rod_diameter + frame_tube_clearance;
 frame_ring_inner_d      = frame_tube_hole_d + 2 * frame_ring_gap;
 frame_ring_outer_d      = frame_ring_inner_d + 2 * frame_ring_radial;
@@ -160,6 +161,21 @@ frame_light_y_start   = frame_light_center_y - (frame_light_ny - 1) / 2 * frame_
 spacer_ring_bore       = rod_hole_diameter;       // Snug fit on tube (19.55 mm)
 spacer_ring_od         = 24;       // Sized to contact only S6904ZZ inner race (OD ≈25 mm)
 spacer_ring_thickness  = frame_gap; // Fills the gap between wheel and bearing (2 mm)
+
+// --- Support Sleeve ------------------------------------------
+//     Tapered tube around the aluminum tube on the −Z (bevel-gear)
+//     side of the frame bracket.  Bracket end inserts into the
+//     frame tube hole and touches the S6904ZZ bearing face.
+//     Rotates with the tube/wheel.
+support_sleeve_length          = 43;    // Total length (mm)
+support_sleeve_bore            = rod_hole_diameter;   // Same bore as other hubs (19.55 mm)
+support_sleeve_bracket_wall    = 2;     // Wall thickness at bracket (near) end
+support_sleeve_far_wall        = 5;     // Wall thickness at bevel-gear (far) end
+support_sleeve_insertion       = frame_thickness - frame_bearing_width;  // How far it enters the frame hole (3 mm)
+
+// Derived
+support_sleeve_bracket_od  = support_sleeve_bore + 2 * support_sleeve_bracket_wall;  // ≈23.55 mm
+support_sleeve_far_od      = support_sleeve_bore + 2 * support_sleeve_far_wall;      // ≈29.55 mm
 
 // --- Spray Tube (visual reference) ---------------------------
 //     3/4″ aluminum tube running parallel to the connecting rod,
@@ -229,6 +245,11 @@ echo(str("Spacer ring: bore=", spacer_ring_bore, " OD=", spacer_ring_od,
 echo(str("Spray tube: length=", spray_tube_length, " mm  OD=", rod_diameter,
          " mm  spacing=", spray_tube_spacing, " mm  local Z=",
          spray_tube_z_local, " mm"));
+echo(str("Support sleeve: length=", support_sleeve_length,
+         " mm  bore=", support_sleeve_bore,
+         " mm  bracket OD=", support_sleeve_bracket_od,
+         " mm  far OD=", support_sleeve_far_od,
+         " mm  insertion=", support_sleeve_insertion, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -379,6 +400,29 @@ module spacer_ring() {
 }
 
 // ============================================================
+//  Support Sleeve Module
+// ============================================================
+// Tapered tube that sits on the aluminum tube between the frame
+// bracket and the bevel gear.  Bracket end (smaller OD, 2 mm wall)
+// inserts into the frame tube hole and touches the bearing face.
+// Far end (larger OD, 5 mm wall) faces the bevel gear.
+//
+// Module-local coords:
+//   z = 0: far end (5 mm wall, larger OD) — print bed (−Z face)
+//   z = support_sleeve_length: bracket end (2 mm wall, smaller OD)
+module support_sleeve() {
+    difference() {
+        cylinder(h = support_sleeve_length,
+                 d1 = support_sleeve_far_od,
+                 d2 = support_sleeve_bracket_od);
+
+        // Straight bore
+        translate([0, 0, -1])
+            cylinder(h = support_sleeve_length + 2, d = support_sleeve_bore);
+    }
+}
+
+// ============================================================
 //  Helper: cube with rounded vertical (XY) edges
 // ============================================================
 module rounded_rect(size, r) {
@@ -480,6 +524,16 @@ translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         translate([0, 0, -(wheel_thickness / 2 + frame_gap)])
             frame_bracket();
+
+// ---- Support sleeve (rotates with tube, between frame and bevel gear) ----
+//      Bracket end inserts into the frame tube hole and touches the bearing.
+//      Far end (larger OD) faces the bevel gear.
+if (build_support_sleeve)
+translate([0, 0, wheel_diameter / 2])
+    rotate([90, 0, 0])
+        rotate([0, 0, crank_angle])
+            translate([0, 0, -(wheel_thickness / 2 + frame_gap + frame_bearing_width + support_sleeve_length)])
+                support_sleeve();
 
 // ---- Crank pin (visual reference, metallic) ----
 //      8 mm steel pin inserted into the wheel's blind hole.
