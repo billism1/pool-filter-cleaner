@@ -155,8 +155,9 @@ hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from
 // crank-pin (+Z) side, so it clears the rod at all crank angles.
 con_rod_total_h     = con_rod_socket_height + con_rod_bar_thickness;
 con_rod_base_z_val  = wheel_thickness / 2 + crank_pin_fillet_height + con_rod_pin_gap;
-spray_tube_z_local  = con_rod_base_z_val + con_rod_total_h
-                    + spray_tube_spacing + rod_diameter / 2;
+spray_tube_z_local = -wheel_thickness - 45;
+// spray_tube_z_local  = con_rod_base_z_val + con_rod_total_h
+//                     + spray_tube_spacing + rod_diameter / 2;
 
 // --- Crank position geometry (derived from crank_position) ---
 crank_angle = crank_position == 0 ?    0 :   // Top
@@ -472,7 +473,7 @@ if (show_spray_tube) {
     color("DimGray")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
-            translate([0, 0, spray_tube_z_local])
+            translate([85, 0, spray_tube_z_local])
                 rotate([0, 90, 0])
                     difference() {
                         cylinder(h = spray_tube_length, d = rod_diameter);
