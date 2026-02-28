@@ -108,9 +108,10 @@ frame_width             = 70;       // Y dimension of plate
 frame_plate_y_min       = -(wheel_diameter / 2 + 5);  // 5 mm beyond wheel bottom
 frame_plate_y_max       =  (wheel_diameter / 2 + 5);  // 5 mm beyond wheel top (symmetric)
 frame_plate_y_span      = frame_plate_y_max - frame_plate_y_min;  // Total Y span of plate
-frame_x_start           = -50;      // Left edge relative to wheel centre
-frame_x_end             = 125;      // Right edge (past max slider pos)
-frame_length            = frame_x_end - frame_x_start;  // ≈ 405 mm
+frame_half_length       = 125;      // Half-length of plate (each side of wheel centre)
+frame_x_start           = -frame_half_length;  // Left edge (symmetric)
+frame_x_end             =  frame_half_length;  // Right edge (symmetric)
+frame_length            = frame_x_end - frame_x_start;  // 250 mm
 
 // S6904ZZ bearing pocket (same bearing as filter holders)
 frame_bearing_od_wiggle = 0.25;
