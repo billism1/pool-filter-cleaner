@@ -18,7 +18,7 @@
 //   • Crank pin projects in the −Y direction from the front face.
 //   • Bottom of wheel rim sits on the XY plane (Z = 0).
 
-$fn = 80;  // High facet count for smooth curves.  Use 60 for fast previews.
+$fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // --- Render toggles ------------------------------------------
 build_crank_wheel     = true;   // Render the crank wheel
@@ -33,7 +33,7 @@ show_spray_tube       = true;   // Render the spray pipe (parallel to connecting
 //     four extreme crank positions to verify clearances, stroke,
 //     and connecting-rod alignment.
 //     0 = Top, 1 = Right (max extension), 2 = Bottom, 3 = Left (max retraction)
-crank_position = 1;
+crank_position = 3;
 
 // ============================================================
 //  Parameters
@@ -172,7 +172,9 @@ hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from
 // crank-pin (+Z) side, so it clears the rod at all crank angles.
 con_rod_total_h     = con_rod_socket_height + con_rod_bar_thickness;
 con_rod_base_z_val  = wheel_thickness / 2 + crank_pin_fillet_height + con_rod_pin_gap;
-spray_tube_z_local = -wheel_thickness - 45;
+spray_tube_z_local = -(wheel_thickness / 2) - frame_gap - (frame_thickness / 2); // Center the long aluminum tube on the thickness of the frame.
+
+//spray_tube_z_local = -((wheel_thickness / 2 + frame_thickness / 2 + spray_tube_spacing / 2) / 2);
 // spray_tube_z_local  = con_rod_base_z_val + con_rod_total_h
 //                     + spray_tube_spacing + rod_diameter / 2;
 
