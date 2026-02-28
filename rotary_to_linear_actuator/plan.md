@@ -36,7 +36,7 @@ The result: water pressure alone powers the entire system — spinning the filte
 
 ### Step 1 — Crank Wheel ✅ DONE
 
-**File:** `rotary_to_linear_actuator/rotary_to_linear_actuator.scad`
+**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad`
 
 The crank wheel connects to the 3/4" aluminum tube from the mating bevel gear and converts its rotation into crank motion via a pin offset from centre.
 
@@ -52,7 +52,7 @@ The crank wheel connects to the 3/4" aluminum tube from the mating bevel gear an
 
 ### Step 2 — Connecting Rod ✅ DONE
 
-**File:** `rotary_to_linear_actuator/rotary_to_linear_actuator.scad` (same file as crank wheel)
+**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (same file as crank wheel)
 
 The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot, converting rotary crank motion into push-pull force.
 
@@ -74,7 +74,7 @@ The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot
 
 ### Step 3 — Frame / Mounting Bracket (with integrated guide rails) ✅ DONE
 
-**File:** `rotary_to_linear_actuator/rotary_to_linear_actuator.scad` (same file, `frame_bracket()` module)
+**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (same file, `frame_bracket()` module)
 
 The frame bracket is a stationary plate on the −Z side of the wheel that houses a bearing for the tube and provides guide-rod support walls for the sleigh.
 
@@ -98,7 +98,7 @@ The frame bracket is a stationary plate on the −Z side of the wheel that house
 
 ### Step 4 — Sleigh / Carriage ✅ DONE
 
-**File:** `rotary_to_linear_actuator/rotary_to_linear_actuator.scad` (same file, `carriage()` module)
+**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (same file, `carriage()` module)
 
 The carriage rides on the two 8 mm guide rods via LM8UU linear bearings and connects to the connecting rod's small end via a wrist pin.
 
@@ -118,7 +118,7 @@ The carriage rides on the two 8 mm guide rods via LM8UU linear bearings and conn
 
 ### Step 5 — Spacer Ring ✅ DONE
 
-**File:** `rotary_to_linear_actuator/rotary_to_linear_actuator.scad` (same file, `spacer_ring()` module)
+**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (same file, `spacer_ring()` module)
 
 A thin ring on the aluminum tube between the wheel's −Z face and the S6904ZZ bearing inner race in the frame bracket. Prevents the rotating wheel from rubbing against the stationary frame.
 
@@ -136,7 +136,7 @@ A thin ring on the aluminum tube between the wheel's −Z face and the S6904ZZ b
 
 ### Step 6 — Visual References ✅ DONE
 
-**File:** `rotary_to_linear_actuator/rotary_to_linear_actuator.scad` (assembly section)
+**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (assembly section)
 
 Non-printed reference geometry rendered to aid visual inspection of the assembly.
 
