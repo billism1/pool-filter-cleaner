@@ -130,9 +130,9 @@ frame_ring_outer_d      = frame_ring_inner_d + 2 * frame_ring_radial; // ≈ 27.
 frame_edge_radius       = 3;        // Fillet radius on vertical edges of plate
 
 // Frame lightening holes (circular, same style as wheel)
-frame_light_hole_diameter        = 30;   // Hole diameter (slightly smaller than wheel's 35 mm to suit plate)
+frame_light_hole_diameter        = 35;   // Hole diameter (slightly smaller than wheel's 35 mm to suit plate)
 frame_light_hole_edge_margin     = 10;   // Minimum distance from hole edge to plate edge
-frame_light_hole_spacing         = 40;   // Centre-to-centre spacing (diameter + margin gap)
+frame_light_hole_spacing         = 45;   // Centre-to-centre spacing (diameter + margin gap)
 frame_light_hole_bearing_margin  = 5;    // Minimum distance from hole edge to bearing pocket edge
 
 // Derived: centre the hole grid symmetrically on the plate
