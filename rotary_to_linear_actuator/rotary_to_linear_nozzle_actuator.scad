@@ -21,13 +21,13 @@
 $fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // --- Render toggles ------------------------------------------
-build_crank_wheel     = true;   // Render the crank wheel
-build_connecting_rod  = false;   // Render the connecting rod
-build_frame_bracket   = true;   // Render the frame / mounting bracket
-build_spacer_ring     = true;   // Render the spacer ring (between wheel and frame bearing)
-show_aluminum_tube    = true;   // Render the aluminum tube as a visual reference (gray color)
-show_spray_tube       = true;   // Render the spray pipe (parallel to connecting rod, gray)
-show_crank_pin        = false;   // Render the crank pin as a visual reference (metallic)
+build_crank_wheel                  = false;   // Render the crank wheel
+build_connecting_rod               = false;   // Render the connecting rod
+build_frame_bracket                = true;   // Render the frame / mounting bracket
+build_spacer_ring                  = false;   // Render the spacer ring (between wheel and frame bearing)
+show_rotary_aluminum_tube          = true;   // Render the aluminum tube as a visual reference (gray color)
+show_nozzle_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
+show_crank_pin                     = true;   // Render the crank pin as a visual reference (metallic)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -64,6 +64,8 @@ crank_radius       = stroke_length / 2;   // 76.2 mm
 wheel_rim_width    = 15;      // Material beyond crank-pin centre
 wheel_diameter     = 2 * (crank_radius + wheel_rim_width);  // ≈182.4 mm
 wheel_thickness    = 12;      // Face-to-face thickness of disc
+
+wheel_aluminum_tube_visual_length = 103;
 
 // --- Crank Pin -----------------------------------------------
 //     Now a separate metal pin (8 mm steel rod) inserted into
@@ -126,10 +128,10 @@ frame_bearing_width     = 9;        // = bearing thickness
 frame_ring_gap          = 0.633;    // Gap between tube hole edge and cutout
 frame_ring_radial       = 2.5;      // Radial thickness of cutout
 frame_ring_depth        = 2;        // Axial depth into frame below bearing
-frame_tube_clearance    = 2.0;      // Loose fit — bearing provides alignment
-frame_tube_hole_d       = rod_diameter + frame_tube_clearance;  // ≈ 21 mm
-frame_ring_inner_d      = frame_tube_hole_d + 2 * frame_ring_gap;   // ≈ 22.3 mm
-frame_ring_outer_d      = frame_ring_inner_d + 2 * frame_ring_radial; // ≈ 27.3 mm
+frame_tube_clearance    = 5.0;      // Loose fit — bearing provides alignment
+frame_tube_hole_d       = rod_diameter + frame_tube_clearance;
+frame_ring_inner_d      = frame_tube_hole_d + 2 * frame_ring_gap;
+frame_ring_outer_d      = frame_ring_inner_d + 2 * frame_ring_radial;
 
 frame_edge_radius       = 3;        // Fillet radius on vertical edges of plate
 
@@ -400,23 +402,21 @@ module frame_bracket() {
             translate([frame_x_start, frame_plate_y_min, -frame_thickness])
                 rounded_rect([frame_length, frame_plate_y_span, frame_thickness],
                              frame_edge_radius);
-
-
         }
 
         // ---- S6904ZZ bearing pocket (recessed from +Z face) ----
         translate([0, 0, -frame_bearing_width])
             cylinder(h = frame_bearing_width + 0.1, d = frame_bearing_od);
 
-        // ---- Ring cutout below bearing pocket ----
-        //      Prevents the rotating bearing inner race from rubbing
-        //      against the frame body (same technique as filter_holder).
-        translate([0, 0, -(frame_bearing_width + frame_ring_depth)]) {
-            difference() {
-                cylinder(h = frame_ring_depth + 1, d = frame_ring_outer_d);
-                cylinder(h = frame_ring_depth + 1, d = frame_ring_inner_d);
-            }
-        }
+        // // ---- Ring cutout below bearing pocket ----
+        // //      Prevents the rotating bearing inner race from rubbing
+        // //      against the frame body (same technique as filter_holder).
+        // translate([0, 0, -(frame_bearing_width + frame_ring_depth)]) {
+        //     difference() {
+        //         cylinder(h = frame_ring_depth + 1, d = frame_ring_outer_d);
+        //         cylinder(h = frame_ring_depth + 1, d = frame_ring_inner_d);
+        //     }
+        // }
 
         // ---- Tube through-hole (loose fit below bearing) ----
         translate([0, 0, -frame_thickness - 1])
@@ -494,24 +494,21 @@ if (show_crank_pin) {
                              d = crank_pin_diameter);
 }
 
-if (show_aluminum_tube) {
+if (show_rotary_aluminum_tube) {
     // ---- Aluminum tube (visual reference, gray) ----
     //      Runs along the wheel's rotation axis (Z in wheel-local coords).
     //      Starts at the top of the hub extension, passes through the wheel,
     //      spacer ring, and frame bearing, then extends 150 mm beyond the frame.
-    tube_visual_length = hub_total_height          // hub top to wheel −Z face
-                       + frame_gap                 // spacer ring / gap
-                       + frame_thickness           // through the frame
-                       + 150;                      // extension beyond frame
+
     color("DimGray")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
             rotate([0, 0, crank_angle])
-                translate([0, 0, -wheel_thickness / 2 - frame_gap - frame_thickness - 150])
+                translate([0, 0, -wheel_aluminum_tube_visual_length + (wheel_thickness / 2) + hub_total_height - wheel_thickness])
                     difference() {
-                        cylinder(h = tube_visual_length, d = rod_diameter);
+                        cylinder(h = wheel_aluminum_tube_visual_length, d = rod_diameter);
                         translate([0, 0, -1])
-                            cylinder(h = tube_visual_length + 2, d = rod_diameter - 2 * 1.65);
+                            cylinder(h = wheel_aluminum_tube_visual_length + 2, d = rod_diameter - 2 * 1.65);
                     }
 }
 
@@ -521,7 +518,7 @@ if (show_aluminum_tube) {
 //      Runs from X = 0 (wheel centre) to X = 914.4 mm (3 ft).
 //      At world Z = wheel_diameter/2 (same height as the existing
 //      drive tube, i.e. the Z centre of that tube).
-if (show_spray_tube) {
+if (show_nozzle_carriage_aluminum_tube) {
     color("DimGray")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
