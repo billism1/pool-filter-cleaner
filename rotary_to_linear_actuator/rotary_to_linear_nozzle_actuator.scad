@@ -33,6 +33,7 @@ show_wrist_pin                         = true;   // Render the small-end wrist p
 build_spray_pipe_carriage              = true;   // Render the spray pipe carriage (Step 4)
 show_lm20uu_bearings                   = true;   // Render LM20UU bearings in carriage (visual reference)
 show_pvc_spray_pipe                    = true;   // Render PVC spray pipe in carriage (visual reference)
+build_guide_rod_pvc_clip               = true;   // Render guide rod PVC clip (stationary pipe support)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -259,6 +260,15 @@ pvc_clip_center_y         = lm20uu_housing_od / 2 + pvc_clip_od / 2;
 pvc_clip_opening_width    = pvc_clip_id * sin((360 - pvc_clip_wrap_angle) / 2);
 pvc_spray_pipe_length     = 914.4;   // 3 ft PVC spray pipe (visual reference)
 
+// --- Guide Rod PVC Clip ----------------------------------------
+//     Simple clip that rides on the guide rod via a single LM20UU
+//     bearing and holds the PVC spray pipe.  No arm or 608 pin
+//     connector.  ±X end faces flush; flat −Y base for printing.
+guide_clip_length       = pvc_clip_length;                  // 50 mm — housing and clip same length, flush both ends
+guide_clip_pvc_center_y = lm20uu_housing_od / 2 + pvc_clip_od / 2;  // PVC clip tangent above housing
+guide_clip_flat_cut     = 1;                                // Flat cut on −Y for print bed (mm)
+guide_clip_x_pos        = 609.6;                            // 2 feet along guide rod from wheel centre (+X)
+
 // --- Crank position geometry (derived from crank_position) ---
 crank_angle = crank_position == 0 ?    0 :   // Top
               crank_position == 1 ?  -90 :   // Right
@@ -327,6 +337,10 @@ echo(str("  PVC clip: ID=", pvc_clip_id, " mm  OD=", pvc_clip_od,
 echo(str("  608 socket: bore=", carriage_608_bore, " mm  OD=",
          carriage_608_od, " mm  height=", carriage_608_socket_height,
          " mm  flat_cut=", carriage_608_flat_cut, " mm"));
+echo(str("Guide rod PVC clip: length=", guide_clip_length,
+         " mm  x_pos=", guide_clip_x_pos,
+         " mm  housing_od=", lm20uu_housing_od,
+         " mm  pvc_center_y=", guide_clip_pvc_center_y, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -782,6 +796,63 @@ module spray_pipe_carriage() {
 }
 
 // ============================================================
+//  Guide Rod PVC Clip Module
+// ============================================================
+// Simple clip that rides on the guide rod via a single LM20UU
+// bearing and holds the PVC spray pipe in a top-loading C-clip.
+// No arm or 608 bearing socket — just the housing and clip.
+//
+// Module-local coordinate system:
+//   Origin at LM20UU bearing centre (= guide rod bore centre)
+//   X = guide rod axis (bore axis)
+//   Y = up toward PVC clip (+Y), down to print base (−Y)
+//   Z = lateral
+//
+// 3D Print: −Y face (flat base) on bed.  Both ±X ends flush.
+module guide_rod_pvc_clip() {
+    difference() {
+        union() {
+            // ---- LM20UU housing cylinder (bore along X) ----
+            rotate([0, 90, 0])
+                cylinder(h = guide_clip_length,
+                         d = lm20uu_housing_od, center = true);
+
+            // ---- PVC clip cradle (C-clip along X, above housing) ----
+            translate([0, guide_clip_pvc_center_y, 0])
+                rotate([0, 90, 0])
+                    cylinder(h = guide_clip_length,
+                             d = pvc_clip_od, center = true);
+
+            // ---- Bridge web (housing top ↔ PVC clip) ----
+            translate([-guide_clip_length / 2,
+                        lm20uu_housing_od / 2 - 2,
+                        -carriage_arm_thickness / 2])
+                cube([guide_clip_length, 4, carriage_arm_thickness]);
+        }
+
+        // ---- LM20UU bearing bore (along X) ----
+        rotate([0, 90, 0])
+            translate([0, 0, -(guide_clip_length / 2 + 1)])
+                cylinder(d = lm20uu_pocket_d,
+                         h = guide_clip_length + 2);
+
+        // ---- PVC clip bore (along X) ----
+        translate([0, guide_clip_pvc_center_y, 0])
+            rotate([0, 90, 0])
+                translate([0, 0, -(guide_clip_length / 2 + 1)])
+                    cylinder(h = guide_clip_length + 2, d = pvc_clip_id);
+
+        // ---- PVC clip opening slot (C-shape, opens +Y = up) ----
+        translate([-guide_clip_length / 2 - 1,
+                    guide_clip_pvc_center_y,
+                    -pvc_clip_opening_width / 2])
+            cube([guide_clip_length + 2,
+                  pvc_clip_od / 2 + 1,
+                  pvc_clip_opening_width]);
+    }
+}
+
+// ============================================================
 //  Assembly — place parts in final orientation
 // ============================================================
 //  rotate([90, 0, 0])  →  local Z becomes world −Y  (tube runs along Y)
@@ -842,6 +913,13 @@ translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
         translate([slider_x, 0, carriage_bearing_center_z])
             spray_pipe_carriage();
+
+// ---- Guide rod PVC clip (stationary pipe support, 2 ft along guide rod) ----
+if (build_guide_rod_pvc_clip)
+translate([0, 0, wheel_diameter / 2])
+    rotate([90, 0, 0])
+        translate([guide_clip_x_pos, 0, spray_tube_z_local])
+            guide_rod_pvc_clip();
 
 // ---- Crank pin (big-end, in wheel blind hole) ----
 //      8 mm steel pin with a flat edge for 3D printability.
@@ -934,6 +1012,14 @@ if (show_lm20uu_bearings) {
                     rotate([0, 90, 0])
                         cylinder(h = lm20uu_length, d = lm20uu_od, center = true);
             }
+
+    // ---- LM20UU bearing in guide rod PVC clip (visual reference) ----
+    color("SteelBlue", 0.5)
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            translate([guide_clip_x_pos, 0, spray_tube_z_local])
+                rotate([0, 90, 0])
+                    cylinder(h = lm20uu_length, d = lm20uu_od, center = true);
 }
 
 // ---- PVC spray pipe (visual reference, white) ----
