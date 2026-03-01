@@ -113,13 +113,14 @@ con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
 frame_thickness         = 12;
 frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
 frame_width             = 70;       // Y dimension of plate
-frame_plate_y_min       = -(wheel_diameter / 4);  // 5 mm beyond wheel bottom
-frame_plate_y_max       =  (wheel_diameter / 2 + 5);  // 5 mm beyond wheel top (symmetric)
+frame_plate_y_min       = -(wheel_diameter / 2 + 10);  // 10 mm beyond wheel bottom
+frame_plate_y_max       =  (wheel_diameter / 6);
 frame_plate_y_span      = frame_plate_y_max - frame_plate_y_min;  // Total Y span of plate
 frame_half_length       = 125;      // Half-length of plate (each side of wheel centre)
 frame_x_start           = -frame_half_length;  // Left edge (symmetric)
 frame_x_end             = frame_half_length;   // Right edge (symmetric)
 frame_length            = frame_x_end - frame_x_start;
+frame_top_width         = 70;
 
 // S6904ZZ bearing pocket (same bearing as filter holders)
 frame_bearing_od_wiggle = 0.25;
@@ -137,10 +138,16 @@ frame_ring_outer_d      = frame_ring_inner_d + 2 * frame_ring_radial;
 frame_edge_radius       = 10;        // Fillet radius on vertical edges of plate
 
 // Frame lightening holes (circular, same style as wheel)
-frame_light_hole_diameter        = 35;   // Hole diameter (slightly smaller than wheel's 35 mm to suit plate)
+frame_light_hole_diameter        = 30;   // Hole diameter (slightly smaller than wheel's 35 mm to suit plate)
 frame_light_hole_edge_margin     = 10;   // Minimum distance from hole edge to plate edge
-frame_light_hole_spacing         = 45;   // Centre-to-centre spacing (diameter + margin gap)
+frame_light_hole_spacing         = 35;   // Centre-to-centre spacing (diameter + margin gap)
 frame_light_hole_bearing_margin  = 5;    // Minimum distance from hole edge to bearing pocket edge
+
+// Derived: half-width at any Y position (linear interpolation for trapezoid)
+function frame_half_width_at_y(y) =
+    frame_half_length
+    + (frame_top_width / 2 - frame_half_length)
+      * (y - frame_plate_y_min) / frame_plate_y_span;
 
 // Derived: centre the hole grid symmetrically on the plate
 frame_light_center_x  = (frame_x_start + frame_x_end) / 2;
@@ -238,7 +245,7 @@ echo(str("Connecting rod: length=", con_rod_length, " mm  big bore=",
          " mm  socket height=", con_rod_socket_height, " mm"));
 echo(str("Frame: ", frame_length, "×", frame_plate_y_span, "×", frame_thickness,
          " mm  (plate Y: ", frame_plate_y_min, " to ", frame_plate_y_max,
-         ")  bearing pocket OD=", frame_bearing_od, " mm"));
+         ")  top width=", frame_top_width, " mm  bearing pocket OD=", frame_bearing_od, " mm"));
 echo(str("  Slider travel: x=", con_rod_length - crank_radius,
          " to x=", con_rod_length + crank_radius, " mm"));
 echo(str("Spacer ring: bore=", spacer_ring_bore, " OD=", spacer_ring_od,
@@ -458,11 +465,31 @@ module rounded_rect(size, r) {
 module frame_bracket() {
     difference() {
         union() {
-            // ---- Main plate (rounded vertical edges) ----
-            //      Extended in −Y to reach 5 mm below the wheel bottom.
-            translate([frame_x_start, frame_plate_y_min, -frame_thickness])
-                rounded_rect([frame_length, frame_plate_y_span, frame_thickness],
-                             frame_edge_radius);
+            // ---- Main plate (trapezoidal, rounded corners) ----
+            //      Full width (250 mm) at bottom, narrows to frame_top_width
+            //      (70 mm) at top.  Uniform thickness throughout.
+            hull() {
+                // Bottom-left
+                translate([frame_x_start + frame_edge_radius,
+                           frame_plate_y_min + frame_edge_radius,
+                           -frame_thickness])
+                    cylinder(r = frame_edge_radius, h = frame_thickness);
+                // Bottom-right
+                translate([frame_x_end - frame_edge_radius,
+                           frame_plate_y_min + frame_edge_radius,
+                           -frame_thickness])
+                    cylinder(r = frame_edge_radius, h = frame_thickness);
+                // Top-left
+                translate([-frame_top_width / 2 + frame_edge_radius,
+                           frame_plate_y_max - frame_edge_radius,
+                           -frame_thickness])
+                    cylinder(r = frame_edge_radius, h = frame_thickness);
+                // Top-right
+                translate([frame_top_width / 2 - frame_edge_radius,
+                           frame_plate_y_max - frame_edge_radius,
+                           -frame_thickness])
+                    cylinder(r = frame_edge_radius, h = frame_thickness);
+            }
         }
 
         // ---- S6904ZZ bearing pocket (recessed from +Z face) ----
@@ -493,8 +520,11 @@ module frame_bracket() {
                 hy = frame_light_y_start + iy * frame_light_hole_spacing;
                 if (sqrt(hx * hx + hy * hy) >
                     frame_bearing_od / 2 + frame_light_hole_diameter / 2 + frame_light_hole_bearing_margin)
-                    translate([hx, hy, -frame_thickness - 1])
-                        cylinder(h = frame_thickness + 2, d = frame_light_hole_diameter);
+                    // Also check hole fits within the trapezoidal boundary
+                    if (abs(hx) + frame_light_hole_diameter / 2 + frame_light_hole_edge_margin
+                        <= frame_half_width_at_y(hy))
+                        translate([hx, hy, -frame_thickness - 1])
+                            cylinder(h = frame_thickness + 2, d = frame_light_hole_diameter);
             }
 
     }

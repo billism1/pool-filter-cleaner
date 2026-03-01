@@ -79,8 +79,9 @@ The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot
 The frame bracket is a stationary plate on the −Z side of the wheel that houses a bearing for the tube and provides guide-rod support walls for the sleigh.
 
 **What was built:**
-- **Main plate:** 435 mm long (x = −50 to x = 385) × 12 mm thick, with 3 mm rounded vertical edges
-- **Plate Y span:** asymmetric — extends from `frame_plate_y_min` = −96.2 mm (5 mm below wheel bottom) to `frame_plate_y_max` = +35 mm (half of `frame_width`), giving a total Y span of ~131.2 mm. This ensures the plate reaches the bottom edge of the wheel plus a 5 mm margin.
+- **Main plate:** Trapezoidal — 250 mm wide at bottom (X), narrowing to 70 mm (`2 × frame_light_hole_diameter`) at top, × 12 mm thick, with 10 mm rounded corners. Uniform thickness throughout.
+- **Plate Y span:** extends from `frame_plate_y_min` (5 mm below wheel bottom) to `frame_plate_y_max` (5 mm above wheel top). Bottom edge is full width (250 mm); top edge is narrower (70 mm) to save material where less support is needed.
+- **Trapezoidal shape** implemented via `hull()` of four corner cylinders; `frame_half_width_at_y()` function provides linear interpolation for lightening-hole boundary checks
 - **Guide walls** remain at `frame_width` = 70 mm Y extent (centred on tube axis), independent of the wider plate
 - **S6904ZZ bearing pocket** recessed from the +Z face at the tube centre, with ring cutout below (same technique as `filter_holder.scad`) to prevent the rotating inner race from rubbing
 - **Tube through-hole** with 2 mm clearance (bearing provides alignment)
@@ -90,7 +91,7 @@ The frame bracket is a stationary plate on the −Z side of the wheel that house
 - **Wall 2 (far end):** Same XZ-rounded top edges. Far edge (at frame edge) additionally has vertical Y-corner rounding to match the frame's rounded corners, achieved via `intersection()` of the XZ-rounded shape with a Y-corner-rounded shape.
 - **Triangular gussets** on the inside face of each wall (wall 1 toward +X, wall 2 toward −X), penetrating into the wall body to avoid visible seams. `frame_gusset_length` = 20 mm, `frame_gusset_width` = 10 mm.
 - Frame sits with a 2 mm air gap below the wheel's −Z face
-- Main plate uses `rounded_rect()` helper with `frame_edge_radius` = 3 mm
+- Main plate uses trapezoidal `hull()` with `frame_edge_radius` = 10 mm rounded corners; `frame_top_width` parameter controls top width
 - **3D print orientation:** −Z face (flat) on bed; walls print upward, no supports needed
 - **Render toggle:** `build_frame_bracket` boolean
 
