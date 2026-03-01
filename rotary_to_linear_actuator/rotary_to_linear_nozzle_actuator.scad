@@ -26,14 +26,14 @@ build_connecting_rod                   = true;   // Render the connecting rod
 build_frame_bracket                    = true;   // Render the frame / mounting bracket
 build_spacer_ring                      = true;   // Render the spacer ring (between wheel and frame bearing)
 build_support_sleeve                   = true;   // Render the support sleeve (between frame and bevel gear)
+build_spray_pipe_carriage              = true;   // Render the spray pipe carriage (Step 4)
+build_guide_rod_pvc_clip               = true;   // Render guide rod PVC clip (stationary pipe support)
 show_rotary_aluminum_tube              = true;   // Render the aluminum tube as a visual reference (gray color)
 show_spray_pipe_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
 show_crank_pin                         = true;   // Render the big-end crank pin (metallic, in wheel blind hole)
 show_wrist_pin                         = true;   // Render the small-end wrist pin (metallic, in con-rod socket)
-build_spray_pipe_carriage              = true;   // Render the spray pipe carriage (Step 4)
 show_lm20uu_bearings                   = true;   // Render LM20UU bearings in carriage (visual reference)
 show_pvc_spray_pipe                    = true;   // Render PVC spray pipe in carriage (visual reference)
-build_guide_rod_pvc_clip               = true;   // Render guide rod PVC clip (stationary pipe support)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
