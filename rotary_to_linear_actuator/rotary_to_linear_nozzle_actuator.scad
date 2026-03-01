@@ -665,14 +665,14 @@ module spray_pipe_carriage() {
             //      Plate lives in X-Z plane, thickness in Y.
 
             // −X side hull (straight vertical −X edge)
-            //   Uses the 608 socket at top and a flat wall down to
-            //   the housing level, with the −X tangent of the hull
-            //   aligned at X = −carriage_608_od/2 (same as 608 socket).
+            //   Uses the 608 socket extents at top and a flat wall
+            //   down to the housing level.  −X tangent aligned at
+            //   X = −carriage_608_od/2 (same as 608 socket).
             hull() {
-                // 608 socket end
-                rotate([90, 0, 0])
-                    cylinder(h = carriage_arm_thickness,
-                             d = carriage_608_od, center = true);
+                // 608 socket end — rectangular slab matching socket
+                // X width and Z height (socket_bot to socket_top)
+                translate([-carriage_608_od / 2, -carriage_arm_thickness / 2, socket_bot])
+                    cube([carriage_608_od, carriage_arm_thickness, carriage_608_socket_height]);
                 // Housing 1 end — two slim pillars spanning the housing
                 // diameter, placed so the −X face is flush with the
                 // 608 socket's −X tangent.
@@ -687,10 +687,9 @@ module spray_pipe_carriage() {
             }
             // +X side hull (angled edge)
             hull() {
-                // 608 socket end
-                rotate([90, 0, 0])
-                    cylinder(h = carriage_arm_thickness,
-                             d = carriage_608_od, center = true);
+                // 608 socket end — rectangular slab matching socket
+                translate([-carriage_608_od / 2, -carriage_arm_thickness / 2, socket_bot])
+                    cube([carriage_608_od, carriage_arm_thickness, carriage_608_socket_height]);
                 // Housing 2 (+X side, at guide rod)
                 translate([carriage_x_offset + lm20uu_cc / 2, 0, -arm_len + 5])
                     rotate([90, 0, 0])
