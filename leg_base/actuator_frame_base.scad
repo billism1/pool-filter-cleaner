@@ -61,8 +61,13 @@ set_screw_position = leg_tube_length - 10;               // Distance from leg or
 horizontal_screw_position = frame_cradle_length - 10; // Position for horizontal tube screw (far from legs)
 
 frame_cradle_length = 20;  // Length of horizontal tube section
-frame_cradle_height = 40;
+frame_cradle_height = 45;
 frame_thickness = 12.15; // Add 0.15 to ensure fit
+frame_cradle_wall_thickness = 8;
+frame_cradle_total_thickness = frame_cradle_wall_thickness * 2 + frame_thickness;
+
+// Frame cradle set screw positions
+cradle_set_screw_y_position = frame_cradle_height - tube_outer_diameter / 2 + 6 - 8;  // 8mm below top of cradle walls
 
 module rod_tube(length, cut_center=true) {
     // Simple tube to hold aluminum rod - extends in positive Z direction only
@@ -73,9 +78,15 @@ module rod_tube(length, cut_center=true) {
     }
 }
 
+cradle_rounding = 3;  // Rounding radius for bracket cradle edges/corners
+
 module bracket_cradle(length) {
-    translate([-tube_outer_diameter/2, -tube_outer_diameter/2, 2])
-        cube([tube_outer_diameter, frame_cradle_height, length], center = false);
+    translate([-tube_outer_diameter/2 + tube_outer_diameter/2,
+               -tube_outer_diameter/2 + frame_cradle_height/2,
+               2 + length/2])
+        cuboid([frame_cradle_total_thickness, frame_cradle_height, length],
+               rounding = cradle_rounding,
+               except = [TOP, BOT]);
 }
 
 // Central hub removed - using curved base instead
@@ -152,13 +163,13 @@ module filter_base() {
         union() {
             // Horizontal cradle to hold frame.
             rotate([0, 90, 0])
-                translate([0, 10, 0])
+                translate([0, 6, 0])
                     bracket_cradle(frame_cradle_length);
 
             // Add another tube for the portion of the rod that extends into the curved base (extends in negative X direction).
             // This allows a quick and dirty/easy way to apply a "difference" to cut the rod hole through the curved base without affecting the horizontal tube.
             rotate([0, 90, 0])
-                translate([0, 10, -printing_base_total_height])
+                translate([0, 6, -printing_base_total_height])
                 if (horizontal_through_hole_both_sides)
                     bracket_cradle(printing_base_total_height);
                     //rod_tube(length=printing_base_total_height, cut_center=false);
@@ -232,6 +243,10 @@ module filter_base() {
                 cube([frame_cradle_length + 100, frame_cradle_height + 10, frame_thickness], center = false);
                 // frame_cradle_height
                 //cube([100, 100, 200], center = false);
+
+        // Frame cradle set screw holes - one in each wall, centered and toward the top of the slot
+        translate([-2, cradle_set_screw_y_position, -(tube_outer_diameter / 2 + 1)])
+            cylinder(d = set_screw_diameter, h = tube_outer_diameter + 2);
     }
     
     // Add curved printing base with hole through it
