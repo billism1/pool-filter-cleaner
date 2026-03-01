@@ -11,7 +11,7 @@ This actuator is part of the **gear-driven pool filter cleaner** system. The ful
 3. On the gear-driven end, a **spur gear ring** on one filter holder meshes with a **compound gear** (spur + straight bevel). The bevel pinion drives a **mating bevel gear** that changes axis 90°.
 4. A 3/4" aluminum tube is secured (via set screw) through the centre of the mating bevel gear. As the filter spins, it drives this tube in rotation.
 5. The **other end** of that same tube connects to a **rotary-to-linear actuator** (crank-slider mechanism). The actuator converts the tube's rotation into a **6-inch (152.4 mm) back-and-forth linear stroke**.
-6. A **sleigh/carriage** rides on the actuator and carries the **PVC spray pipe**. The actuator sweeps the pipe back and forth by ~6 inches (one orifice spacing). Because the orifices are spaced ~6" apart and the stroke is also ~6", every point along the filter's length is reached by at least one orifice during a full stroke cycle, giving **complete coverage** of the entire filter.
+6. A **carriage** rides on the actuator and carries the **PVC spray pipe**. The actuator sweeps the pipe back and forth by ~6 inches (one orifice spacing). Because the orifices are spaced ~6" apart and the stroke is also ~6", every point along the filter's length is reached by at least one orifice during a full stroke cycle, giving **complete coverage** of the entire filter.
 
 The result: water pressure alone powers the entire system — spinning the filter *and* sweeping the spray pipe — no electricity or motor needed.
 
@@ -54,7 +54,7 @@ The crank wheel connects to the 3/4" aluminum tube from the mating bevel gear an
 
 **File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (same file as crank wheel)
 
-The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot, converting rotary crank motion into push-pull force.
+The connecting rod links the crank pin on the wheel to the carriage pivot, converting rotary crank motion into push-pull force.
 
 **What was built:**
 - **Socket-style design** for hub clearance: cylindrical socket bosses at each end extend downward (toward the wheel face), with an elevated flat bar connecting them on top. This keeps the rod body clear of the hub tube as the wheel rotates.
@@ -76,7 +76,7 @@ The connecting rod links the crank pin on the wheel to the sleigh/carriage pivot
 
 **File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (same file, `frame_bracket()` module)
 
-The frame bracket is a stationary plate on the −Z side of the wheel that houses a bearing for the aluminum tube. This design has **no guide walls or guide rods** — the spray tube is carried directly by the connecting rod's wrist pin.
+The frame bracket is a stationary plate on the −Z side of the wheel that houses a bearing for the aluminum tube. This design has **no guide walls or guide rods** — the spray pipe is carried directly by the connecting rod's wrist pin.
 
 **What was built:**
 - **Main plate:** Trapezoidal — 250 mm wide at bottom (X), narrowing to 70 mm (`frame_top_width`) at top, × 12 mm thick, with 10 mm rounded corners. Uniform thickness throughout.
@@ -92,13 +92,13 @@ The frame bracket is a stationary plate on the −Z side of the wheel that house
 
 ---
 
-### Step 4 — Nozzle Carriage ❌ NOT YET BUILT
+### Step 4 — Spray Pipe Carriage ❌ NOT YET BUILT
 
 **File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad`
 
-The spray tube (3/4″ aluminum pipe) will be connected directly to the connecting rod's small-end wrist pin and will slide linearly. No guide-rod / LM8UU carriage is used.
+The spray pipe (3/4″ aluminum pipe) will be connected directly to the connecting rod's small-end wrist pin and will slide linearly. No guide-rod / LM20UU carriage is used.
 
-**Status:** No carriage module exists in this file yet. A wrist pin visual reference (`show_wrist_pin`) renders at the small-end position to show where the spray tube will attach. The design of the nozzle carriage / spray tube clamp is still to be determined.
+**Status:** No carriage module exists in this file yet. A wrist pin visual reference (`show_wrist_pin`) renders at the small-end position to show where the spray pipe will attach. The design of the nozzle carriage / spray pipe clamp is still to be determined.
 
 ---
 
@@ -144,9 +144,9 @@ Non-printed reference geometry rendered to aid visual inspection of the assembly
 
 **What was built:**
 - **Rotary aluminum tube** (DimGray): hollow cylinder (19.05 mm OD, 1.65 mm wall = standard 3/4″ tube), extending from the hub top through the wheel, spacer ring, and frame bearing. Rotates with `crank_angle`. Toggle: `show_rotary_aluminum_tube`.
-- **Nozzle carriage aluminum tube / spray pipe** (DimGray): 3/4″ aluminum tube (1219.2 mm / 4 ft long) running parallel to the connecting rod, offset in the −Z (frame) direction at `spray_tube_z_local = −110 mm`. Extends from X = −150 mm for the full spray tube length. Stationary reference showing the spray pipe's swept path. Toggle: `show_nozzle_carriage_aluminum_tube`.
+- **Spray pipe carriage aluminum tube / spray pipe** (DimGray): 3/4″ aluminum tube (1219.2 mm / 4 ft long) running parallel to the connecting rod, offset in the −Z (frame) direction at `spray_tube_z_local = −110 mm`. Extends from X = −150 mm for the full spray pipe length. Stationary reference showing the spray pipe's swept path. Toggle: `show_spray_pipe_carriage_aluminum_tube`.
 - **Crank pin** (Silver): 8 mm steel pin in the wheel's blind hole, with a flat edge for printability. Extends `crank_pin_height` (20 mm) above the +Z wheel face. Toggle: `show_crank_pin`.
-- **Wrist pin** (Silver): 8 mm steel pin at the connecting rod's small end (at slider_x on the X axis). Shows where the spray tube attachment will be. Toggle: `show_wrist_pin`.
+- **Wrist pin** (Silver): 8 mm steel pin at the connecting rod's small end (at slider_x on the X axis). Shows where the spray pipe attachment will be. Toggle: `show_wrist_pin`.
 
 ---
 
@@ -171,15 +171,15 @@ All components are assembled **inline** in the same `.scad` file (no separate as
 
 **Completed:**
 - Crank wheel, connecting rod, spacer ring, frame bracket, and support sleeve all placed with proper transforms
-- Visual references (rotary aluminum tube, spray tube, crank pin, wrist pin) rendered for context
+- Visual references (rotary aluminum tube, spray pipe, crank pin, wrist pin) rendered for context
 - 4-state `crank_position` for manual clearance/stroke checks (Top / Right / Bottom / Left)
 - Support sleeve positioned between frame bracket and bevel gear, rotating with tube
 
 **Still TODO:**
-- Design and build the nozzle carriage / spray tube clamp (Step 4)
+- Design and build the spray pipe carriage / spray pipe clamp (Step 4)
 - Animate the crank rotation (OpenSCAD `$t` variable) for continuous motion verification
 - Un-comment and verify the ring cutout below the S6904ZZ bearing pocket in the frame bracket
-- Verify spray tube clearance at all crank positions
+- Verify spray pipe clearance at all crank positions
 - Export STLs for all actuator components
 - Update the project `README.md` with actuator parts BOM
 
