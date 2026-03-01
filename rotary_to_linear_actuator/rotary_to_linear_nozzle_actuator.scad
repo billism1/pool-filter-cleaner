@@ -21,15 +21,15 @@
 $fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // --- Render toggles ------------------------------------------
-build_crank_wheel                  = true;   // Render the crank wheel
-build_connecting_rod               = true;   // Render the connecting rod
-build_frame_bracket                = true;   // Render the frame / mounting bracket
-build_spacer_ring                  = true;   // Render the spacer ring (between wheel and frame bearing)
-build_support_sleeve               = true;   // Render the support sleeve (between frame and bevel gear)
-show_rotary_aluminum_tube          = true;   // Render the aluminum tube as a visual reference (gray color)
-show_nozzle_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
-show_crank_pin                     = true;   // Render the big-end crank pin (metallic, in wheel blind hole)
-show_wrist_pin                     = true;   // Render the small-end wrist pin (metallic, in con-rod socket)
+build_crank_wheel                      = true;   // Render the crank wheel
+build_connecting_rod                   = true;   // Render the connecting rod
+build_frame_bracket                    = true;   // Render the frame / mounting bracket
+build_spacer_ring                      = true;   // Render the spacer ring (between wheel and frame bearing)
+build_support_sleeve                   = true;   // Render the support sleeve (between frame and bevel gear)
+show_rotary_aluminum_tube              = true;   // Render the aluminum tube as a visual reference (gray color)
+show_spray_pipe_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
+show_crank_pin                         = true;   // Render the big-end crank pin (metallic, in wheel blind hole)
+show_wrist_pin                         = true;   // Render the small-end wrist pin (metallic, in con-rod socket)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -644,7 +644,7 @@ if (show_rotary_aluminum_tube) {
 //      Runs from X = 0 (wheel centre) to X = 914.4 mm (3 ft).
 //      At world Z = wheel_diameter/2 (same height as the existing
 //      drive tube, i.e. the Z centre of that tube).
-if (show_nozzle_carriage_aluminum_tube) {
+if (show_spray_pipe_carriage_aluminum_tube) {
     color("DimGray")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
