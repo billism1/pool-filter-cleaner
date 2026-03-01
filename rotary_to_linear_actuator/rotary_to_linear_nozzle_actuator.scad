@@ -28,7 +28,8 @@ build_spacer_ring                  = true;   // Render the spacer ring (between 
 build_support_sleeve               = true;   // Render the support sleeve (between frame and bevel gear)
 show_rotary_aluminum_tube          = true;   // Render the aluminum tube as a visual reference (gray color)
 show_nozzle_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
-show_crank_pins                     = true;   // Render the crank pin as a visual reference (metallic)
+show_crank_pin                     = true;   // Render the big-end crank pin (metallic, in wheel blind hole)
+show_wrist_pin                     = true;   // Render the small-end wrist pin (metallic, in con-rod socket)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -585,11 +586,11 @@ translate([0, 0, wheel_diameter / 2])
             translate([0, 0, -(wheel_thickness / 2 + frame_gap + frame_bearing_width + support_sleeve_length)])
                 support_sleeve();
 
-// ---- Crank pin (visual reference, metallic) ----
+// ---- Crank pin (big-end, in wheel blind hole) ----
 //      8 mm steel pin with a flat edge for 3D printability.
 //      Inserted into the wheel's blind hole.
 //      Exposed portion extends crank_pin_height above the +Z face.
-if (show_crank_pins) {
+if (show_crank_pin)
     color("Silver")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
@@ -606,7 +607,18 @@ if (show_crank_pins) {
                                   crank_pin_flat_depth + 1,
                                   crank_pin_hole_depth + crank_pin_height + 2]);
                     }
-}
+
+// ---- Wrist pin (small-end, through connecting rod socket) ----
+//      8 mm steel pin through the small-end 608 bearing.
+//      Will connect the nozzle carriage to the connecting rod.
+//      Stays on the slider axis (Y = 0) at X = slider_x.
+if (show_wrist_pin)
+    color("Silver")
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            translate([slider_x, 0, con_rod_base_z - crank_pin_hole_depth])
+                cylinder(h = crank_pin_hole_depth + crank_pin_height,
+                         d = crank_pin_diameter);
 
 if (show_rotary_aluminum_tube) {
     // ---- Aluminum tube (visual reference, gray) ----
