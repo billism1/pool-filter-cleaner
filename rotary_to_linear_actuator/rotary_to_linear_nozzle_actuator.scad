@@ -252,7 +252,8 @@ spray_tube_z_local = -110;
 // Spray pipe carriage derived
 carriage_bearing_center_z = con_rod_base_z_val - carriage_wrist_gap - bearing_608_width / 2;
 carriage_arm_length       = carriage_bearing_center_z - spray_tube_z_local;
-pvc_clip_center_x         = -(lm20uu_cc / 2 + lm20uu_length / 2 - pvc_clip_length / 2);  // Flush −X edge with LM20UU housing 1
+carriage_x_offset         = lm20uu_cc / 2 + lm20uu_housing_od / 2 - carriage_608_od / 2;  // Shift housing pair so −X edge aligns with 608 socket
+pvc_clip_center_x         = -carriage_608_od / 2 + pvc_clip_length / 2;  // Flush −X edge with 608 socket / housing 1
 pvc_clip_center_y         = lm20uu_housing_od / 2 + pvc_clip_od / 2;
 pvc_clip_opening_width    = pvc_clip_id * sin((360 - pvc_clip_wrap_angle) / 2);
 pvc_spray_pipe_length     = 914.4;   // 3 ft PVC spray pipe (visual reference)
@@ -313,7 +314,8 @@ echo(str("Support sleeve: length=", support_sleeve_length,
          " mm  insertion=", support_sleeve_insertion, " mm"));
 echo(str("Spray pipe carriage: arm_length=", carriage_arm_length,
          " mm  bearing_center_z=", carriage_bearing_center_z,
-         " mm  LM20UU c-c=", lm20uu_cc, " mm"));
+         " mm  LM20UU c-c=", lm20uu_cc,
+         " mm  x_offset=", carriage_x_offset, " mm"));
 echo(str("  LM20UU housing OD=", lm20uu_housing_od,
          " mm  pocket_d=", lm20uu_pocket_d,
          " mm  gap=", lm20uu_gap, " mm"));
@@ -656,44 +658,55 @@ module spray_pipe_carriage() {
             translate([0, 0, socket_bot])
                 cylinder(h = carriage_608_socket_height, d = carriage_608_od);
 
-            // ---- Triangular arm plate ----
-            //      Fans from 608 socket to two LM20UU housing positions.
+            // ---- Arm plate (asymmetric: straight −X wall, angled +X) ----
+            //      −X side: perpendicular wall from 608 socket straight
+            //      down to housing 1 (−X edges aligned by carriage_x_offset).
+            //      +X side: angled from 608 socket to housing 2.
             //      Plate lives in X-Z plane, thickness in Y.
+
+            // −X side hull (straight vertical −X edge)
             hull() {
-                // Wrist pin end (narrow)
+                // 608 socket end
                 rotate([90, 0, 0])
                     cylinder(h = carriage_arm_thickness,
                              d = carriage_608_od, center = true);
-                // Housing 1 (−X side, at guide rod)
-                translate([-lm20uu_cc / 2, 0, -arm_len])
+                // Housing 1 (−X side, at guide rod — −X edges aligned)
+                translate([carriage_x_offset - lm20uu_cc / 2, 0, -arm_len])
                     rotate([90, 0, 0])
                         cylinder(h = carriage_arm_thickness,
                                  d = lm20uu_housing_od, center = true);
+            }
+            // +X side hull (angled edge)
+            hull() {
+                // 608 socket end
+                rotate([90, 0, 0])
+                    cylinder(h = carriage_arm_thickness,
+                             d = carriage_608_od, center = true);
                 // Housing 2 (+X side, at guide rod)
-                translate([lm20uu_cc / 2, 0, -arm_len])
+                translate([carriage_x_offset + lm20uu_cc / 2, 0, -arm_len])
                     rotate([90, 0, 0])
                         cylinder(h = carriage_arm_thickness,
                                  d = lm20uu_housing_od, center = true);
             }
 
             // ---- LM20UU housing cylinder 1 (−X) ----
-            translate([-lm20uu_cc / 2, 0, -arm_len])
+            translate([carriage_x_offset - lm20uu_cc / 2, 0, -arm_len])
                 rotate([0, 90, 0])
                     cylinder(h = lm20uu_length,
                              d = lm20uu_housing_od, center = true);
 
             // ---- LM20UU housing cylinder 2 (+X) ----
-            translate([lm20uu_cc / 2, 0, -arm_len])
+            translate([carriage_x_offset + lm20uu_cc / 2, 0, -arm_len])
                 rotate([0, 90, 0])
                     cylinder(h = lm20uu_length,
                              d = lm20uu_housing_od, center = true);
 
             // ---- Connecting block between housings (fills gap) ----
             hull() {
-                translate([-lm20uu_gap / 2, 0, -arm_len])
+                translate([carriage_x_offset - lm20uu_gap / 2, 0, -arm_len])
                     rotate([0, 90, 0])
                         cylinder(h = 0.01, d = lm20uu_housing_od);
-                translate([lm20uu_gap / 2, 0, -arm_len])
+                translate([carriage_x_offset + lm20uu_gap / 2, 0, -arm_len])
                     rotate([0, 90, 0])
                         cylinder(h = 0.01, d = lm20uu_housing_od);
             }
@@ -722,14 +735,14 @@ module spray_pipe_carriage() {
                      h = carriage_608_socket_height - bearing_608_width + 1);
 
         // ---- LM20UU bearing bore 1 (along X) ----
-        translate([-lm20uu_cc / 2, 0, -arm_len])
+        translate([carriage_x_offset - lm20uu_cc / 2, 0, -arm_len])
             rotate([0, 90, 0])
                 translate([0, 0, -(lm20uu_length / 2 + 1)])
                     cylinder(d = lm20uu_pocket_d,
                              h = lm20uu_length + 2);
 
         // ---- LM20UU bearing bore 2 (along X) ----
-        translate([lm20uu_cc / 2, 0, -arm_len])
+        translate([carriage_x_offset + lm20uu_cc / 2, 0, -arm_len])
             rotate([0, 90, 0])
                 translate([0, 0, -(lm20uu_length / 2 + 1)])
                     cylinder(d = lm20uu_pocket_d,
@@ -902,11 +915,11 @@ if (show_lm20uu_bearings) {
         rotate([90, 0, 0])
             translate([slider_x, 0, spray_tube_z_local]) {
                 // Bearing 1 (−X)
-                translate([-lm20uu_cc / 2, 0, 0])
+                translate([carriage_x_offset - lm20uu_cc / 2, 0, 0])
                     rotate([0, 90, 0])
                         cylinder(h = lm20uu_length, d = lm20uu_od, center = true);
                 // Bearing 2 (+X)
-                translate([lm20uu_cc / 2, 0, 0])
+                translate([carriage_x_offset + lm20uu_cc / 2, 0, 0])
                     rotate([0, 90, 0])
                         cylinder(h = lm20uu_length, d = lm20uu_od, center = true);
             }
