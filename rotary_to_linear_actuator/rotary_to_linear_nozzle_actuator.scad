@@ -252,6 +252,7 @@ spray_tube_z_local = -110;
 // Spray pipe carriage derived
 carriage_bearing_center_z = con_rod_base_z_val - carriage_wrist_gap - bearing_608_width / 2;
 carriage_arm_length       = carriage_bearing_center_z - spray_tube_z_local;
+pvc_clip_center_x         = -(lm20uu_cc / 2 + lm20uu_length / 2 - pvc_clip_length / 2);  // Flush −X edge with LM20UU housing 1
 pvc_clip_center_y         = lm20uu_housing_od / 2 + pvc_clip_od / 2;
 pvc_clip_opening_width    = pvc_clip_id * sin((360 - pvc_clip_wrap_angle) / 2);
 pvc_spray_pipe_length     = 914.4;   // 3 ft PVC spray pipe (visual reference)
@@ -317,6 +318,7 @@ echo(str("  LM20UU housing OD=", lm20uu_housing_od,
          " mm  pocket_d=", lm20uu_pocket_d,
          " mm  gap=", lm20uu_gap, " mm"));
 echo(str("  PVC clip: ID=", pvc_clip_id, " mm  OD=", pvc_clip_od,
+         " mm  center_x=", pvc_clip_center_x,
          " mm  opening=", pvc_clip_opening_width, " mm  wrap=",
          pvc_clip_wrap_angle, "°"));
 echo(str("  608 socket: bore=", carriage_608_bore, " mm  OD=",
@@ -637,9 +639,7 @@ module frame_bracket() {
 //   Z = perpendicular to wheel face (+Z = toward con rod,
 //       −Z = toward guide rod / frame)
 //
-// 3D Printing: −Y face (flat base) on bed.  Teardrop bores
-//   with point toward +Y (upward during printing) eliminate
-//   bridging on all horizontal bores.
+// 3D Printing: print orientation TBD (redesign in progress).
 module spray_pipe_carriage() {
     arm_len = carriage_arm_length;
 
@@ -699,61 +699,61 @@ module spray_pipe_carriage() {
             }
 
             // ---- PVC clip cradle (C-clip along X, above housings) ----
-            translate([0, pvc_clip_center_y, -arm_len])
+            translate([pvc_clip_center_x, pvc_clip_center_y, -arm_len])
                 rotate([0, 90, 0])
                     cylinder(h = pvc_clip_length,
                              d = pvc_clip_od, center = true);
 
             // ---- Bridge web (housing top ↔ PVC clip, structural fillet) ----
-            translate([-pvc_clip_length / 2,
+            translate([pvc_clip_center_x - pvc_clip_length / 2,
                         lm20uu_housing_od / 2 - 2,
                         -arm_len - carriage_arm_thickness / 2])
                 cube([pvc_clip_length, 4, carriage_arm_thickness]);
         }
 
-        // ---- 608 bearing pocket (teardrop, open at +Z toward con rod) ----
+        // ---- 608 bearing pocket (along Z toward con rod) ----
         translate([0, 0, -bearing_608_width / 2])
-            teardrop_cylinder(d = carriage_608_bore,
-                              h = bearing_608_width + 1);
+            cylinder(d = carriage_608_bore,
+                     h = bearing_608_width + 1);
 
         // ---- 608 shoulder hole (below bearing, clears inner race) ----
         translate([0, 0, socket_bot - 1])
-            teardrop_cylinder(d = bearing_608_shoulder_hole_d,
-                              h = carriage_608_socket_height - bearing_608_width + 1);
+            cylinder(d = bearing_608_shoulder_hole_d,
+                     h = carriage_608_socket_height - bearing_608_width + 1);
 
-        // ---- LM20UU bearing bore 1 (teardrop, along X) ----
+        // ---- LM20UU bearing bore 1 (along X) ----
         translate([-lm20uu_cc / 2, 0, -arm_len])
             rotate([0, 90, 0])
                 translate([0, 0, -(lm20uu_length / 2 + 1)])
-                    teardrop_cylinder(d = lm20uu_pocket_d,
-                                      h = lm20uu_length + 2);
+                    cylinder(d = lm20uu_pocket_d,
+                             h = lm20uu_length + 2);
 
-        // ---- LM20UU bearing bore 2 (teardrop, along X) ----
+        // ---- LM20UU bearing bore 2 (along X) ----
         translate([lm20uu_cc / 2, 0, -arm_len])
             rotate([0, 90, 0])
                 translate([0, 0, -(lm20uu_length / 2 + 1)])
-                    teardrop_cylinder(d = lm20uu_pocket_d,
-                                      h = lm20uu_length + 2);
+                    cylinder(d = lm20uu_pocket_d,
+                             h = lm20uu_length + 2);
 
         // ---- PVC clip bore (along X) ----
-        translate([0, pvc_clip_center_y, -arm_len])
+        translate([pvc_clip_center_x, pvc_clip_center_y, -arm_len])
             rotate([0, 90, 0])
                 translate([0, 0, -(pvc_clip_length / 2 + 1)])
                     cylinder(h = pvc_clip_length + 2, d = pvc_clip_id);
 
         // ---- PVC clip opening slot (C-shape, opens +Y = up in world) ----
         //      Rectangular cut from clip centre outward in +Y
-        translate([-pvc_clip_length / 2 - 1,
+        translate([pvc_clip_center_x - pvc_clip_length / 2 - 1,
                     pvc_clip_center_y,
                     -arm_len - pvc_clip_opening_width / 2])
             cube([pvc_clip_length + 2,
                   pvc_clip_od / 2 + 1,
                   pvc_clip_opening_width]);
 
-        // ---- Flat bottom cut for print bed stability ----
-        //      Removes carriage_flat_cut mm from housing bottoms (−Y side)
-        translate([-500, -500, -500])
-            cube([1000, 500 + flat_y_min, 1000]);
+        // // ---- Flat bottom cut for print bed stability ----
+        // //      Removes carriage_flat_cut mm from housing bottoms (−Y side)
+        // translate([-500, -500, -500])
+        //     cube([1000, 500 + flat_y_min, 1000]);
     }
 }
 
