@@ -267,7 +267,7 @@ pvc_spray_pipe_length     = 914.4;   // 3 ft PVC spray pipe (visual reference)
 guide_clip_length       = pvc_clip_length;                  // 50 mm — housing and clip same length, flush both ends
 guide_clip_pvc_center_y = lm20uu_housing_od / 2 + pvc_clip_od / 2;  // PVC clip tangent above housing
 guide_clip_flat_cut     = 1;                                // Flat cut on −Y for print bed (mm)
-guide_clip_x_pos        = 609.6;                            // 2 feet along guide rod from wheel centre (+X)
+guide_clip_x_pos        = 800;                              // 800 mm along guide rod from wheel centre (+X)
 
 // --- Crank position geometry (derived from crank_position) ---
 crank_angle = crank_position == 0 ?    0 :   // Top
