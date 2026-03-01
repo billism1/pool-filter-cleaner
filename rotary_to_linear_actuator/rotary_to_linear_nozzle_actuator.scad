@@ -510,13 +510,14 @@ module frame_bracket() {
         translate([0, 0, -frame_thickness - 1])
             cylinder(h = frame_thickness + 2, d = frame_tube_hole_d);
 
-        // ---- Lightening holes (centred grid, skipping bearing area) ----
-        //      Grid is centred on the plate so holes are equidistant from
-        //      all four edges.  Any hole that would encroach on the bearing
-        //      pocket is automatically skipped.
+        // ---- Lightening holes (staggered grid, skipping bearing area) ----
+        //      Brick/hex pattern: odd rows are shifted half a spacing in X.
+        //      Any hole that would encroach on the bearing pocket or
+        //      extend beyond the trapezoidal boundary is skipped.
         for (ix = [0 : frame_light_nx - 1])
             for (iy = [0 : frame_light_ny - 1]) {
-                hx = frame_light_x_start + ix * frame_light_hole_spacing;
+                x_offset = (iy % 2 == 1) ? frame_light_hole_spacing / 2 : 0;
+                hx = frame_light_x_start + ix * frame_light_hole_spacing + x_offset;
                 hy = frame_light_y_start + iy * frame_light_hole_spacing;
                 if (sqrt(hx * hx + hy * hy) >
                     frame_bearing_od / 2 + frame_light_hole_diameter / 2 + frame_light_hole_bearing_margin)
