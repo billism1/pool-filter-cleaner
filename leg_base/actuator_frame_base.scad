@@ -6,7 +6,7 @@
 include <BOSL2/std.scad>
 // https://github.com/BelfrySCAD/BOSL2
 
-$fn = 60;  // Reduce to 60 for faster preview, increase to 180+ to for final render
+$fn = 180;  // Reduce to 60 for faster preview, increase to 180+ to for final render
 
 // Horizontal hole configuration
 horizontal_through_hole_both_sides = true;  // If true, rod hole goes through both sides; if false, only extends in positive X direction
@@ -54,12 +54,6 @@ printing_base_sweep_angle = 145; // Degrees of base footprint to keep (trim full
 printing_base_sweep_rotation = 198; // Rotational alignment of sweep so footprint supports both leg tubes
 printing_base_total_height = printing_base_height + printing_base_taper_height + printing_base_neck_height; // Total height of the curved base
 
-// Set screw dimensions
-set_screw_diameter = 3.4;                                // Diameter of set screw holes. 3.4mm (85% of 4mm) for M4 screws, which are common and provide good holding strength.
-set_screw_depth = tube_outer_diameter / 2 + 2;           // Depth of screw hole (goes halfway through + a bit)
-set_screw_position = leg_tube_length - 10;               // Distance from leg origin (near the open end)
-horizontal_screw_position = frame_cradle_length - 10; // Position for horizontal tube screw (far from legs)
-
 frame_cradle_length = 20;  // Length of horizontal tube section
 frame_cradle_height = 45;
 frame_thickness = 12.15; // Add 0.15 to ensure fit
@@ -68,6 +62,12 @@ frame_cradle_total_thickness = frame_cradle_wall_thickness * 2 + frame_thickness
 
 // Frame cradle set screw positions
 cradle_set_screw_y_position = frame_cradle_height - tube_outer_diameter / 2 + 6 - 8;  // 8mm below top of cradle walls
+
+// Set screw dimensions
+set_screw_diameter = 3.4;                                // Diameter of set screw holes. 3.4mm (85% of 4mm) for M4 screws, which are common and provide good holding strength.
+set_screw_depth = tube_outer_diameter / 2 + 2;           // Depth of screw hole (goes halfway through + a bit)
+set_screw_position = leg_tube_length - 10;               // Distance from leg origin (near the open end)
+horizontal_screw_position = frame_cradle_length - 10; // Position for horizontal tube screw (far from legs)
 
 module rod_tube(length, cut_center=true) {
     // Simple tube to hold aluminum rod - extends in positive Z direction only
