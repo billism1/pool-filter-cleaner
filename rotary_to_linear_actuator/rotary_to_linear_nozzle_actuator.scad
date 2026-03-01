@@ -22,7 +22,7 @@ $fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // --- Render toggles ------------------------------------------
 build_crank_wheel                      = true;   // Render the crank wheel
-build_connecting_rod                   = true;   // Render the connecting rod
+build_connecting_rod                   = false;   // Render the connecting rod
 build_frame_bracket                    = true;   // Render the frame / mounting bracket
 build_spacer_ring                      = true;   // Render the spacer ring (between wheel and frame bearing)
 build_support_sleeve                   = true;   // Render the support sleeve (between frame and bevel gear)
@@ -671,7 +671,7 @@ module spray_pipe_carriage() {
                     cylinder(h = carriage_arm_thickness,
                              d = carriage_608_od, center = true);
                 // Housing 1 (−X side, at guide rod — −X edges aligned)
-                translate([carriage_x_offset - lm20uu_cc / 2, 0, -arm_len])
+                translate([carriage_x_offset - lm20uu_cc / 2, 0, -arm_len + 5])
                     rotate([90, 0, 0])
                         cylinder(h = carriage_arm_thickness,
                                  d = lm20uu_housing_od, center = true);
@@ -683,7 +683,7 @@ module spray_pipe_carriage() {
                     cylinder(h = carriage_arm_thickness,
                              d = carriage_608_od, center = true);
                 // Housing 2 (+X side, at guide rod)
-                translate([carriage_x_offset + lm20uu_cc / 2, 0, -arm_len])
+                translate([carriage_x_offset + lm20uu_cc / 2, 0, -arm_len + 5])
                     rotate([90, 0, 0])
                         cylinder(h = carriage_arm_thickness,
                                  d = lm20uu_housing_od, center = true);
