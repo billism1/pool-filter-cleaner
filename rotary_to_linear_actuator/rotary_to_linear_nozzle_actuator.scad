@@ -113,13 +113,13 @@ con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
 frame_thickness         = 12;
 frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
 frame_width             = 70;       // Y dimension of plate
-frame_plate_y_min       = -(wheel_diameter / 2 + 5);  // 5 mm beyond wheel bottom
+frame_plate_y_min       = -(wheel_diameter / 4);  // 5 mm beyond wheel bottom
 frame_plate_y_max       =  (wheel_diameter / 2 + 5);  // 5 mm beyond wheel top (symmetric)
 frame_plate_y_span      = frame_plate_y_max - frame_plate_y_min;  // Total Y span of plate
 frame_half_length       = 125;      // Half-length of plate (each side of wheel centre)
 frame_x_start           = -frame_half_length;  // Left edge (symmetric)
-frame_x_end             =  frame_half_length;  // Right edge (symmetric)
-frame_length            = frame_x_end - frame_x_start;  // 250 mm
+frame_x_end             = frame_half_length;   // Right edge (symmetric)
+frame_length            = frame_x_end - frame_x_start;
 
 // S6904ZZ bearing pocket (same bearing as filter holders)
 frame_bearing_od_wiggle = 0.25;
@@ -134,8 +134,7 @@ frame_tube_clearance    = 6.5;      // Loose fit — bearing provides alignment
 frame_tube_hole_d       = rod_diameter + frame_tube_clearance;
 frame_ring_inner_d      = frame_tube_hole_d + 2 * frame_ring_gap;
 frame_ring_outer_d      = frame_ring_inner_d + 2 * frame_ring_radial;
-
-frame_edge_radius       = 3;        // Fillet radius on vertical edges of plate
+frame_edge_radius       = 10;        // Fillet radius on vertical edges of plate
 
 // Frame lightening holes (circular, same style as wheel)
 frame_light_hole_diameter        = 35;   // Hole diameter (slightly smaller than wheel's 35 mm to suit plate)
