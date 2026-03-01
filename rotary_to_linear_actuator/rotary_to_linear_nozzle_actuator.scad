@@ -28,14 +28,14 @@ build_spacer_ring                  = true;   // Render the spacer ring (between 
 build_support_sleeve               = true;   // Render the support sleeve (between frame and bevel gear)
 show_rotary_aluminum_tube          = true;   // Render the aluminum tube as a visual reference (gray color)
 show_nozzle_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
-show_crank_pin                     = true;   // Render the crank pin as a visual reference (metallic)
+show_crank_pins                     = true;   // Render the crank pin as a visual reference (metallic)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
 //     four extreme crank positions to verify clearances, stroke,
 //     and connecting-rod alignment.
 //     0 = Top, 1 = Right (max extension), 2 = Bottom, 3 = Left (max retraction)
-crank_position = 1;
+crank_position = 3;
 
 // ============================================================
 //  Parameters
@@ -273,7 +273,7 @@ module crank_wheel_body() {
             translate([0, 0, -wheel_thickness / 2])
                 cylinder(h = hub_total_height, d = hub_outer_diameter);
 
-            // (Crank pin is a separate metal pin — see show_crank_pin)
+            // (Crank pin is a separate metal pin — see show_crank_pins)
 
             // ---- Fillet boss around pin hole (stabilises inserted pin) ----
             translate([0, crank_radius, wheel_thickness / 2])
@@ -589,7 +589,7 @@ translate([0, 0, wheel_diameter / 2])
 //      8 mm steel pin with a flat edge for 3D printability.
 //      Inserted into the wheel's blind hole.
 //      Exposed portion extends crank_pin_height above the +Z face.
-if (show_crank_pin) {
+if (show_crank_pins) {
     color("Silver")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
