@@ -188,9 +188,9 @@ support_sleeve_far_od      = support_sleeve_bore + 2 * support_sleeve_far_wall; 
 // --- Spray Tube (visual reference) ---------------------------
 //     3/4″ aluminum tube running parallel to the connecting rod,
 //     offset 20 mm from it on the crank-pin side of the wheel.
-//     Extends 3 feet (914.4 mm) in the +X direction from the
+//     Extends 4 feet (1219.2 mm) in the +X direction from the
 //     wheel centre.  Stationary — does not rotate with the wheel.
-spray_tube_length    = 914.4;   // 3 feet = 914.4 mm
+spray_tube_length    = 1219.2;   // 4 feet = 1219.2 mm
 spray_tube_spacing   = 20;      // Edge-to-edge gap from connecting rod (mm)
 spray_tube_wall      = 1.65;    // Same wall thickness as main aluminum tube
 
@@ -202,7 +202,7 @@ hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from
 // crank-pin (+Z) side, so it clears the rod at all crank angles.
 con_rod_total_h     = con_rod_socket_height + con_rod_bar_thickness;
 con_rod_base_z_val  = wheel_thickness / 2 + crank_pin_fillet_height + con_rod_pin_gap;
-spray_tube_z_local = -106;
+spray_tube_z_local = -110;
 //spray_tube_z_local = -(wheel_thickness / 2) - frame_gap - (frame_thickness / 2); // Center the long aluminum tube on the thickness of the frame.
 
 // --- Crank position geometry (derived from crank_position) ---
@@ -636,7 +636,7 @@ if (show_nozzle_carriage_aluminum_tube) {
     color("DimGray")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
-            translate([130, 0, spray_tube_z_local])
+            translate([-150, 0, spray_tube_z_local])
                 rotate([0, 90, 0])
                     difference() {
                         cylinder(h = spray_tube_length, d = rod_diameter);
