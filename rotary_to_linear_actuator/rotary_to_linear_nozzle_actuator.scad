@@ -22,7 +22,7 @@ $fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // --- Render toggles ------------------------------------------
 build_crank_wheel                      = true;   // Render the crank wheel
-build_connecting_rod                   = false;   // Render the connecting rod
+build_connecting_rod                   = true;   // Render the connecting rod
 build_frame_bracket                    = true;   // Render the frame / mounting bracket
 build_spacer_ring                      = true;   // Render the spacer ring (between wheel and frame bearing)
 build_support_sleeve                   = true;   // Render the support sleeve (between frame and bevel gear)
