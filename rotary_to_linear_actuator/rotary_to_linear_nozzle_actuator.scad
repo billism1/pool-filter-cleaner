@@ -22,14 +22,14 @@ $fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // --- Render toggles ------------------------------------------
 build_crank_wheel                      = true;   // Render the crank wheel
-build_connecting_rod                   = true;   // Render the connecting rod
+build_connecting_rod                   = false;   // Render the connecting rod
 build_frame_bracket                    = true;   // Render the frame / mounting bracket
 build_spacer_ring                      = true;   // Render the spacer ring (between wheel and frame bearing)
 build_support_sleeve                   = true;   // Render the support sleeve (between frame and bevel gear)
 show_rotary_aluminum_tube              = true;   // Render the aluminum tube as a visual reference (gray color)
 show_spray_pipe_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
 show_crank_pin                         = true;   // Render the big-end crank pin (metallic, in wheel blind hole)
-show_wrist_pin                         = true;   // Render the small-end wrist pin (metallic, in con-rod socket)
+show_wrist_pin                         = false;   // Render the small-end wrist pin (metallic, in con-rod socket)
 build_spray_pipe_carriage              = true;   // Render the spray pipe carriage (Step 4)
 show_lm20uu_bearings                   = true;   // Render LM20UU bearings in carriage (visual reference)
 show_pvc_spray_pipe                    = true;   // Render PVC spray pipe in carriage (visual reference)
@@ -237,6 +237,7 @@ carriage_608_od            = carriage_608_bore + 8;   // ≈30.2 mm (wall around
 carriage_608_socket_height = bearing_608_width + 4;   // 11 mm (bearing + shoulder)
 carriage_wrist_gap         = 1;       // Clearance between carriage top and con rod bottom (mm)
 carriage_flat_cut          = 1;       // Material removed from housing bottom for flat print base (mm)
+carriage_608_flat_cut      = 1;       // Material removed from 608 socket −X side for flat print bed (mm)
 
 // Derived
 hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from −Z face
@@ -252,8 +253,8 @@ spray_tube_z_local = -110;
 // Spray pipe carriage derived
 carriage_bearing_center_z = con_rod_base_z_val - carriage_wrist_gap - bearing_608_width / 2;
 carriage_arm_length       = carriage_bearing_center_z - spray_tube_z_local;
-carriage_x_offset         = lm20uu_cc / 2 + lm20uu_length / 2 - carriage_608_od / 2;  // Shift housing pair so −X end face aligns with 608 socket tangent
-pvc_clip_center_x         = -carriage_608_od / 2 + pvc_clip_length / 2;  // Flush −X edge with 608 socket / housing 1
+carriage_x_offset         = lm20uu_cc / 2 + lm20uu_length / 2 - carriage_608_od / 2 + carriage_608_flat_cut;  // Shift housing pair so −X end face aligns with 608 flat cut
+pvc_clip_center_x         = -carriage_608_od / 2 + carriage_608_flat_cut + pvc_clip_length / 2;  // Flush −X edge with 608 flat cut / housing 1
 pvc_clip_center_y         = lm20uu_housing_od / 2 + pvc_clip_od / 2;
 pvc_clip_opening_width    = pvc_clip_id * sin((360 - pvc_clip_wrap_angle) / 2);
 pvc_spray_pipe_length     = 914.4;   // 3 ft PVC spray pipe (visual reference)
@@ -324,7 +325,8 @@ echo(str("  PVC clip: ID=", pvc_clip_id, " mm  OD=", pvc_clip_od,
          " mm  opening=", pvc_clip_opening_width, " mm  wrap=",
          pvc_clip_wrap_angle, "°"));
 echo(str("  608 socket: bore=", carriage_608_bore, " mm  OD=",
-         carriage_608_od, " mm  height=", carriage_608_socket_height, " mm"));
+         carriage_608_od, " mm  height=", carriage_608_socket_height,
+         " mm  flat_cut=", carriage_608_flat_cut, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -676,11 +678,11 @@ module spray_pipe_carriage() {
                 // Housing 1 end — two slim pillars spanning the housing
                 // diameter, placed so the −X face is flush with the
                 // 608 socket's −X tangent.
-                translate([-carriage_608_od / 2 + 0.5, 0, -arm_len + 5])
+                translate([-carriage_608_od / 2 + carriage_608_flat_cut + 0.5, 0, -arm_len + 5])
                     rotate([90, 0, 0])
                         cylinder(h = carriage_arm_thickness,
                                  d = 1, center = true);
-                translate([-carriage_608_od / 2 + lm20uu_housing_od + 0.5, 0, -arm_len + 5])
+                translate([-carriage_608_od / 2 + carriage_608_flat_cut + lm20uu_housing_od + 0.5, 0, -arm_len + 5])
                     rotate([90, 0, 0])
                         cylinder(h = carriage_arm_thickness,
                                  d = 1, center = true);
@@ -771,10 +773,11 @@ module spray_pipe_carriage() {
                   pvc_clip_od / 2 + 1,
                   pvc_clip_opening_width]);
 
-        // // ---- Flat bottom cut for print bed stability ----
-        // //      Removes carriage_flat_cut mm from housing bottoms (−Y side)
-        // translate([-500, -500, -500])
-        //     cube([1000, 500 + flat_y_min, 1000]);
+        // ---- Flat −X cut for print bed (608 socket D-shape) ----
+        //      Removes carriage_608_flat_cut mm from the −X tangent
+        //      of the 608 socket, creating a flat face for the print bed.
+        translate([-carriage_608_od / 2 - 1, -500, -500])
+            cube([carriage_608_flat_cut + 1, 1000, 1000]);
     }
 }
 
