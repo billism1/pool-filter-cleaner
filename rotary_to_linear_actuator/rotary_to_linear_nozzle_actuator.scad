@@ -252,7 +252,7 @@ spray_tube_z_local = -110;
 // Spray pipe carriage derived
 carriage_bearing_center_z = con_rod_base_z_val - carriage_wrist_gap - bearing_608_width / 2;
 carriage_arm_length       = carriage_bearing_center_z - spray_tube_z_local;
-carriage_x_offset         = lm20uu_cc / 2 + lm20uu_housing_od / 2 - carriage_608_od / 2;  // Shift housing pair so −X edge aligns with 608 socket
+carriage_x_offset         = lm20uu_cc / 2 + lm20uu_length / 2 - carriage_608_od / 2;  // Shift housing pair so −X end face aligns with 608 socket tangent
 pvc_clip_center_x         = -carriage_608_od / 2 + pvc_clip_length / 2;  // Flush −X edge with 608 socket / housing 1
 pvc_clip_center_y         = lm20uu_housing_od / 2 + pvc_clip_od / 2;
 pvc_clip_opening_width    = pvc_clip_id * sin((360 - pvc_clip_wrap_angle) / 2);
@@ -665,16 +665,25 @@ module spray_pipe_carriage() {
             //      Plate lives in X-Z plane, thickness in Y.
 
             // −X side hull (straight vertical −X edge)
+            //   Uses the 608 socket at top and a flat wall down to
+            //   the housing level, with the −X tangent of the hull
+            //   aligned at X = −carriage_608_od/2 (same as 608 socket).
             hull() {
                 // 608 socket end
                 rotate([90, 0, 0])
                     cylinder(h = carriage_arm_thickness,
                              d = carriage_608_od, center = true);
-                // Housing 1 (−X side, at guide rod — −X edges aligned)
-                translate([carriage_x_offset - lm20uu_cc / 2, 0, -arm_len + 5])
+                // Housing 1 end — two slim pillars spanning the housing
+                // diameter, placed so the −X face is flush with the
+                // 608 socket's −X tangent.
+                translate([-carriage_608_od / 2 + 0.5, 0, -arm_len + 5])
                     rotate([90, 0, 0])
                         cylinder(h = carriage_arm_thickness,
-                                 d = lm20uu_housing_od, center = true);
+                                 d = 1, center = true);
+                translate([-carriage_608_od / 2 + lm20uu_housing_od + 0.5, 0, -arm_len + 5])
+                    rotate([90, 0, 0])
+                        cylinder(h = carriage_arm_thickness,
+                                 d = 1, center = true);
             }
             // +X side hull (angled edge)
             hull() {
