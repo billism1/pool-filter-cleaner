@@ -944,19 +944,30 @@ if (show_crank_pin)
                     }
 
 // ---- Wrist pin (small-end, through connecting rod AND carriage) ----
-//      8 mm steel pin through both the con-rod's small-end 608 bearing
+//      8 mm steel pin with a flat edge (same side as crank pin)
+//      through both the con-rod's small-end 608 bearing
 //      and the carriage's 608 bearing below it.
 //      Stays on the slider axis (Y = 0) at X = slider_x.
 if (show_wrist_pin) {
     wrist_pin_bottom = carriage_bearing_center_z - carriage_608_socket_height / 2;
     wrist_pin_top    = con_rod_base_z + crank_pin_height;
+    wrist_pin_len    = wrist_pin_top - wrist_pin_bottom;
 
     color("Silver")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
             translate([slider_x, 0, wrist_pin_bottom])
-                cylinder(h = wrist_pin_top - wrist_pin_bottom,
-                         d = crank_pin_diameter);
+                difference() {
+                    cylinder(h = wrist_pin_len,
+                             d = crank_pin_diameter);
+                    // Flat edge: same side (+Y in wheel-local) as crank pin
+                    translate([-(crank_pin_diameter / 2),
+                               crank_pin_diameter / 2 - crank_pin_flat_depth,
+                               -1])
+                        cube([crank_pin_diameter,
+                              crank_pin_flat_depth + 1,
+                              wrist_pin_len + 2]);
+                }
 }
 
 if (show_rotary_aluminum_tube) {
