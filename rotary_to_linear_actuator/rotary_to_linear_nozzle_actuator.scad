@@ -35,7 +35,7 @@ show_crank_pin                     = true;   // Render the crank pin as a visual
 //     four extreme crank positions to verify clearances, stroke,
 //     and connecting-rod alignment.
 //     0 = Top, 1 = Right (max extension), 2 = Bottom, 3 = Left (max retraction)
-crank_position = 3;
+crank_position = 1;
 
 // ============================================================
 //  Parameters
@@ -113,7 +113,7 @@ con_rod_gusset_width   = 10;    // Y width of gusset (matches bar thickness)
 frame_thickness         = 12;
 frame_gap               = 2;        // Air gap between wheel −Z face and frame +Z face
 frame_width             = 70;       // Y dimension of plate
-frame_plate_y_min       = -(wheel_diameter / 2 + 10);  // 10 mm beyond wheel bottom
+frame_plate_y_min       = -(wheel_diameter / 2 + 20);  // 10 mm beyond wheel bottom
 frame_plate_y_max       =  (wheel_diameter / 6);
 frame_plate_y_span      = frame_plate_y_max - frame_plate_y_min;  // Total Y span of plate
 frame_half_length       = 125;      // Half-length of plate (each side of wheel centre)
@@ -140,7 +140,7 @@ frame_edge_radius       = 10;        // Fillet radius on vertical edges of plate
 // Frame lightening holes (circular, same style as wheel)
 frame_light_hole_diameter        = 30;   // Hole diameter (slightly smaller than wheel's 35 mm to suit plate)
 frame_light_hole_edge_margin     = 10;   // Minimum distance from hole edge to plate edge
-frame_light_hole_spacing         = 35;   // Centre-to-centre spacing (diameter + margin gap)
+frame_light_hole_spacing         = 40;   // Centre-to-centre spacing (diameter + margin gap)
 frame_light_hole_bearing_margin  = 5;    // Minimum distance from hole edge to bearing pocket edge
 
 // Derived: half-width at any Y position (linear interpolation for trapezoid)
