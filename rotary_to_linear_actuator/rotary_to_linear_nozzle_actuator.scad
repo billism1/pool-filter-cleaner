@@ -30,6 +30,9 @@ show_rotary_aluminum_tube              = true;   // Render the aluminum tube as 
 show_spray_pipe_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
 show_crank_pin                         = true;   // Render the big-end crank pin (metallic, in wheel blind hole)
 show_wrist_pin                         = true;   // Render the small-end wrist pin (metallic, in con-rod socket)
+build_spray_pipe_carriage              = true;   // Render the spray pipe carriage (Step 4)
+show_lm20uu_bearings                   = true;   // Render LM20UU bearings in carriage (visual reference)
+show_pvc_spray_pipe                    = true;   // Render PVC spray pipe in carriage (visual reference)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -195,6 +198,46 @@ spray_tube_length    = 1219.2;   // 4 feet = 1219.2 mm
 spray_tube_spacing   = 20;      // Edge-to-edge gap from connecting rod (mm)
 spray_tube_wall      = 1.65;    // Same wall thickness as main aluminum tube
 
+// --- Spray Pipe Carriage -------------------------------------
+//     Rides on the guide rod (spray_pipe_carriage aluminum tube)
+//     via dual LM20UU linear bearings, connects to the connecting
+//     rod's wrist pin via a 608 2RS bearing, and holds the PVC
+//     spray pipe in a top-loading friction-fit C-clip.
+//     Triangular arm fans from wrist pin socket to bearing pair.
+//
+//     3D Print: −Y face (flat base) on bed; teardrop bores
+//     eliminate bridging on all horizontal bores.
+
+// LM20UU linear bearing (rides on 3/4″ aluminum guide rod)
+lm20uu_bore                = 20;      // Inner diameter (mm) — 20 mm nominal bore
+lm20uu_od                  = 32;      // Outer diameter (mm)
+lm20uu_length              = 42;      // Bearing length (mm)
+lm20uu_clearance           = 0.2;     // Press-fit tolerance for housing pocket
+lm20uu_pocket_d            = lm20uu_od + lm20uu_clearance;  // 32.2 mm housing bore
+
+// LM20UU housing
+lm20uu_housing_wall        = 4;       // Wall thickness around bearing
+lm20uu_housing_od          = lm20uu_pocket_d + 2 * lm20uu_housing_wall;  // ≈40.2 mm
+lm20uu_gap                 = 30;      // Gap between bearing ends (mm)
+lm20uu_cc                  = lm20uu_length + lm20uu_gap;  // Centre-to-centre = 72 mm
+
+// PVC spray pipe (Schedule 40, 3/4″ nominal)
+pvc_od                     = 26.67;   // 1.050″ OD (Schedule 40)
+pvc_clip_clearance         = 0.3;     // Clearance for clip bore
+pvc_clip_id                = pvc_od + pvc_clip_clearance;  // ≈26.97 mm
+pvc_clip_wall              = 4;       // Wall thickness of C-clip
+pvc_clip_od                = pvc_clip_id + 2 * pvc_clip_wall;  // ≈34.97 mm
+pvc_clip_wrap_angle        = 270;     // Degrees of pipe wrapped (90° opening for top-loading)
+pvc_clip_length            = 50;      // Clip length along X / guide rod axis (mm)
+
+// Carriage structure
+carriage_arm_thickness     = 8;       // Arm plate thickness — same as con rod bar (mm)
+carriage_608_bore          = bearing_608_od + bearing_608_clearance;  // 22.2 mm (reuse 608 params)
+carriage_608_od            = carriage_608_bore + 8;   // ≈30.2 mm (wall around bearing)
+carriage_608_socket_height = bearing_608_width + 4;   // 11 mm (bearing + shoulder)
+carriage_wrist_gap         = 1;       // Clearance between carriage top and con rod bottom (mm)
+carriage_flat_cut          = 1;       // Material removed from housing bottom for flat print base (mm)
+
 // Derived
 hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from −Z face
 
@@ -205,6 +248,13 @@ con_rod_total_h     = con_rod_socket_height + con_rod_bar_thickness;
 con_rod_base_z_val  = wheel_thickness / 2 + crank_pin_fillet_height + con_rod_pin_gap;
 spray_tube_z_local = -110;
 //spray_tube_z_local = -(wheel_thickness / 2) - frame_gap - (frame_thickness / 2); // Center the long aluminum tube on the thickness of the frame.
+
+// Spray pipe carriage derived
+carriage_bearing_center_z = con_rod_base_z_val - carriage_wrist_gap - bearing_608_width / 2;
+carriage_arm_length       = carriage_bearing_center_z - spray_tube_z_local;
+pvc_clip_center_y         = lm20uu_housing_od / 2 + pvc_clip_od / 2;
+pvc_clip_opening_width    = pvc_clip_id * sin((360 - pvc_clip_wrap_angle) / 2);
+pvc_spray_pipe_length     = 914.4;   // 3 ft PVC spray pipe (visual reference)
 
 // --- Crank position geometry (derived from crank_position) ---
 crank_angle = crank_position == 0 ?    0 :   // Top
@@ -260,6 +310,17 @@ echo(str("Support sleeve: length=", support_sleeve_length,
          " mm  bracket OD=", support_sleeve_bracket_od,
          " mm  far OD=", support_sleeve_far_od,
          " mm  insertion=", support_sleeve_insertion, " mm"));
+echo(str("Spray pipe carriage: arm_length=", carriage_arm_length,
+         " mm  bearing_center_z=", carriage_bearing_center_z,
+         " mm  LM20UU c-c=", lm20uu_cc, " mm"));
+echo(str("  LM20UU housing OD=", lm20uu_housing_od,
+         " mm  pocket_d=", lm20uu_pocket_d,
+         " mm  gap=", lm20uu_gap, " mm"));
+echo(str("  PVC clip: ID=", pvc_clip_id, " mm  OD=", pvc_clip_od,
+         " mm  opening=", pvc_clip_opening_width, " mm  wrap=",
+         pvc_clip_wrap_angle, "°"));
+echo(str("  608 socket: bore=", carriage_608_bore, " mm  OD=",
+         carriage_608_od, " mm  height=", carriage_608_socket_height, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -460,6 +521,33 @@ module rounded_rect(size, r) {
 }
 
 // ============================================================
+//  Helper: Teardrop cylinder for FDM-friendly horizontal bores
+// ============================================================
+// Cross-section: full circle plus a 45° triangle on the +Y side
+// (replacing the upper arc with straight lines that stay within
+// 45° overhang).  Eliminates bridging when printed with +Y
+// pointing in the build direction (upward during printing).
+//
+// Parameters:
+//   d = bore diameter
+//   h = extrusion length (along Z axis)
+// Built at origin, bore axis along Z, starts at z=0, ends at z=h.
+// Teardrop point faces +Y.  Callers rotate into desired orientation.
+module teardrop_cylinder(d, h) {
+    r = d / 2;
+    linear_extrude(height = h)
+        union() {
+            circle(d = d);
+            // 45° triangle above the 45° latitude of the circle
+            polygon([
+                [-r * sin(45), r * cos(45)],
+                [0, r * sqrt(2)],
+                [r * sin(45), r * cos(45)]
+            ]);
+        }
+}
+
+// ============================================================
 //  Frame / Mounting Bracket Module
 // ============================================================
 // Built with +Z face at z = 0 (faces the wheel).
@@ -534,6 +622,142 @@ module frame_bracket() {
 }
 
 // ============================================================
+//  Spray Pipe Carriage Module
+// ============================================================
+// Rides on the guide rod via dual LM20UU linear bearings.
+// Connects to the connecting rod's wrist pin via a 608 2RS bearing.
+// Holds the PVC spray pipe in a top-loading friction-fit C-clip.
+// A triangular arm fans from the wrist pin socket to the bearing
+// pair for moment resistance against the ~115 mm offset.
+//
+// Module-local coordinate system:
+//   Origin at the 608 bearing centre (= wrist pin bore centre)
+//   X = slider axis / guide rod axis (travel direction)
+//   Y = perpendicular in wheel plane (+Y = world +Z = upward)
+//   Z = perpendicular to wheel face (+Z = toward con rod,
+//       −Z = toward guide rod / frame)
+//
+// 3D Printing: −Y face (flat base) on bed.  Teardrop bores
+//   with point toward +Y (upward during printing) eliminate
+//   bridging on all horizontal bores.
+module spray_pipe_carriage() {
+    arm_len = carriage_arm_length;
+
+    // Socket Z extents (relative to bearing centre at origin)
+    socket_top = bearing_608_width / 2;                        // +3.5
+    socket_bot = socket_top - carriage_608_socket_height;      // −7.5
+
+    // Flat cut Y — remove carriage_flat_cut mm from housing bottom
+    flat_y_min = -(lm20uu_housing_od / 2 - carriage_flat_cut); // −19.1
+
+    difference() {
+        union() {
+            // ---- 608 bearing socket (wrist pin pivot, at origin) ----
+            translate([0, 0, socket_bot])
+                cylinder(h = carriage_608_socket_height, d = carriage_608_od);
+
+            // ---- Triangular arm plate ----
+            //      Fans from 608 socket to two LM20UU housing positions.
+            //      Plate lives in X-Z plane, thickness in Y.
+            hull() {
+                // Wrist pin end (narrow)
+                rotate([90, 0, 0])
+                    cylinder(h = carriage_arm_thickness,
+                             d = carriage_608_od, center = true);
+                // Housing 1 (−X side, at guide rod)
+                translate([-lm20uu_cc / 2, 0, -arm_len])
+                    rotate([90, 0, 0])
+                        cylinder(h = carriage_arm_thickness,
+                                 d = lm20uu_housing_od, center = true);
+                // Housing 2 (+X side, at guide rod)
+                translate([lm20uu_cc / 2, 0, -arm_len])
+                    rotate([90, 0, 0])
+                        cylinder(h = carriage_arm_thickness,
+                                 d = lm20uu_housing_od, center = true);
+            }
+
+            // ---- LM20UU housing cylinder 1 (−X) ----
+            translate([-lm20uu_cc / 2, 0, -arm_len])
+                rotate([0, 90, 0])
+                    cylinder(h = lm20uu_length,
+                             d = lm20uu_housing_od, center = true);
+
+            // ---- LM20UU housing cylinder 2 (+X) ----
+            translate([lm20uu_cc / 2, 0, -arm_len])
+                rotate([0, 90, 0])
+                    cylinder(h = lm20uu_length,
+                             d = lm20uu_housing_od, center = true);
+
+            // ---- Connecting block between housings (fills gap) ----
+            hull() {
+                translate([-lm20uu_gap / 2, 0, -arm_len])
+                    rotate([0, 90, 0])
+                        cylinder(h = 0.01, d = lm20uu_housing_od);
+                translate([lm20uu_gap / 2, 0, -arm_len])
+                    rotate([0, 90, 0])
+                        cylinder(h = 0.01, d = lm20uu_housing_od);
+            }
+
+            // ---- PVC clip cradle (C-clip along X, above housings) ----
+            translate([0, pvc_clip_center_y, -arm_len])
+                rotate([0, 90, 0])
+                    cylinder(h = pvc_clip_length,
+                             d = pvc_clip_od, center = true);
+
+            // ---- Bridge web (housing top ↔ PVC clip, structural fillet) ----
+            translate([-pvc_clip_length / 2,
+                        lm20uu_housing_od / 2 - 2,
+                        -arm_len - carriage_arm_thickness / 2])
+                cube([pvc_clip_length, 4, carriage_arm_thickness]);
+        }
+
+        // ---- 608 bearing pocket (teardrop, open at +Z toward con rod) ----
+        translate([0, 0, -bearing_608_width / 2])
+            teardrop_cylinder(d = carriage_608_bore,
+                              h = bearing_608_width + 1);
+
+        // ---- 608 shoulder hole (below bearing, clears inner race) ----
+        translate([0, 0, socket_bot - 1])
+            teardrop_cylinder(d = bearing_608_shoulder_hole_d,
+                              h = carriage_608_socket_height - bearing_608_width + 1);
+
+        // ---- LM20UU bearing bore 1 (teardrop, along X) ----
+        translate([-lm20uu_cc / 2, 0, -arm_len])
+            rotate([0, 90, 0])
+                translate([0, 0, -(lm20uu_length / 2 + 1)])
+                    teardrop_cylinder(d = lm20uu_pocket_d,
+                                      h = lm20uu_length + 2);
+
+        // ---- LM20UU bearing bore 2 (teardrop, along X) ----
+        translate([lm20uu_cc / 2, 0, -arm_len])
+            rotate([0, 90, 0])
+                translate([0, 0, -(lm20uu_length / 2 + 1)])
+                    teardrop_cylinder(d = lm20uu_pocket_d,
+                                      h = lm20uu_length + 2);
+
+        // ---- PVC clip bore (along X) ----
+        translate([0, pvc_clip_center_y, -arm_len])
+            rotate([0, 90, 0])
+                translate([0, 0, -(pvc_clip_length / 2 + 1)])
+                    cylinder(h = pvc_clip_length + 2, d = pvc_clip_id);
+
+        // ---- PVC clip opening slot (C-shape, opens +Y = up in world) ----
+        //      Rectangular cut from clip centre outward in +Y
+        translate([-pvc_clip_length / 2 - 1,
+                    pvc_clip_center_y,
+                    -arm_len - pvc_clip_opening_width / 2])
+            cube([pvc_clip_length + 2,
+                  pvc_clip_od / 2 + 1,
+                  pvc_clip_opening_width]);
+
+        // ---- Flat bottom cut for print bed stability ----
+        //      Removes carriage_flat_cut mm from housing bottoms (−Y side)
+        translate([-500, -500, -500])
+            cube([1000, 500 + flat_y_min, 1000]);
+    }
+}
+
+// ============================================================
 //  Assembly — place parts in final orientation
 // ============================================================
 //  rotate([90, 0, 0])  →  local Z becomes world −Y  (tube runs along Y)
@@ -586,6 +810,15 @@ translate([0, 0, wheel_diameter / 2])
             translate([0, 0, -(wheel_thickness / 2 + frame_gap + frame_bearing_width + support_sleeve_length)])
                 support_sleeve();
 
+// ---- Spray pipe carriage (rides on guide rod, moves with slider) ----
+//      Connects to wrist pin via 608 bearing; guide rod via LM20UU bearings.
+//      Does NOT rotate with crank — stays aligned with guide rod.
+if (build_spray_pipe_carriage)
+translate([0, 0, wheel_diameter / 2])
+    rotate([90, 0, 0])
+        translate([slider_x, 0, carriage_bearing_center_z])
+            spray_pipe_carriage();
+
 // ---- Crank pin (big-end, in wheel blind hole) ----
 //      8 mm steel pin with a flat edge for 3D printability.
 //      Inserted into the wheel's blind hole.
@@ -608,17 +841,21 @@ if (show_crank_pin)
                                   crank_pin_hole_depth + crank_pin_height + 2]);
                     }
 
-// ---- Wrist pin (small-end, through connecting rod socket) ----
-//      8 mm steel pin through the small-end 608 bearing.
-//      Will connect the nozzle carriage to the connecting rod.
+// ---- Wrist pin (small-end, through connecting rod AND carriage) ----
+//      8 mm steel pin through both the con-rod's small-end 608 bearing
+//      and the carriage's 608 bearing below it.
 //      Stays on the slider axis (Y = 0) at X = slider_x.
-if (show_wrist_pin)
+if (show_wrist_pin) {
+    wrist_pin_bottom = carriage_bearing_center_z - carriage_608_socket_height / 2;
+    wrist_pin_top    = con_rod_base_z + crank_pin_height;
+
     color("Silver")
     translate([0, 0, wheel_diameter / 2])
         rotate([90, 0, 0])
-            translate([slider_x, 0, con_rod_base_z - crank_pin_hole_depth])
-                cylinder(h = crank_pin_hole_depth + crank_pin_height,
+            translate([slider_x, 0, wrist_pin_bottom])
+                cylinder(h = wrist_pin_top - wrist_pin_bottom,
                          d = crank_pin_diameter);
+}
 
 if (show_rotary_aluminum_tube) {
     // ---- Aluminum tube (visual reference, gray) ----
@@ -656,5 +893,34 @@ if (show_spray_pipe_carriage_aluminum_tube) {
                             cylinder(h = spray_tube_length + 2,
                                      d = rod_diameter - 2 * spray_tube_wall);
                     }
+}
+
+// ---- LM20UU bearings in carriage (visual reference) ----
+if (show_lm20uu_bearings) {
+    color("SteelBlue", 0.5)
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            translate([slider_x, 0, spray_tube_z_local]) {
+                // Bearing 1 (−X)
+                translate([-lm20uu_cc / 2, 0, 0])
+                    rotate([0, 90, 0])
+                        cylinder(h = lm20uu_length, d = lm20uu_od, center = true);
+                // Bearing 2 (+X)
+                translate([lm20uu_cc / 2, 0, 0])
+                    rotate([0, 90, 0])
+                        cylinder(h = lm20uu_length, d = lm20uu_od, center = true);
+            }
+}
+
+// ---- PVC spray pipe (visual reference, white) ----
+//      3/4″ PVC Schedule 40 pipe (26.67 mm OD), 3 ft long.
+//      Clipped into the carriage, moves with slider_x.
+if (show_pvc_spray_pipe) {
+    color("White", 0.6)
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            translate([slider_x - 100, pvc_clip_center_y, spray_tube_z_local])
+                rotate([0, 90, 0])
+                    cylinder(h = pvc_spray_pipe_length, d = pvc_od);
 }
 
