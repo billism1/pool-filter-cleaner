@@ -21,14 +21,14 @@
 $fn = 180;  // High facet count for smooth curves.  Use 60 for fast previews.
 
 // --- Render toggles ------------------------------------------
-build_crank_wheel                  = false;   // Render the crank wheel
-build_connecting_rod               = false;   // Render the connecting rod
+build_crank_wheel                  = true;   // Render the crank wheel
+build_connecting_rod               = true;   // Render the connecting rod
 build_frame_bracket                = true;   // Render the frame / mounting bracket
-build_spacer_ring                  = false;   // Render the spacer ring (between wheel and frame bearing)
+build_spacer_ring                  = true;   // Render the spacer ring (between wheel and frame bearing)
+build_support_sleeve               = true;   // Render the support sleeve (between frame and bevel gear)
 show_rotary_aluminum_tube          = true;   // Render the aluminum tube as a visual reference (gray color)
 show_nozzle_carriage_aluminum_tube = true;   // Render the spray pipe (parallel to connecting rod, gray)
 show_crank_pin                     = true;   // Render the crank pin as a visual reference (metallic)
-build_support_sleeve               = true;   // Render the support sleeve (between frame and bevel gear)
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
@@ -74,6 +74,7 @@ wheel_aluminum_tube_visual_length = 103;
 crank_pin_diameter      = 8;    // 8 mm steel pin diameter (= 608 2RS bore)
 crank_pin_height        = 20;   // Exposed shaft above wheel +Z face for bearing + con-rod
 crank_pin_hole_depth    = 8;    // Depth of blind hole from +Z face (leaves 4 mm of material)
+crank_pin_flat_depth    = 1;    // Depth of flat edge cut (for 3D printing on its side)
 crank_pin_fillet_dia    = 14;   // Wider tapered boss around hole for pin stabilisation
 crank_pin_fillet_height = 2;    // Height of fillet boss above +Z face
 
@@ -86,9 +87,9 @@ bearing_608_shoulder_hole_d = 16; // Shoulder hole: clears inner race (~12 mm OD
                                   // outer race (22 mm OD) seats on remaining ring
 
 // --- Lightening holes (material saving, same style as mating_bevel_gear) ---
-lightening_hole_count           = 6;
-lightening_hole_diameter         = 35;     // Diameter of each circular hole
-lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2) / 2;  // Midway between hub and rim
+wheel_lightening_hole_count           = 6;
+wheel_lightening_hole_diameter         = 35;     // Diameter of each circular hole
+wheel_lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2) / 2;  // Midway between hub and rim
 
 // --- Connecting Rod ------------------------------------------
 con_rod_length         = 240;   // Centre-to-centre distance (mm) — ≈2.6× crank radius
@@ -164,13 +165,14 @@ spacer_ring_thickness  = frame_gap; // Fills the gap between wheel and bearing (
 
 // --- Support Sleeve ------------------------------------------
 //     Tapered tube around the aluminum tube on the −Z (bevel-gear)
-//     side of the frame bracket.  Bracket end inserts into the
-//     frame tube hole and touches the S6904ZZ bearing face.
+//     side of the frame bracket.  Keeps the frame bracket and the
+//     bevel gear apart at the correct spacing.  Bracket end inserts
+//     into the frame tube hole and touches the S6904ZZ bearing face.
 //     Rotates with the tube/wheel.
 support_sleeve_length          = 43;    // Total length (mm)
 support_sleeve_bore            = rod_hole_diameter;   // Same bore as other hubs (19.55 mm)
 support_sleeve_bracket_wall    = 2;     // Wall thickness at bracket (near) end
-support_sleeve_far_wall        = 5;     // Wall thickness at bevel-gear (far) end
+support_sleeve_far_wall        = 4;     // Wall thickness at bevel-gear (far) end
 support_sleeve_insertion       = frame_thickness - frame_bearing_width;  // How far it enters the frame hole (3 mm)
 
 // Derived
@@ -296,12 +298,12 @@ module crank_wheel_body() {
                 cylinder(h = set_screw_depth, d = set_screw_diameter);
 
         // ---- Lightening holes (circular, same style as mating_bevel_gear) ----
-        for (i = [0 : lightening_hole_count - 1]) {
-            angle = i * 360 / lightening_hole_count;
+        for (i = [0 : wheel_lightening_hole_count - 1]) {
+            angle = i * 360 / wheel_lightening_hole_count;
             rotate([0, 0, angle])
-                translate([lightening_hole_circle_radius, 0, -wheel_thickness / 2 - 1])
+                translate([wheel_lightening_hole_circle_radius, 0, -wheel_thickness / 2 - 1])
                     cylinder(h = wheel_thickness + 2,
-                             d = lightening_hole_diameter);
+                             d = wheel_lightening_hole_diameter);
         }
     }
 }
@@ -403,14 +405,19 @@ module spacer_ring() {
 //  Support Sleeve Module
 // ============================================================
 // Tapered tube that sits on the aluminum tube between the frame
-// bracket and the bevel gear.  Bracket end (smaller OD, 2 mm wall)
-// inserts into the frame tube hole and touches the bearing face.
-// Far end (larger OD, 5 mm wall) faces the bevel gear.
+// bracket and the bevel gear.  Keeps the two apart at the correct
+// spacing.  Bracket end (smaller OD, 2 mm wall) inserts into the
+// frame tube hole and touches the bearing face.  Far end (larger
+// OD) faces the bevel gear and has two M4 set-screw holes (180°
+// apart) for clamping onto the aluminum tube.
 //
 // Module-local coords:
-//   z = 0: far end (5 mm wall, larger OD) — print bed (−Z face)
-//   z = support_sleeve_length: bracket end (2 mm wall, smaller OD)
+//   z = 0: far end (larger OD) — print bed (−Z face)
+//   z = support_sleeve_length: bracket end (smaller OD)
 module support_sleeve() {
+    ss_z = support_sleeve_far_wall + 2;  // Set-screw Z: centred in the thick wall region
+    ss_depth = support_sleeve_far_od / 2 + 2;  // Reaches to tube bore
+
     difference() {
         cylinder(h = support_sleeve_length,
                  d1 = support_sleeve_far_od,
@@ -419,6 +426,17 @@ module support_sleeve() {
         // Straight bore
         translate([0, 0, -1])
             cylinder(h = support_sleeve_length + 2, d = support_sleeve_bore);
+
+        // ---- Set-screw holes at thick (far/bevel-gear) end, 180° apart ----
+        // Hole at 0° (along +X)
+        translate([0, 0, ss_z])
+            rotate([0, 90, 0])
+                cylinder(h = ss_depth, d = set_screw_diameter);
+
+        // Hole at 180° (along −X)
+        translate([0, 0, ss_z])
+            rotate([0, -90, 0])
+                cylinder(h = ss_depth, d = set_screw_diameter);
     }
 }
 
@@ -526,8 +544,9 @@ translate([0, 0, wheel_diameter / 2])
             frame_bracket();
 
 // ---- Support sleeve (rotates with tube, between frame and bevel gear) ----
+//      Keeps the frame bracket and bevel gear apart.
 //      Bracket end inserts into the frame tube hole and touches the bearing.
-//      Far end (larger OD) faces the bevel gear.
+//      Far end (larger OD) faces the bevel gear, with set-screw clamping.
 if (build_support_sleeve)
 translate([0, 0, wheel_diameter / 2])
     rotate([90, 0, 0])
@@ -536,7 +555,8 @@ translate([0, 0, wheel_diameter / 2])
                 support_sleeve();
 
 // ---- Crank pin (visual reference, metallic) ----
-//      8 mm steel pin inserted into the wheel's blind hole.
+//      8 mm steel pin with a flat edge for 3D printability.
+//      Inserted into the wheel's blind hole.
 //      Exposed portion extends crank_pin_height above the +Z face.
 if (show_crank_pin) {
     color("Silver")
@@ -544,8 +564,17 @@ if (show_crank_pin) {
         rotate([90, 0, 0])
             rotate([0, 0, crank_angle])
                 translate([0, crank_radius, wheel_thickness / 2 - crank_pin_hole_depth])
-                    cylinder(h = crank_pin_hole_depth + crank_pin_height,
-                             d = crank_pin_diameter);
+                    difference() {
+                        cylinder(h = crank_pin_hole_depth + crank_pin_height,
+                                 d = crank_pin_diameter);
+                        // Flat edge: cut a slab off one side
+                        translate([-(crank_pin_diameter / 2),
+                                   crank_pin_diameter / 2 - crank_pin_flat_depth,
+                                   -1])
+                            cube([crank_pin_diameter,
+                                  crank_pin_flat_depth + 1,
+                                  crank_pin_hole_depth + crank_pin_height + 2]);
+                    }
 }
 
 if (show_rotary_aluminum_tube) {
