@@ -96,7 +96,7 @@ The frame bracket is a stationary plate on the −Z side of the wheel that house
 
 **File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad`
 
-The spray pipe (3/4″ aluminum pipe) will be connected directly to the connecting rod's small-end wrist pin and will slide linearly. No guide-rod / LM20UU carriage is used.
+The spray pipe (3/4″ aluminum pipe) will be connected directly to the connecting rod's small-end wrist pin and will slide linearly. An adjacent 3/4" aluminum tube, parallel with the filter cartridge, will be used as a guide rod. A LM20UU bearing will be used for the 3/4" aluminum tube to glide through.
 
 **Status:** No carriage module exists in this file yet. A wrist pin visual reference (`show_wrist_pin`) renders at the small-end position to show where the spray pipe will attach. The design of the nozzle carriage / spray pipe clamp is still to be determined.
 
