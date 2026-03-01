@@ -87,7 +87,7 @@ bearing_608_shoulder_hole_d = 16; // Shoulder hole: clears inner race (~12 mm OD
                                   // outer race (22 mm OD) seats on remaining ring
 
 // --- Lightening holes (material saving, same style as mating_bevel_gear) ---
-wheel_lightening_hole_count           = 6;
+wheel_lightening_hole_count            = 6;
 wheel_lightening_hole_diameter         = 35;     // Diameter of each circular hole
 wheel_lightening_hole_circle_radius    = (hub_outer_diameter / 2 + wheel_diameter / 2) / 2;  // Midway between hub and rim
 
@@ -202,7 +202,7 @@ hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from
 // crank-pin (+Z) side, so it clears the rod at all crank angles.
 con_rod_total_h     = con_rod_socket_height + con_rod_bar_thickness;
 con_rod_base_z_val  = wheel_thickness / 2 + crank_pin_fillet_height + con_rod_pin_gap;
-spray_tube_z_local = -50;
+spray_tube_z_local = -106;
 //spray_tube_z_local = -(wheel_thickness / 2) - frame_gap - (frame_thickness / 2); // Center the long aluminum tube on the thickness of the frame.
 
 // --- Crank position geometry (derived from crank_position) ---
