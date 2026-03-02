@@ -92,13 +92,27 @@ The frame bracket is a stationary plate on the −Z side of the wheel that house
 
 ---
 
-### Step 4 — Spray Pipe Carriage ❌ NOT YET BUILT
+### Step 4 — Spray Pipe Carriage 🔶 PARTIALLY DONE
 
-**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad`
+**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (same file, `spray_pipe_carriage()` module)
 
-The spray pipe (3/4″ aluminum pipe) will be connected directly to the connecting rod's small-end wrist pin and will slide linearly. An adjacent 3/4" aluminum tube, parallel with the filter cartridge, will be used as a guide rod. A LM20UU bearing will be used for the 3/4" aluminum tube to glide through.
+The carriage rides on a 3/4″ aluminum guide rod (parallel to the filter) via dual LM20UU linear bearings, connects to the connecting rod's wrist pin via a 608 2RS bearing, and holds the PVC spray pipe in a top-loading C-clip.
 
-**Status:** No carriage module exists in this file yet. A wrist pin visual reference (`show_wrist_pin`) renders at the small-end position to show where the spray pipe will attach. The design of the nozzle carriage / spray pipe clamp is still to be determined.
+**What was built:**
+- **Dual LM20UU bearing housings** (40.2 mm OD each, 42 mm long) spaced 30 mm apart (`lm20uu_gap`), with a connecting block filling the gap. Centre-to-centre = 72 mm. Housing wall = 4 mm, bearing pocket = 32.2 mm (32 mm OD + 0.2 mm press-fit).
+- **608 bearing socket** at the top (wrist pin pivot): 30.2 mm OD, 11 mm tall (bearing width 7 mm + 4 mm shoulder). Stepped bore with 22.2 mm bearing pocket and 16 mm shoulder hole. Socket sits above the arm plate.
+- **Triangular arm plate** (8 mm thick) connecting the 608 socket at the top to the LM20UU housing pair at the bottom. Asymmetric: straight −X wall, angled +X wall. The arm spans `carriage_arm_length` (~107 mm) to bridge the offset between the wrist pin (near the wheel face) and the guide rod (at `spray_tube_z_local = −100 mm`).
+- **PVC C-clip cradle** (34.67 mm OD, 26.67 mm bore, 270° wrap, 50 mm long) mounted above the LM20UU housings with a bridge web. Top-loading slot for easy pipe insertion.
+- **Guide rod through-hole** (LM20UU bore + 7 mm clearance) so the 3/4″ aluminum tube passes unobstructed through both housings and the gap.
+- **Flat −X cut** (1 mm) on the 608 socket for print bed face.
+- **Render toggle:** `build_spray_pipe_carriage`
+- **Visual references:** LM20UU bearings rendered in SteelBlue (`show_lm20uu_bearings`); PVC spray pipe rendered in white (`show_pvc_spray_pipe`)
+
+**Still TODO — Carriage arm support:**
+- The long arm from the wrist pin socket to the guide rod housings (~107 mm) creates a significant moment arm. The connecting rod pushes/pulls at the top while the guide rod constrains at the bottom, causing bending forces on the arm.
+- **Planned fix:** Add a **support rod** (aluminum tube or steel rod) extending from the frame bracket, parallel to the guide rod, positioned to support the carriage arm. The arm would ride on the support rod via **1–2 bearings** (608 2RS or similar) mounted in bearing pockets on the arm. This would resist the bending moment and prevent arm flex during the stroke.
+- The support rod would need a bracket or boss on the frame to hold it in place.
+- Alternative: a second guide rod closer to the wrist pin, with additional LM20UU bearings.
 
 ---
 
@@ -144,9 +158,11 @@ Non-printed reference geometry rendered to aid visual inspection of the assembly
 
 **What was built:**
 - **Rotary aluminum tube** (DimGray): hollow cylinder (19.05 mm OD, 1.65 mm wall = standard 3/4″ tube), extending from the hub top through the wheel, spacer ring, and frame bearing. Rotates with `crank_angle`. Toggle: `show_rotary_aluminum_tube`.
-- **Spray pipe carriage aluminum tube / spray pipe** (DimGray): 3/4″ aluminum tube (1219.2 mm / 4 ft long) running parallel to the connecting rod, offset in the −Z (frame) direction at `spray_tube_z_local = −110 mm`. Extends from X = −150 mm for the full spray pipe length. Stationary reference showing the spray pipe's swept path. Toggle: `show_spray_pipe_carriage_aluminum_tube`.
-- **Crank pin** (Silver): 8 mm steel pin in the wheel's blind hole, with a flat edge for printability. Extends `crank_pin_height` (20 mm) above the +Z wheel face. Toggle: `show_crank_pin`.
-- **Wrist pin** (Silver): 8 mm steel pin at the connecting rod's small end (at slider_x on the X axis). Shows where the spray pipe attachment will be. Toggle: `show_wrist_pin`.
+- **Spray pipe carriage aluminum tube / guide rod** (DimGray): 3/4″ aluminum tube (1219.2 mm / 4 ft long) running parallel to the connecting rod, offset in the −Z (frame) direction at `spray_tube_z_local = −100 mm`. Extends from X = −150 mm for the full spray tube length. Stationary reference showing the guide rod the carriage rides on. Toggle: `show_spray_pipe_carriage_aluminum_tube`.
+- **Crank pin** (Silver): 8 mm steel pin in the wheel's blind hole, with a flat edge for 3D printability. Extends `crank_pin_height` (20 mm) above the +Z wheel face. Toggle: `show_crank_pin`.
+- **Wrist pin** (Silver): 8 mm steel pin at the connecting rod's small end (at slider_x on the X axis), with a flat edge matching the crank pin for printability. Passes through both the con-rod's small-end 608 bearing and the carriage's 608 bearing. Toggle: `show_wrist_pin`.
+- **LM20UU bearings** (SteelBlue, 50% opacity): rendered inside both the carriage (2 bearings) and the guide rod PVC clip (1 bearing). Toggle: `show_lm20uu_bearings`.
+- **PVC spray pipe** (White, 60% opacity): 3/4″ PVC Schedule 40 pipe (26.67 mm OD), 3 ft long, clipped into the carriage. Moves with `slider_x`. Toggle: `show_pvc_spray_pipe`.
 
 ---
 
@@ -165,18 +181,35 @@ Holds the frame bracket upright. **Print 2** — one for each end of the bottom 
 
 ---
 
-### Step 8 — Assembly & Validation 🔶 PARTIALLY DONE
+### Step 9 — Guide Rod PVC Clip ✅ DONE
+
+**File:** `rotary_to_linear_actuator/rotary_to_linear_nozzle_actuator.scad` (same file, `guide_rod_pvc_clip()` module)
+
+A simple stationary clip that rides on the guide rod and holds the PVC spray pipe at a fixed point further down the rod. Provides a second support point for the PVC pipe so it doesn't sag or whip during the carriage stroke.
+
+**What was built:**
+- **Single LM20UU housing** (40.2 mm OD, 50 mm long) — housing and clip are the same length, flush on both ±X ends. Bore along X axis for the guide rod.
+- **PVC C-clip cradle** (same dimensions as carriage clip: 34.67 mm OD, 26.67 mm bore, 270° wrap, 50 mm long) mounted above the housing with a bridge web. Top-loading.
+- **Flat −Y cut** (1 mm) for print bed stability.
+- **No arm or 608 bearing socket** — this clip does not connect to the connecting rod; it is a passive support.
+- Placed at **800 mm** along the guide rod in the +X direction from the wheel centre (`guide_clip_x_pos`).
+- LM20UU bearing visual reference rendered when `show_lm20uu_bearings` is true.
+- **Render toggle:** `build_guide_rod_pvc_clip`
+
+---
+
+### Step 10 — Assembly & Validation 🔶 PARTIALLY DONE
 
 All components are assembled **inline** in the same `.scad` file (no separate assembly file). The 4-state `crank_position` parameter allows visual inspection at each extreme.
 
 **Completed:**
-- Crank wheel, connecting rod, spacer ring, frame bracket, and support sleeve all placed with proper transforms
-- Visual references (rotary aluminum tube, spray pipe, crank pin, wrist pin) rendered for context
+- Crank wheel, connecting rod, spacer ring, frame bracket, support sleeve, spray pipe carriage, and guide rod PVC clip all placed with proper transforms
+- Visual references (rotary aluminum tube, guide rod, crank pin, wrist pin, LM20UU bearings, PVC spray pipe) rendered for context
 - 4-state `crank_position` for manual clearance/stroke checks (Top / Right / Bottom / Left)
 - Support sleeve positioned between frame bracket and bevel gear, rotating with tube
 
 **Still TODO:**
-- Design and build the spray pipe carriage / spray pipe clamp (Step 4)
+- **Carriage arm support rod/bearing** — add a support rod extending from the frame bracket (parallel to the guide rod) with 1–2 bearings on the carriage arm to resist bending moment from the ~107 mm offset between wrist pin and guide rod (see Step 4 TODO)
 - Animate the crank rotation (OpenSCAD `$t` variable) for continuous motion verification
 - Un-comment and verify the ring cutout below the S6904ZZ bearing pocket in the frame bracket
 - Verify spray pipe clearance at all crank positions
@@ -208,6 +241,8 @@ Understanding the coordinate transforms is critical when modifying the assembly:
 - **Frame bracket:** +Z face at z=0 (faces wheel); plate extends into −Z; walls extend into +Z
 - **Spacer ring:** −Z face at z=0 (print bed)
 - **Support sleeve:** z=0 is far end (larger OD, print bed); z=`support_sleeve_length` is bracket end (smaller OD)
+- **Spray pipe carriage:** origin at 608 bearing centre (wrist pin); X = slider axis; Y = perpendicular in wheel plane; Z = perpendicular to wheel face
+- **Guide rod PVC clip:** origin at LM20UU bearing centre (guide rod); X = bore axis; Y = up toward PVC clip
 
 ### Assembly transforms (module-local → world)
 All parts share a common prefix transform:
