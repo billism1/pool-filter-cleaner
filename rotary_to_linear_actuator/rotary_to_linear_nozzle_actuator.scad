@@ -224,7 +224,7 @@ lm20uu_cc                  = lm20uu_length + lm20uu_gap;  // Centre-to-centre = 
 
 // PVC spray pipe (Schedule 40, 3/4″ nominal)
 pvc_od                     = 26.67;   // 1.050″ OD (Schedule 40)
-pvc_clip_clearance         = 0.3;     // Clearance for clip bore
+pvc_clip_clearance         = 0.0;     // Clearance for clip bore
 pvc_clip_id                = pvc_od + pvc_clip_clearance;  // ≈26.97 mm
 pvc_clip_wall              = 4;       // Wall thickness of C-clip
 pvc_clip_od                = pvc_clip_id + 2 * pvc_clip_wall;  // ≈34.97 mm
@@ -257,7 +257,7 @@ carriage_arm_length       = carriage_bearing_center_z - spray_tube_z_local;
 carriage_x_offset         = lm20uu_cc / 2 + lm20uu_length / 2 - carriage_608_od / 2 + carriage_608_flat_cut;  // Shift housing pair so −X end face aligns with 608 flat cut
 pvc_clip_center_x         = -carriage_608_od / 2 + carriage_608_flat_cut + pvc_clip_length / 2;  // Flush −X edge with 608 flat cut / housing 1
 pvc_clip_center_y         = lm20uu_housing_od / 2 + pvc_clip_od / 2;
-pvc_clip_opening_width    = pvc_clip_id * sin((360 - pvc_clip_wrap_angle) / 2);
+pvc_clip_opening_width    = pvc_clip_id * sin((360 - pvc_clip_wrap_angle) / 2) + 4; // Effective width of the opening when flattened (mm), with extra clearance for easy insertion
 pvc_spray_pipe_length     = 914.4;   // 3 ft PVC spray pipe (visual reference)
 
 // --- Guide Rod PVC Clip ----------------------------------------
@@ -771,6 +771,17 @@ module spray_pipe_carriage() {
                 translate([0, 0, -(lm20uu_length / 2 + 1)])
                     cylinder(d = lm20uu_pocket_d,
                              h = lm20uu_length + 2);
+
+        // ---- Guide rod through-hole (along X, full length) ----
+        //      Allows the 3/4″ aluminum tube to pass all the way
+        //      through both LM20UU housings and the gap between
+        //      them without obstruction.  Diameter matches the
+        //      LM20UU bore (20 mm) so there is no step-down.
+        translate([carriage_x_offset, 0, -arm_len])
+            rotate([0, 90, 0])
+                translate([0, 0, -(lm20uu_cc / 2 + lm20uu_length / 2 + 1)])
+                    cylinder(d = lm20uu_bore + 7, // +7 for clearance, since this is a through-hole
+                             h = lm20uu_cc + lm20uu_length + 2);
 
         // ---- PVC clip bore (along X) ----
         translate([pvc_clip_center_x, pvc_clip_center_y, -arm_len])
