@@ -248,7 +248,7 @@ hub_total_height    = wheel_thickness + hub_extension;  // Total hub height from
 // crank-pin (+Z) side, so it clears the rod at all crank angles.
 con_rod_total_h     = con_rod_socket_height + con_rod_bar_thickness;
 con_rod_base_z_val  = wheel_thickness / 2 + crank_pin_fillet_height + con_rod_pin_gap;
-spray_tube_z_local = -110;
+spray_tube_z_local = -100;
 //spray_tube_z_local = -(wheel_thickness / 2) - frame_gap - (frame_thickness / 2); // Center the long aluminum tube on the thickness of the frame.
 
 // Spray pipe carriage derived
