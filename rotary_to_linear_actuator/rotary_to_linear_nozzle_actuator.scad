@@ -85,10 +85,11 @@ crank_pin_fillet_dia    = 14;   // Wider tapered boss around hole for pin stabil
 crank_pin_fillet_height = 2;    // Height of fillet boss above +Z face
 
 // --- 608 2RS Bearing (on crank pin) --------------------------
-bearing_608_bore        = 8;    // Inner diameter
-bearing_608_od          = 22;   // Outer diameter
-bearing_608_width       = 7;    // Width / thickness
-bearing_608_clearance   = 0.2;  // Press-fit tolerance for OD pocket in socket
+bearing_608_bore            = 8;    // Inner diameter
+bearing_608_inner_race_d    = 10;   // Inner race diameter
+bearing_608_od              = 22;   // Outer diameter
+bearing_608_width           = 7;    // Width / thickness
+bearing_608_clearance       = 0.2;  // Press-fit tolerance for OD pocket in socket
 bearing_608_shoulder_hole_d = 16; // Shoulder hole: clears inner race (~12 mm OD),
                                   // outer race (22 mm OD) seats on remaining ring
 
@@ -294,6 +295,8 @@ arm_rod_mount_boss2_z       = arm_rod_mount_center_z - arm_rod_mount_gap / 2
                               - arm_rod_mount_boss_width;
                               // Boss 2 outer face (further from socket);
                               // boss spans boss2_z to boss2_z + boss_width
+arm_rod_mount_spacer_height = (arm_rod_mount_gap - bearing_608_width) / 2;
+                              // Spacer ring height each side = (11 − 7) / 2 = 2 mm
 
 // --- Crank position geometry (derived from crank_position) ---
 crank_angle = crank_position == 0 ?    0 :   // Top
@@ -370,6 +373,9 @@ echo(str("Guide rod PVC clip: length=", guide_clip_length,
 echo(str("Arm rod mount: OD=", arm_rod_mount_od,
          " mm  boss_width=", arm_rod_mount_boss_width,
          " mm  gap=", arm_rod_mount_gap,
+         " mm  spacer_h=", arm_rod_mount_spacer_height,
+         " mm  spacer_OD=", bearing_608_inner_race_d,
+         " mm  spacer_ID=", bearing_608_bore + 0.3,
          " mm  center_z=", arm_rod_mount_center_z,
          " mm  boss1_z=", arm_rod_mount_boss1_z,
          " mm  boss2_z=", arm_rod_mount_boss2_z, " mm"));
@@ -782,19 +788,50 @@ module spray_pipe_carriage() {
             // ---- Connecting arm rod mount boss 1 (closer to 608 socket) ----
             //      Rounded pad extending the arm profile in Y to clear the
             //      608 bearing.  Cylinder axis along Z (rod axis).
-            translate([0, 0, arm_rod_mount_boss1_z])
-                cylinder(h = arm_rod_mount_boss_width, d = arm_rod_mount_od);
+            //      Extended into gap by spacer_height so the integrated
+            //      spacer ring has material.
+            translate([0, 0, arm_rod_mount_boss1_z - arm_rod_mount_spacer_height])
+                cylinder(h = arm_rod_mount_boss_width + arm_rod_mount_spacer_height,
+                         d = arm_rod_mount_od);
 
             // ---- Connecting arm rod mount boss 2 (further from 608 socket) ----
-            translate([0, 0, arm_rod_mount_boss2_z - 4]) // Add 4 mm to give the wrist pin some material to be isnerted into.
-                cylinder(h = arm_rod_mount_boss_width + 4, d = arm_rod_mount_od);
+            //      Extended 4 mm outward for wrist pin material, plus
+            //      spacer_height inward (toward +Z) for integrated spacer.
+            translate([0, 0, arm_rod_mount_boss2_z - 4])
+                cylinder(h = arm_rod_mount_boss_width + 4 + arm_rod_mount_spacer_height,
+                         d = arm_rod_mount_od);
         }
 
-        // ---- Arm rod mount gap cutout (between boss 1 and boss 2) ----
-        //      Clears the space between the two bosses so the 608
-        //      bearing + spacer rings can sit freely in the gap.
-        translate([0, 0, arm_rod_mount_boss2_z + arm_rod_mount_boss_width - 0.01])
-            cylinder(h = arm_rod_mount_gap + 0.02, d = arm_rod_mount_od);
+        // ---- Arm rod mount: bearing pocket (centre of gap) ----
+        //      Clears full OD for the 608 bearing in the centre 7 mm.
+        translate([0, 0, arm_rod_mount_center_z - bearing_608_width / 2])
+            cylinder(h = bearing_608_width, d = arm_rod_mount_od + 0.02);
+
+        // ---- Arm rod mount: spacer ring 1 cutout (boss 1 side) ----
+        //      Ring-shaped cutout removes material from inner_race_d
+        //      outward, leaving a spacer ring at bearing_608_inner_race_d
+        //      that presses against the bearing inner race.
+        difference() {
+            translate([0, 0, arm_rod_mount_center_z + bearing_608_width / 2])
+                cylinder(h = arm_rod_mount_spacer_height + 0.01,
+                         d = arm_rod_mount_od + 0.02);
+            translate([0, 0, arm_rod_mount_center_z + bearing_608_width / 2 - 0.01])
+                cylinder(h = arm_rod_mount_spacer_height + 0.03,
+                         d = bearing_608_inner_race_d);
+        }
+
+        // ---- Arm rod mount: spacer ring 2 cutout (boss 2 side) ----
+        //      Same ring-shaped cutout on the opposite side.
+        difference() {
+            translate([0, 0, arm_rod_mount_center_z - bearing_608_width / 2
+                            - arm_rod_mount_spacer_height])
+                cylinder(h = arm_rod_mount_spacer_height + 0.01,
+                         d = arm_rod_mount_od + 0.02);
+            translate([0, 0, arm_rod_mount_center_z - bearing_608_width / 2
+                            - arm_rod_mount_spacer_height - 0.01])
+                cylinder(h = arm_rod_mount_spacer_height + 0.03,
+                         d = bearing_608_inner_race_d);
+        }
 
         // ---- 608 bearing pocket (along Z toward con rod) ----
         translate([0, 0, -bearing_608_width / 2])
