@@ -1059,7 +1059,10 @@ if (show_crank_pin)
 //      and the carriage's 608 bearing below it.
 //      Stays on the slider axis (Y = 0) at X = slider_x.
 if (show_wrist_pin) {
-    wrist_pin_bottom = carriage_bearing_center_z - carriage_608_socket_height / 2;
+    // Bottom of pin: extends through carriage boss 1, across the gap,
+    // and 5 mm into boss 2 (matches wrist pin through-bore depth).
+    wrist_pin_bottom = carriage_bearing_center_z
+                       + (arm_rod_mount_boss2_z + arm_rod_mount_boss_width - 5);
     wrist_pin_top    = con_rod_base_z + crank_pin_height;
     wrist_pin_len    = wrist_pin_top - wrist_pin_bottom;
 
