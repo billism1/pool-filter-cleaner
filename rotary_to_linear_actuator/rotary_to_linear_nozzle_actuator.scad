@@ -811,17 +811,23 @@ module spray_pipe_carriage() {
         //      Ring-shaped cutout removes material from inner_race_d
         //      outward, leaving a spacer ring at bearing_608_inner_race_d
         //      that presses against the bearing inner race.
+        //      Cone taper (45°): inner_race_d at bearing face,
+        //      inner_race_d + 2×spacer_height at boss face — no overhang.
         difference() {
             translate([0, 0, arm_rod_mount_center_z + bearing_608_width / 2])
                 cylinder(h = arm_rod_mount_spacer_height + 0.01,
                          d = arm_rod_mount_od + 0.02);
             translate([0, 0, arm_rod_mount_center_z + bearing_608_width / 2 - 0.01])
                 cylinder(h = arm_rod_mount_spacer_height + 0.03,
-                         d = bearing_608_inner_race_d);
+                         d1 = bearing_608_inner_race_d,
+                         d2 = bearing_608_inner_race_d
+                              + 2 * arm_rod_mount_spacer_height);
         }
 
         // ---- Arm rod mount: spacer ring 2 cutout (boss 2 side) ----
         //      Same ring-shaped cutout on the opposite side.
+        //      Cone taper (45°): inner_race_d at bearing face (+Z),
+        //      wider at boss face (−Z).
         difference() {
             translate([0, 0, arm_rod_mount_center_z - bearing_608_width / 2
                             - arm_rod_mount_spacer_height])
@@ -830,7 +836,9 @@ module spray_pipe_carriage() {
             translate([0, 0, arm_rod_mount_center_z - bearing_608_width / 2
                             - arm_rod_mount_spacer_height - 0.01])
                 cylinder(h = arm_rod_mount_spacer_height + 0.03,
-                         d = bearing_608_inner_race_d);
+                         d1 = bearing_608_inner_race_d
+                              + 2 * arm_rod_mount_spacer_height,
+                         d2 = bearing_608_inner_race_d);
         }
 
         // ---- 608 bearing pocket (along Z toward con rod) ----
