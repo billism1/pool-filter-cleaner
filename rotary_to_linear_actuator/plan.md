@@ -108,10 +108,20 @@ The carriage rides on a 3/4″ aluminum guide rod (parallel to the filter) via d
 - **Render toggle:** `build_spray_pipe_carriage`
 - **Visual references:** LM20UU bearings rendered in SteelBlue (`show_lm20uu_bearings`); PVC spray pipe rendered in white (`show_pvc_spray_pipe`)
 
+**Connecting arm rod mount (added to carriage):**
+- Two **boss pads** (26 mm OD = `bearing_608_od + 4`) near the wrist pin socket, centred on the frame bracket Z position (carriage-local Z). Boss 1 is closer to the 608 socket (+Z side); boss 2 is further away (−Z side).
+- **Boss width:** 5 mm each (`arm_rod_mount_boss_width`). Boss 2 has an extra 4 mm extension in −Z for wrist pin insertion material.
+- **Gap between bosses:** 14 mm (`arm_rod_mount_gap`) — accommodates a 608 2RS bearing (7 mm) plus integrated spacer rings (3.5 mm each side).
+- **Integrated spacer rings** built into each boss (no separate parts). Each boss extends `arm_rod_mount_spacer_height` (3.5 mm) into the gap zone. A ring-shaped cutout removes material from `bearing_608_inner_race_d` (10 mm, reduced by 0.5 mm for contact pressure) outward, leaving an annular spacer that presses against the 608 bearing inner race. **45° cone taper** on the cutout (wider at boss face, narrower at bearing face) eliminates overhangs for support-free FDM printing.
+- **Bearing pocket:** full-OD clearance in the centre 7 mm of the gap for the 608 2RS bearing.
+- **Wrist pin rod through-bore:** 8.3 mm diameter (8 mm + 0.3 mm clearance) bore extending from the 608 socket top, through boss 1, across the gap, and 5 mm into boss 2. The extended wrist pin (8 mm steel rod) passes through this bore for structural support.
+- **Visual reference:** 608 2RS bearing rendered in SteelBlue between the bosses (`show_arm_rod_mount_bearing`).
+- **Parameters:** `arm_rod_mount_od`, `arm_rod_mount_boss_width`, `arm_rod_mount_gap`, `arm_rod_mount_center_z` (derived), `arm_rod_mount_boss1_z`, `arm_rod_mount_boss2_z`, `arm_rod_mount_spacer_height` (derived).
+
 **Still TODO — Carriage arm support:**
-- The long arm from the wrist pin socket to the guide rod housings (~107 mm) creates a significant moment arm. The connecting rod pushes/pulls at the top while the guide rod constrains at the bottom, causing bending forces on the arm.
-- **Planned fix:** Add a **support rod** (aluminum tube or steel rod) extending from the frame bracket, parallel to the guide rod, positioned to support the carriage arm. The arm would ride on the support rod via **1–2 bearings** (608 2RS or similar) mounted in bearing pockets on the arm. This would resist the bending moment and prevent arm flex during the stroke.
-- The support rod would need a bracket or boss on the frame to hold it in place.
+- The arm rod mount bosses and bearing are in place. Still needed:
+  - **Support rod bore holes** through both bosses for the actual support rod (aluminum tube or steel rod) that the 608 bearing rides on.
+  - **Support frame/rail** extending along X (parallel to guide rod) attached to the frame bracket, for the arm rod mount bearing outer race to roll on. This rail resists the bending moment on the carriage arm.
 - Alternative: a second guide rod closer to the wrist pin, with additional LM20UU bearings.
 
 ---
@@ -160,9 +170,10 @@ Non-printed reference geometry rendered to aid visual inspection of the assembly
 - **Rotary aluminum tube** (DimGray): hollow cylinder (19.05 mm OD, 1.65 mm wall = standard 3/4″ tube), extending from the hub top through the wheel, spacer ring, and frame bearing. Rotates with `crank_angle`. Toggle: `show_rotary_aluminum_tube`.
 - **Spray pipe carriage aluminum tube / guide rod** (DimGray): 3/4″ aluminum tube (1219.2 mm / 4 ft long) running parallel to the connecting rod, offset in the −Z (frame) direction at `spray_tube_z_local = −100 mm`. Extends from X = −150 mm for the full spray tube length. Stationary reference showing the guide rod the carriage rides on. Toggle: `show_spray_pipe_carriage_aluminum_tube`.
 - **Crank pin** (Silver): 8 mm steel pin in the wheel's blind hole, with a flat edge for 3D printability. Extends `crank_pin_height` (20 mm) above the +Z wheel face. Toggle: `show_crank_pin`.
-- **Wrist pin** (Silver): 8 mm steel pin at the connecting rod's small end (at slider_x on the X axis), with a flat edge matching the crank pin for printability. Passes through both the con-rod's small-end 608 bearing and the carriage's 608 bearing. Toggle: `show_wrist_pin`.
+- **Wrist pin** (Silver): 8 mm steel pin at the connecting rod's small end (at slider_x on the X axis), with a flat edge matching the crank pin for printability. Passes through the con-rod's small-end 608 bearing, the carriage's 608 bearing, carriage boss 1, across the arm rod mount gap, and 5 mm into boss 2. Toggle: `show_wrist_pin`.
 - **LM20UU bearings** (SteelBlue, 50% opacity): rendered inside both the carriage (2 bearings) and the guide rod PVC clip (1 bearing). Toggle: `show_lm20uu_bearings`.
 - **PVC spray pipe** (White, 60% opacity): 3/4″ PVC Schedule 40 pipe (26.67 mm OD), 3 ft long, clipped into the carriage. Moves with `slider_x`. Toggle: `show_pvc_spray_pipe`.
+- **Arm rod mount 608 bearing** (SteelBlue, 50% opacity): 608 2RS bearing rendered between arm rod mount bosses on the carriage, centred on the frame bracket Z position. Toggle: `show_arm_rod_mount_bearing`.
 
 ---
 
@@ -209,7 +220,8 @@ All components are assembled **inline** in the same `.scad` file (no separate as
 - Support sleeve positioned between frame bracket and bevel gear, rotating with tube
 
 **Still TODO:**
-- **Carriage arm support rod/bearing** — add a support rod extending from the frame bracket (parallel to the guide rod) with 1–2 bearings on the carriage arm to resist bending moment from the ~107 mm offset between wrist pin and guide rod (see Step 4 TODO)
+- **Support frame/rail** for the arm rod mount bearing — a rail extending from the frame bracket along X for the bearing outer race to roll on. This is the last structural piece needed for the carriage arm support system.
+- **Support rod bore holes** through arm rod mount bosses — for the rod that the 608 bearing sits on.
 - Animate the crank rotation (OpenSCAD `$t` variable) for continuous motion verification
 - Un-comment and verify the ring cutout below the S6904ZZ bearing pocket in the frame bracket
 - Verify spray pipe clearance at all crank positions
@@ -225,6 +237,7 @@ All components are assembled **inline** in the same `.scad` file (no separate as
 - All dimensions are in **millimetres**
 - The project convention is to use **set-screw holes** (M4 / 3.4 mm diameter, 85% of nominal for self-threading into plastic) to secure aluminum tubes in hubs
 - Bearings used: **S6904ZZ** (37 mm OD × 20 mm ID × 9 mm thick) for tube support in frame and filter holders; **608 2RS** (22 mm OD × 8 mm bore × 7 mm width) for crank pin and wrist pin pivots
+- **Pins (crank pin, wrist pin)** are rendered as 8 mm steel rod visual references, but they can also be **3D-printed** using the generated shapes (with the flat edge for print-bed orientation). The visual references (`show_crank_pin`, `show_wrist_pin`) produce the exact printable geometry — export with those toggles enabled to get STLs for printed pins as an alternative to metal.
 - The **spray element is a PVC pipe** (not the fan-out nozzle in `nozzle/`). The pipe is mounted horizontally on the sleigh, parallel to the filter, with orifices drilled ~150 mm (~6") apart and a closed far end. The garden hose connects to the open end. The sleigh moves the pipe back and forth by one orifice spacing (~6") so the jets sweep the entire filter length.
 - The tube connecting the mating bevel gear to the crank wheel needs to be long enough to clear the filter cartridge and legs; typical filter length is ~3 ft (914 mm), so this tube may be 12–18 inches (300–450 mm)
 - Water pressure is the **sole power source** — the mechanism must have low enough friction that the torque transmitted through the gear train from the spinning filter is sufficient to drive the actuator
