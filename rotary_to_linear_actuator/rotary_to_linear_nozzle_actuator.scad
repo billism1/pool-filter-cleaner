@@ -819,7 +819,7 @@ module spray_pipe_carriage() {
                          d = arm_rod_mount_od + 0.02);
             translate([0, 0, arm_rod_mount_center_z + bearing_608_width / 2 - 0.01])
                 cylinder(h = arm_rod_mount_spacer_height + 0.03,
-                         d1 = bearing_608_inner_race_d,
+                         d1 = bearing_608_inner_race_d - 0.5, // Slightly smaller diameter (-0.5 mm) than inner race to ensure to contact outside of inner race
                          d2 = bearing_608_inner_race_d
                               + 2 * arm_rod_mount_spacer_height);
         }
@@ -838,7 +838,7 @@ module spray_pipe_carriage() {
                 cylinder(h = arm_rod_mount_spacer_height + 0.03,
                          d1 = bearing_608_inner_race_d
                               + 2 * arm_rod_mount_spacer_height,
-                         d2 = bearing_608_inner_race_d);
+                         d2 = bearing_608_inner_race_d - 0.5);  // Slightly smaller diameter (-0.5 mm) than inner race to ensure to contact outside of inner race
         }
 
         // ---- 608 bearing pocket (along Z toward con rod) ----
