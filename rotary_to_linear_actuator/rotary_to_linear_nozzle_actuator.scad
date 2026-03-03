@@ -237,7 +237,7 @@ pvc_clip_length            = 50;      // Clip length along X / guide rod axis (m
 carriage_arm_thickness     = 8;       // Arm plate thickness — same as con rod bar (mm)
 carriage_608_bore          = bearing_608_od + bearing_608_clearance;  // 22.2 mm (reuse 608 params)
 carriage_608_od            = carriage_608_bore + 8;   // ≈30.2 mm (wall around bearing)
-carriage_608_socket_height = bearing_608_width + 5;   // 12 mm (bearing + shoulder)
+carriage_608_socket_height = bearing_608_width + 4;   // 11 mm (bearing + shoulder)
 carriage_wrist_gap         = 1;       // Clearance between carriage top and con rod bottom (mm)
 carriage_flat_cut          = 1;       // Material removed from housing bottom for flat print base (mm)
 carriage_608_flat_cut      = 1;       // Material removed from 608 socket −X side for flat print bed (mm)
@@ -279,10 +279,9 @@ guide_clip_x_pos        = 800;                              // 800 mm along guid
 //     with spacer rings on each side.  The bearing outer race
 //     rolls on a support frame (to be added later) that extends
 //     along X, centred on the frame bracket Y position.
-// arm_rod_mount_od            = bearing_608_od + 4;            // 26 mm — bearing OD (22) + 2 mm clearance each side
-arm_rod_mount_od            = carriage_608_od;               // Use the same OD as the 608 socket for a snug fit on the bearing
+arm_rod_mount_od            = bearing_608_od + 4;            // 26 mm — bearing OD (22) + 2 mm clearance each side
 arm_rod_mount_boss_width    = 5;                             // Thickness of each boss along Z (mm)
-arm_rod_mount_gap           = 11;                            // Gap between boss inner faces (7 mm bearing + 2×2 mm spacers)
+arm_rod_mount_gap           = 14;                            // Gap between boss inner faces (7 mm bearing + spacers)
 
 // Derived: centre of the mount gap in carriage-local Z
 //          = frame bracket centre position mapped to carriage-local Z
