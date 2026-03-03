@@ -34,13 +34,14 @@ show_crank_pin                         = true;   // Render the big-end crank pin
 show_wrist_pin                         = true;   // Render the small-end wrist pin (metallic, in con-rod socket)
 show_lm20uu_bearings                   = true;   // Render LM20UU bearings in carriage (visual reference)
 show_pvc_spray_pipe                    = true;   // Render PVC spray pipe in carriage (visual reference)
+show_arm_rod_mount_bearing             = true;   // Render 608 2RS bearing between arm rod mount bosses
 
 // --- Crank position (rotation state) ------------------------
 //     Allows visual inspection of the assembly at each of the
 //     four extreme crank positions to verify clearances, stroke,
 //     and connecting-rod alignment.
 //     0 = Top, 1 = Right (max extension), 2 = Bottom, 3 = Left (max retraction)
-crank_position = 3;
+crank_position = 1;
 
 // ============================================================
 //  Parameters
@@ -269,6 +270,31 @@ guide_clip_pvc_center_y = lm20uu_housing_od / 2 + pvc_clip_od / 2;  // PVC clip 
 guide_clip_flat_cut     = 1;                                // Flat cut on −Y for print bed (mm)
 guide_clip_x_pos        = 800;                              // 800 mm along guide rod from wheel centre (+X)
 
+// --- Connecting Arm Rod Mount --------------------------------
+//     Two rounded boss pads on the carriage arm near the wrist
+//     pin socket.  A support rod passes through holes in both
+//     bosses (along Z in module-local coords = world Y).
+//     Between the bosses, a 608 2RS bearing sits on the rod
+//     with spacer rings on each side.  The bearing outer race
+//     rolls on a support frame (to be added later) that extends
+//     along X, centred on the frame bracket Y position.
+// arm_rod_mount_od            = bearing_608_od + 4;            // 26 mm — bearing OD (22) + 2 mm clearance each side
+arm_rod_mount_od            = carriage_608_od;               // Use the same OD as the 608 socket for a snug fit on the bearing
+arm_rod_mount_boss_width    = 5;                             // Thickness of each boss along Z (mm)
+arm_rod_mount_gap           = 11;                            // Gap between boss inner faces (7 mm bearing + 2×2 mm spacers)
+
+// Derived: centre of the mount gap in carriage-local Z
+//          = frame bracket centre position mapped to carriage-local Z
+arm_rod_mount_center_z      = -(wheel_thickness / 2 + frame_gap + frame_thickness / 2)
+                              - carriage_bearing_center_z;
+arm_rod_mount_boss1_z       = arm_rod_mount_center_z + arm_rod_mount_gap / 2;
+                              // Boss 1 inner face (closer to 608 socket);
+                              // boss spans boss1_z to boss1_z + boss_width
+arm_rod_mount_boss2_z       = arm_rod_mount_center_z - arm_rod_mount_gap / 2
+                              - arm_rod_mount_boss_width;
+                              // Boss 2 outer face (further from socket);
+                              // boss spans boss2_z to boss2_z + boss_width
+
 // --- Crank position geometry (derived from crank_position) ---
 crank_angle = crank_position == 0 ?    0 :   // Top
               crank_position == 1 ?  -90 :   // Right
@@ -341,6 +367,12 @@ echo(str("Guide rod PVC clip: length=", guide_clip_length,
          " mm  x_pos=", guide_clip_x_pos,
          " mm  housing_od=", lm20uu_housing_od,
          " mm  pvc_center_y=", guide_clip_pvc_center_y, " mm"));
+echo(str("Arm rod mount: OD=", arm_rod_mount_od,
+         " mm  boss_width=", arm_rod_mount_boss_width,
+         " mm  gap=", arm_rod_mount_gap,
+         " mm  center_z=", arm_rod_mount_center_z,
+         " mm  boss1_z=", arm_rod_mount_boss1_z,
+         " mm  boss2_z=", arm_rod_mount_boss2_z, " mm"));
 
 // ============================================================
 //  Crank Wheel Module  (built with rotation axis along Z)
@@ -585,7 +617,7 @@ module frame_bracket() {
                            -frame_thickness])
                     cylinder(r = frame_edge_radius, h = frame_thickness);
                 // Bottom-right
-                translate([frame_x_end - frame_edge_radius,
+                translate([frame_x_end - frame_edge_radius,    // Frame bottom can be extended here
                            frame_plate_y_min + frame_edge_radius,
                            -frame_thickness])
                     cylinder(r = frame_edge_radius, h = frame_thickness);
@@ -746,7 +778,23 @@ module spray_pipe_carriage() {
                         lm20uu_housing_od / 2 - 2,
                         -arm_len - carriage_arm_thickness / 2])
                 cube([pvc_clip_length, 4, carriage_arm_thickness]);
+
+            // ---- Connecting arm rod mount boss 1 (closer to 608 socket) ----
+            //      Rounded pad extending the arm profile in Y to clear the
+            //      608 bearing.  Cylinder axis along Z (rod axis).
+            translate([0, 0, arm_rod_mount_boss1_z])
+                cylinder(h = arm_rod_mount_boss_width, d = arm_rod_mount_od);
+
+            // ---- Connecting arm rod mount boss 2 (further from 608 socket) ----
+            translate([0, 0, arm_rod_mount_boss2_z - 4]) // Add 4 mm to give the wrist pin some material to be isnerted into.
+                cylinder(h = arm_rod_mount_boss_width + 4, d = arm_rod_mount_od);
         }
+
+        // ---- Arm rod mount gap cutout (between boss 1 and boss 2) ----
+        //      Clears the space between the two bosses so the 608
+        //      bearing + spacer rings can sit freely in the gap.
+        translate([0, 0, arm_rod_mount_boss2_z + arm_rod_mount_boss_width - 0.01])
+            cylinder(h = arm_rod_mount_gap + 0.02, d = arm_rod_mount_od);
 
         // ---- 608 bearing pocket (along Z toward con rod) ----
         translate([0, 0, -bearing_608_width / 2])
@@ -757,6 +805,13 @@ module spray_pipe_carriage() {
         translate([0, 0, socket_bot - 1])
             cylinder(d = bearing_608_shoulder_hole_d,
                      h = carriage_608_socket_height - bearing_608_width + 1);
+
+        // ---- Wrist pin rod through-bore (extends from 608 socket
+        //      through boss 1, across the gap, and 5 mm into boss 2) ----
+        //      8 mm pin + 0.3 mm clearance for smooth sliding fit.
+        translate([0, 0, arm_rod_mount_boss2_z + arm_rod_mount_boss_width - 5])
+            cylinder(d = bearing_608_bore + 0.3,
+                     h = socket_top - (arm_rod_mount_boss2_z + arm_rod_mount_boss_width - 5) + 1);
 
         // ---- LM20UU bearing bore 1 (along X) ----
         translate([carriage_x_offset - lm20uu_cc / 2, 0, -arm_len])
@@ -1043,6 +1098,16 @@ if (show_lm20uu_bearings) {
                 rotate([0, 90, 0])
                     cylinder(h = lm20uu_length, d = lm20uu_od, center = true);
 }
+
+// ---- Arm rod mount 608 bearing (visual reference) ----
+//      608 2RS bearing centred between the two arm rod mount bosses.
+//      Moves with the carriage (slider_x).
+if (show_arm_rod_mount_bearing)
+    color("SteelBlue", 0.5)
+    translate([0, 0, wheel_diameter / 2])
+        rotate([90, 0, 0])
+            translate([slider_x, 0, carriage_bearing_center_z + arm_rod_mount_center_z])
+                cylinder(h = bearing_608_width, d = bearing_608_od, center = true);
 
 // ---- PVC spray pipe (visual reference, white) ----
 //      3/4″ PVC Schedule 40 pipe (26.67 mm OD), 3 ft long.
