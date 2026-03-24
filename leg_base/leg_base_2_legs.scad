@@ -6,7 +6,7 @@
 include <BOSL2/std.scad>
 // https://github.com/BelfrySCAD/BOSL2
 
-$fn = 180;  // Reduce to 60 for faster preview, increase to 180+ to for final render
+$fn = 60;  // Reduce to 60 for faster preview, increase to 180+ to for final render
 
 // Horizontal hole configuration
 horizontal_through_hole_both_sides = true;  // If true, rod hole goes through both sides; if false, only extends in positive X direction
@@ -53,6 +53,7 @@ printing_base_neck_height = 6;  // Height of the straight top section
 printing_base_round_radius = 4; // Radius for rounding edges of curved base
 printing_base_sweep_angle = 145; // Degrees of base footprint to keep (trim full circle to reduce waste)
 printing_base_sweep_rotation = 198; // Rotational alignment of sweep so footprint supports both leg tubes
+printing_base_end_round_radius = 8; // Radius for rounding the angular ends of the partial sweep (set to 0 to disable)
 printing_base_total_height = printing_base_height + printing_base_taper_height + printing_base_neck_height; // Total height of the curved base
 
 // Set screw dimensions
@@ -132,8 +133,37 @@ module curved_printing_base() {
     
     rounded_profile = round_corners(profile_path, radius=radii);
     if (printing_base_trim_enabled)
-        rotate([0, 0, printing_base_sweep_rotation])
-            rotate_sweep(rounded_profile, angle=printing_base_sweep_angle);
+        if (printing_base_end_round_radius > 0) {
+            // Round the angular "mouth" ends of the partial sweep.
+            // Uses intersection of a full 360° sweep with an annular sector whose
+            // outer corners are rounded via offset (fast 2D operation).
+            _sector_r = printing_base_radius;
+            _inner_r = printing_base_end_round_radius + 1; // survives the negative offset
+            _sector_steps = 72;
+            _inner_steps = 12;
+            _step = printing_base_sweep_angle / _sector_steps;
+            _inner_step = printing_base_sweep_angle / _inner_steps;
+            _sector_pts = concat(
+                // Inner arc (reverse direction to close polygon correctly)
+                [for (i = [0:_inner_steps])
+                    let(a = printing_base_sweep_rotation + printing_base_sweep_angle - i * _inner_step)
+                    [_inner_r * cos(a), _inner_r * sin(a)]],
+                // Outer arc
+                [for (i = [0:_sector_steps])
+                    let(a = printing_base_sweep_rotation + i * _step)
+                    [_sector_r * cos(a), _sector_r * sin(a)]]
+            );
+            intersection() {
+                rotate_sweep(rounded_profile, angle=360);
+                linear_extrude(height = printing_base_total_height + 1)
+                    offset(r = printing_base_end_round_radius)
+                    offset(r = -printing_base_end_round_radius)
+                    polygon(_sector_pts);
+            }
+        } else {
+            rotate([0, 0, printing_base_sweep_rotation])
+                rotate_sweep(rounded_profile, angle=printing_base_sweep_angle);
+        }
     else
         rotate_sweep(rounded_profile, angle=360);
 }
