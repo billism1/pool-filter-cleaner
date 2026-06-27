@@ -9,6 +9,9 @@
 
 $fn = 180; // Number of facets for smoothness. Use 180+ for final renders, but 60 is good for quick previews.
 
+place_bearing_at_holder_interior = false;
+place_bearing_at_holder_exterior = true;
+
 //--- Part Dimensions (in mm)
 
 // Plug that fits inside the filter
@@ -27,7 +30,7 @@ rod_hole_diameter = rod_diameter + rod_clearance;
 total_length = plug_length + flange_thickness; // Total length of the piece
 
 // Drain holes around the flange
-drain_hole_diameter = 25.4; // 1 inch holes
+drain_hole_diameter = 20; // 1 inch holes
 drain_hole_count = 6; // Number of holes around the flange
 drain_hole_circle_radius = plug_major_diameter / 2; // Centers on the outside diameter of the plug
 
@@ -65,9 +68,11 @@ module filter_holder() {
                 cylinder(h = plug_length, d1 = plug_minor_diameter, d2 = plug_major_diameter, center = false);
             }
             
-            // 3. Bearing holder tube extension at the end of the plug
-            translate([0, 0, flange_thickness + plug_length]) {
-                cylinder(h = bearing_tube_height, d = bearing_tube_outer_diameter, center = false);
+            if (place_bearing_at_holder_interior) {
+                // 3. Bearing holder tube extension at the end of the plug
+                translate([0, 0, flange_thickness + plug_length]) {
+                    cylinder(h = bearing_tube_height, d = bearing_tube_outer_diameter, center = false);
+                }
             }
         }
 
@@ -78,16 +83,38 @@ module filter_holder() {
             cylinder(h = flange_thickness + plug_length + bearing_tube_height + 2, d = rod_hole_diameter, center = false);
         }
         
-        // 5. Bearing pocket at the top of the extension tube (open at top for bearing insertion)
-        translate([0, 0, flange_thickness + plug_length]) {
-            cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
+        if (place_bearing_at_holder_interior) {
+            // 5. Bearing pocket at the top of the extension tube (open at top for bearing insertion)
+            translate([0, 0, flange_thickness + plug_length]) {
+                cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
+            }
         }
         
-        // 6. Ring cutout inside bearing area (gap between bearing inner race and plug)
-        translate([0, 0, flange_thickness + plug_length - ring_cutout_depth]) {
-            difference() {
-                cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false); // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
-                cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false); // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
+        if (place_bearing_at_holder_exterior) {
+            // 5b. Bottom bearing pocket - recessed into bottom of flange, flush with bottom surface
+            // Pocket goes UP into the flange from the bottom
+            translate([0, 0, -0.1]) {
+                cylinder(h = bearing_tube_height + 0.1, d = bearing_outer_diameter, center = false);
+            }
+        }
+        
+        if (place_bearing_at_holder_interior) {
+            // 6. Ring cutout inside bearing area (gap between bearing inner race and plug)
+            translate([0, 0, flange_thickness + plug_length - ring_cutout_depth]) {
+                difference() {
+                    cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false); // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
+                    cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false); // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
+                }
+            }
+        }
+        
+        if (place_bearing_at_holder_exterior) {
+            // 6b. Ring cutout for bottom bearing area (gap between bearing inner race and flange)
+            translate([0, 0, bearing_tube_height - 1]) { // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
+                difference() {
+                    cylinder(h = ring_cutout_depth + 1, d = ring_cutout_outer_diameter, center = false); // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
+                    cylinder(h = ring_cutout_depth + 1, d = ring_cutout_inner_diameter, center = false); // Adding 1mm to cut cylinder height to make rendering look cleaner while editing.
+                }
             }
         }
         
