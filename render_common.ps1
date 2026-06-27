@@ -51,7 +51,7 @@ function Invoke-ScadRenders {
         [Parameter(Mandatory)] [string] $Exe,
         [array]  $CommonArgs = @(),
         [Parameter(Mandatory)] [string] $OutDir,
-        [int]    $MaxAttempts = 3
+        [int]    $MaxAttempts = 5
     )
     if (-not (Test-Path $OutDir)) { New-Item -ItemType Directory -Path $OutDir | Out-Null }
 
