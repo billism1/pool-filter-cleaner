@@ -22,6 +22,8 @@ This is the configuration I print and use — the best starting point if you jus
 
 The recommended setup builds one **horizontal stand**: the filter and rod lie horizontally, supported at both ends, and the filter spins freely on bearings while you spray it.
 
+> **Ready to print:** [`publication/pool-filter-cleaner.3mf`](publication/pool-filter-cleaner.3mf) contains all the pieces for this recommended setup, pre-arranged across multiple plates. Open it in your slicer to print them.
+
 **Print this:**
 
 | Qty | STL File | Purpose |
