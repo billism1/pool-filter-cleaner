@@ -7,7 +7,7 @@
 include <BOSL2/std.scad>
 // https://github.com/BelfrySCAD/BOSL2
 
-$fn = 80;  // Reduce to 60 for faster preview, increase to 180+ to for final render
+$fn = 180;  // Reduce to 60 for faster preview, increase to 180+ to for final render
 
 printing_base_trim_enabled = true; // If true, use partial sweep to save material; if false, keep base fully round
 
