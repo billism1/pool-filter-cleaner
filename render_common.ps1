@@ -43,11 +43,15 @@ function Invoke-ScadRenders {
     # Render a list of jobs to STL. Each job is a hashtable:
     #   @{ Src = <full path to .scad>; Out = <stl file name>; Defs = @('-D','x=y') }
     # Returns the number of failed renders (0 = all OK).
+    # MaxAttempts retries on failure. The legacy (2021.01) build crashes
+    # intermittently in BOSL2's curved-base rounding (native access violations);
+    # a re-run usually succeeds. Deterministic errors still fail after retries.
     param(
         [Parameter(Mandatory)] [array]  $Jobs,
         [Parameter(Mandatory)] [string] $Exe,
         [array]  $CommonArgs = @(),
-        [Parameter(Mandatory)] [string] $OutDir
+        [Parameter(Mandatory)] [string] $OutDir,
+        [int]    $MaxAttempts = 3
     )
     if (-not (Test-Path $OutDir)) { New-Item -ItemType Directory -Path $OutDir | Out-Null }
 
@@ -56,19 +60,30 @@ function Invoke-ScadRenders {
         $stl = Join-Path $OutDir $job.Out
         Write-Host "Rendering $(Split-Path $job.Src -Leaf) -> STLs\$($job.Out)"
 
-        $errFile = [System.IO.Path]::GetTempFileName()
-        $proc = Start-Process -FilePath $Exe `
-            -ArgumentList ($CommonArgs + $job.Defs + @('-o', $stl, $job.Src)) `
-            -NoNewWindow -Wait -PassThru -RedirectStandardError $errFile
+        $exit    = $null
+        $lastErr = @()
+        for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+            $errFile = [System.IO.Path]::GetTempFileName()
+            $proc = Start-Process -FilePath $Exe `
+                -ArgumentList ($CommonArgs + $job.Defs + @('-o', $stl, $job.Src)) `
+                -NoNewWindow -Wait -PassThru -RedirectStandardError $errFile
+            $exit    = $proc.ExitCode
+            $lastErr = Get-Content $errFile
+            Remove-Item $errFile -ErrorAction SilentlyContinue
 
-        if ($proc.ExitCode -ne 0) {
+            if ($exit -eq 0) { break }
+            if ($attempt -lt $MaxAttempts) {
+                Write-Host "  retry $attempt/$($MaxAttempts - 1) (exit $exit)" -ForegroundColor DarkYellow
+            }
+        }
+
+        if ($exit -ne 0) {
             $failed++
-            Write-Host "  FAILED (exit $($proc.ExitCode))" -ForegroundColor Red
-            Get-Content $errFile | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
+            Write-Host "  FAILED (exit $exit after $MaxAttempts attempt(s))" -ForegroundColor Red
+            $lastErr | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
         } else {
             Write-Host "  OK" -ForegroundColor Green
         }
-        Remove-Item $errFile -ErrorAction SilentlyContinue
     }
     return $failed
 }
