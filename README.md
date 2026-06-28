@@ -2,7 +2,9 @@
 
 A 3D-printable pool filter cleaning system designed to efficiently clean cylindrical pool filters by spraying them while they rotate. This system allows for thorough cleaning of pool filter cartridges without manual scrubbing.
 
-**Attribution / Inspiration:** This horizontal pool filter cleaner was inspired by other similar pool filter cleaning designs I've seen people post online. I used OpenSCAD to create all 3D models for the horizontal stand in this repository.
+**Attribution:** I designed and modeled all 3D parts for this horizontal stand myself in OpenSCAD, working from measurements I took of my own filters and equipment.
+
+**Scope:** This is a horizontal rotisserie-style stand. The filter is carried at both ends on a single horizontal rod and spins freely on bearings while you spray it. It's an independent, personal, non-commercial project.
 
 ## Overview
 
@@ -18,7 +20,7 @@ This project provides a complete solution for cleaning cylindrical pool filters 
 
 ## Recommended Setup
 
-This is the configuration I print and use — the best starting point if you just want to build the stand. A complete list of every model and configuration, including all the alternative variants you can swap in, is listed and described in the sections further below: [Quick Reference](#quick-reference), [All Rendered STL Files](#all-rendered-stl-files), and [Components & Design Files](#components--design-files).
+This is the configuration I print and use, and the best starting point if you just want to build the stand. A complete list of every model and configuration, including all the alternative variants you can swap in, is listed and described in the sections further below: [Quick Reference](#quick-reference), [All Rendered STL Files](#all-rendered-stl-files), and [Components & Design Files](#components--design-files).
 
 The recommended setup builds one **horizontal stand**: the filter and rod lie horizontally, supported at both ends, and the filter spins freely on bearings while you spray it.
 
@@ -28,20 +30,20 @@ The recommended setup builds one **horizontal stand**: the filter and rod lie ho
 
 | Qty | STL File | Purpose |
 |-----|----------|---------|
-| 4× | `leg_foot.stl` | One foot per leg — two legs on each of the two leg bases. |
+| 4× | `leg_foot.stl` | One foot per leg (two legs on each of the two leg bases). |
 | 2× | `filter_holder_interior-false_exterior-true.stl` | One pressed into each end of the cylindrical filter. |
 | 1× | `leg_base_2_legs_both_sides-false.stl` | Supports one end of the horizontal aluminum rod (closed-end rod hole). |
 | 1× | `leg_base_2_legs_top_insert.stl` | Supports the other end as an open-top cradle, so you can set the rod into it from above instead of pressing it into a tube end-first. |
 
 **How it works:**
-- Each **filter holder** presses into one end of the filter cartridge. An S6904ZZ bearing seats into the recessed pocket on the flange (outer) face of each holder — the pockets face *outward*, so each bearing presses up against the adjacent leg base. The single horizontal aluminum rod runs through both holders and the bearing inner races, and the rod is held fixed by the leg bases. As the filter is sprayed it spins, and the bearings carry that rotation against two stationary contacts at once: radially around the fixed rod, and axially against the fixed leg bases the bearing faces press into. Both contacts would otherwise drag — the bearings cut the friction at each, so the filter keeps spinning freely.
+- Each **filter holder** presses into one end of the filter cartridge. An S6904ZZ bearing seats into the recessed pocket on the flange (outer) face of each holder. The pockets face *outward*, so each bearing presses up against the adjacent leg base. The single horizontal aluminum rod runs through both holders and the bearing inner races, and the rod is held fixed by the leg bases. As the filter is sprayed it spins, and the bearings carry that rotation against two stationary contacts at once: radially around the fixed rod, and axially against the fixed leg bases the bearing faces press into. Both contacts would otherwise drag, but the bearings cut the friction at each, so the filter keeps spinning freely.
 - One end of the rod drops into the **top-insert cradle base**, the other end is captured by the **closed-end 2-leg base**. Using the cradle on one side lets you lay the loaded filter+rod assembly into the stand from above rather than sliding it in lengthwise.
 - Each base splays into **two legs**; a **leg foot** caps each of the four leg rods for stable, non-marring contact with the ground.
-- Everything is **press-fit** — bearings press into the holder pockets, and the rods press into the holder and base tubes. The set-screw holes in the tubes are optional; only add M4 screws if a joint feels too loose.
+- Everything is **press-fit**: bearings press into the holder pockets, and the rods press into the holder and base tubes. The set-screw holes in the tubes are optional; only add M4 screws if a joint feels too loose.
 
 Hardware for this setup: 2× S6904ZZ bearings, 1× horizontal 3/4" rod, 4× leg rods, and optional M4 set screws. See [Additional Hardware Needed](#quick-reference) below for sizes.
 
-The garden hose nozzle is optional — any sufficiently forceful nozzle stream works.
+The garden hose nozzle is optional; any sufficiently forceful nozzle stream works.
 
 ## Quick Reference
 
@@ -52,21 +54,20 @@ Pre-rendered STL files live in the [`STLs/`](STLs/) folder. They are generated f
 | **Filter Holder (Core Set, Standard)** | `filter_holder/filter_holder.scad` | `filter_holder_interior-false_exterior-true.stl` (default) |
 | **Leg Base (2-leg, Core Set)** | `leg_base/leg_base_2_legs.scad` | `leg_base_2_legs_both_sides-true.stl` and `leg_base_2_legs_both_sides-false.stl` |
 | **Leg Base (2-leg, Top-Insert Cradle)** | `leg_base/leg_base_2_legs_top_insert.scad` | `leg_base_2_legs_top_insert.stl` |
-| **Leg Base (4-leg, Alternative)** | `leg_base/leg_base_4_legs.scad` | `leg_base_4_legs_both_sides-false.stl` and `leg_base_4_legs_both_sides-true.stl` |
 | **Leg Foot (Core Set)** | `leg_foot/leg_foot.scad` | `leg_foot.stl` |
 | **Garden Hose Nozzle (Optional)** | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | `garden_hose_nozzle-5-prong-fan-out.stl` |
 
 **Filter holder STL note:** `filter_holder.scad` exports four variants, one per combination of the `place_bearing_at_holder_interior` and `place_bearing_at_holder_exterior` flags:
-- `filter_holder_interior-false_exterior-true.stl` — default (bearing seated on the exterior side)
+- `filter_holder_interior-false_exterior-true.stl`: default (bearing seated on the exterior side)
 - `filter_holder_interior-true_exterior-false.stl`
 - `filter_holder_interior-true_exterior-true.stl`
 - `filter_holder_interior-false_exterior-false.stl`
 
-**Leg base STL note:** For `leg_base/leg_base_2_legs.scad` and `leg_base/leg_base_4_legs.scad`, the included exports cover both rod-hole styles:
-- `*_both_sides-true.stl` (`horizontal_through_hole_both_sides = true`) — rod hole goes through both sides
-- `*_both_sides-false.stl` (`horizontal_through_hole_both_sides = false`) — rod hole is closed on one end
+**Leg base STL note:** For `leg_base/leg_base_2_legs.scad`, the included exports cover both rod-hole styles:
+- `*_both_sides-true.stl` (`horizontal_through_hole_both_sides = true`): rod hole goes through both sides
+- `*_both_sides-false.stl` (`horizontal_through_hole_both_sides = false`): rod hole is closed on one end
 
-**Nozzle STL note:** The garden hose nozzle is optional but is rendered like the other parts — `render_garden_hose_nozzle.ps1` (and `render_all.ps1`) export `garden_hose_nozzle-5-prong-fan-out.stl` (see [Generating STL Files](#generating-stl-files)).
+**Nozzle STL note:** The garden hose nozzle is optional but is rendered like the other parts: `render_garden_hose_nozzle.ps1` (and `render_all.ps1`) export `garden_hose_nozzle-5-prong-fan-out.stl` (see [Generating STL Files](#generating-stl-files)).
 
 **Core solution note:** `filter_holder` + `leg_base` + `leg_foot` are an atomic set and are intended to be used together. The nozzle is optional/experimental; any effective high-force nozzle stream can be used.
 
@@ -78,21 +79,19 @@ Pre-rendered STL files live in the [`STLs/`](STLs/) folder. They are generated f
 
 ## All Rendered STL Files
 
-Every part is committed pre-rendered in [`STLs/`](STLs/). The [Recommended Setup](#recommended-setup) above is the specific combination I settled on and use; every other STL listed here is an available alternative — included so you can experiment with a different bearing placement, rod-hole style, or stand configuration if you want to try something else. All permutations are provided so you can pick whichever fits your build:
+Every part is committed pre-rendered in [`STLs/`](STLs/). The [Recommended Setup](#recommended-setup) above is the specific combination I settled on and use; every other STL listed here is an available alternative, included so you can experiment with a different bearing placement, rod-hole style, or stand configuration if you want to try something else. All permutations are provided so you can pick whichever fits your build:
 
 | STL File | Source SCAD | Parameters baked in |
 |----------|-------------|---------------------|
-| `filter_holder_interior-false_exterior-true.stl` | `filter_holder/filter_holder.scad` | bearing in flange (exterior) — **default** |
+| `filter_holder_interior-false_exterior-true.stl` | `filter_holder/filter_holder.scad` | bearing in flange (exterior), **default** |
 | `filter_holder_interior-true_exterior-false.stl` | `filter_holder/filter_holder.scad` | bearing at plug end (interior) |
 | `filter_holder_interior-true_exterior-true.stl` | `filter_holder/filter_holder.scad` | bearing pockets at both ends |
 | `filter_holder_interior-false_exterior-false.stl` | `filter_holder/filter_holder.scad` | no bearing pocket |
 | `leg_base_2_legs_both_sides-true.stl` | `leg_base/leg_base_2_legs.scad` | rod hole through both sides |
 | `leg_base_2_legs_both_sides-false.stl` | `leg_base/leg_base_2_legs.scad` | rod hole closed on one end |
 | `leg_base_2_legs_top_insert.stl` | `leg_base/leg_base_2_legs_top_insert.scad` | open-top cradle (rod laid in from above) |
-| `leg_base_4_legs_both_sides-true.stl` | `leg_base/leg_base_4_legs.scad` | rod hole through both sides |
-| `leg_base_4_legs_both_sides-false.stl` | `leg_base/leg_base_4_legs.scad` | rod hole closed on one end |
 | `leg_foot.stl` | `leg_foot/leg_foot.scad` | single variant |
-| `garden_hose_nozzle-5-prong-fan-out.stl` | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | single variant — optional/experimental |
+| `garden_hose_nozzle-5-prong-fan-out.stl` | `nozzle/nozzle/garden_hose_nozzle-5-prong-fan-out.scad` | single variant, optional/experimental |
 
 The garden hose nozzle is optional, but it is rendered alongside the other parts (`render_garden_hose_nozzle.ps1`, also covered by `render_all.ps1`). You can swap in any nozzle with an adequately forceful stream instead.
 
@@ -129,10 +128,9 @@ The filter holder attaches to the pool filter cartridge and provides the mountin
 
 **Primary file:** `leg_base/leg_base_2_legs.scad`  
 **Top-insert variant:** `leg_base/leg_base_2_legs_top_insert.scad` (open-top cradle; rod is laid in from above instead of inserted end-first)  
-**Alternative file:** `leg_base/leg_base_4_legs.scad`  
-**STL Outputs:** `STLs/leg_base_2_legs_both_sides-true.stl`, `STLs/leg_base_2_legs_both_sides-false.stl`, `STLs/leg_base_2_legs_top_insert.stl`, `STLs/leg_base_4_legs_both_sides-true.stl`, `STLs/leg_base_4_legs_both_sides-false.stl`
+**STL Outputs:** `STLs/leg_base_2_legs_both_sides-true.stl`, `STLs/leg_base_2_legs_both_sides-false.stl`, `STLs/leg_base_2_legs_top_insert.stl`
 
-A leg-base connector that forms the base of the rotating support system. Supports both 2-leg and 4-leg stand configurations.
+A leg-base connector that forms the base of the rotating support system, with two legs splaying from the horizontal rod tube.
 
 **Specifications:**
 - Designed for 3/4" (19.05mm) aluminum rods
@@ -147,16 +145,12 @@ A leg-base connector that forms the base of the rotating support system. Support
 - Rod holes extend 35mm deep into leg tubes
 - Requires BOSL2 library for advanced geometry operations
 
-**2-leg / 4-leg export variants:**
+**Export variants:**
 - `*_both_sides-true.stl` is rendered with `horizontal_through_hole_both_sides = true`
 - `*_both_sides-false.stl` is rendered with `horizontal_through_hole_both_sides = false`
 
 **Top-insert cradle variant:**
 - `leg_base/leg_base_2_legs_top_insert.scad` is an open-top cradle: the horizontal rod is laid in from above (+Y) rather than pressed into a closed tube end-first, which can make assembly easier.
-
-**4-leg vertical stand note:**
-- `leg_base/leg_base_4_legs.scad` can also be used in a vertical stand setup similar to other vertical pool filter cleaner designs posted online.
-- For best results in that vertical configuration, pair it with a bottom piece so a bearing contacts the top lip of the leg holder.
 
 **Dependencies:**
 - BOSL2 library (https://github.com/BelfrySCAD/BOSL2) - Advanced geometry and rounding functions
@@ -427,7 +421,7 @@ Pre-rendered STLs are committed in [`STLs/`](STLs/), so you only need to regener
 
 **Prerequisites:**
 - [OpenSCAD](https://openscad.org/) installed (2021.01 or newer; a recent Nightly build is recommended because it ships the more robust `manifold` geometry backend).
-- The [BOSL2](https://github.com/BelfrySCAD/BOSL2) library on OpenSCAD's library path — required by all `leg_base` SCAD files. The nozzle's `Threading.scad` and `Naca_sweep.scad` are already bundled in the repo.
+- The [BOSL2](https://github.com/BelfrySCAD/BOSL2) library on OpenSCAD's library path, required by all `leg_base` SCAD files. The nozzle's `Threading.scad` and `Naca_sweep.scad` are already bundled in the repo.
 
 ### Option A: PowerShell scripts (Windows)
 
@@ -444,7 +438,6 @@ powershell -ExecutionPolicy Bypass -File render_all.ps1
 powershell -ExecutionPolicy Bypass -File render_filter_holder.ps1
 powershell -ExecutionPolicy Bypass -File render_leg_base_2_legs.ps1
 powershell -ExecutionPolicy Bypass -File render_leg_base_2_legs_top_insert.ps1
-powershell -ExecutionPolicy Bypass -File render_leg_base_4_legs.ps1
 powershell -ExecutionPolicy Bypass -File render_leg_foot.ps1
 powershell -ExecutionPolicy Bypass -File render_garden_hose_nozzle.ps1
 ```
@@ -455,7 +448,6 @@ powershell -ExecutionPolicy Bypass -File render_garden_hose_nozzle.ps1
 | `render_filter_holder.ps1` | 4 filter-holder bearing-placement variants |
 | `render_leg_base_2_legs.ps1` | 2-leg base, both `horizontal_through_hole_both_sides` values |
 | `render_leg_base_2_legs_top_insert.ps1` | Top-insert cradle base (single variant) |
-| `render_leg_base_4_legs.ps1` | 4-leg base, both `horizontal_through_hole_both_sides` values |
 | `render_leg_foot.ps1` | Leg foot (single variant) |
 | `render_garden_hose_nozzle.ps1` | Garden hose nozzle (single variant, optional) |
 
@@ -507,7 +499,7 @@ Notes:
   - Ring cutout for proper bearing clearance
   
 - **Leg base / Support stand** - Fully designed and ready for printing
-   - 2-leg and 4-leg connector variants available
+   - 2-leg connector with top-insert cradle variant available
   - Curved printing base for stability
   - Bearing lip for smooth rotation interface
   - Set screw holes for secure rod retention
