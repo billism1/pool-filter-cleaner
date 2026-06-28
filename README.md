@@ -522,4 +522,6 @@ Notes:
 
 ## License
 
-This project is open-source. Feel free to modify and improve the designs for your own use.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+Feel free to modify and improve the designs for your own use.
