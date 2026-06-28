@@ -20,7 +20,7 @@ plug_minor_diameter = 76.2; // To this diameter for a snug fit (76.2 mm == 3.0 i
 plug_length = 16; // How far it goes into the filter
 
 // Flange that stays outside the filter
-flange_diameter = 135;
+flange_diameter = 123;
 flange_thickness = 6;
 
 // Central hole for the support rod
@@ -30,7 +30,7 @@ rod_hole_diameter = rod_diameter + rod_clearance;
 total_length = plug_length + flange_thickness; // Total length of the piece
 
 // Drain holes around the flange
-drain_hole_diameter = 20; // 1 inch holes
+drain_hole_diameter = 25;
 drain_hole_count = 6; // Number of holes around the flange
 drain_hole_circle_radius = plug_major_diameter / 2; // Centers on the outside diameter of the plug
 
