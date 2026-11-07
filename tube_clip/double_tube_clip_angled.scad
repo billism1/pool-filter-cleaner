@@ -61,7 +61,7 @@ clip_clearance         = (tube_preset == 0) ? clip_clearance_custom  : _preset_c
 wall                   = 4;          // C-shape wall thickness (mm)
 clip_wrap_angle        = 260;        // Degrees of tube wrapped by each C (e.g. 260° = 100° gap)
 clip_opening_extra_pct = 0.15;       // Extra opening width as fraction of bore_d (0.15 = 15%)
-clip_length            = 15;         // Print height along Z (mm). Grip along each tube = clip_length / cos(tilt)
+clip_length            = 25;         // Print height along Z (mm). Grip along each tube = clip_length / cos(tilt)
 clip_back_overlap      = 2;          // Back overlap of the parallel clip; only used for the tube_gap default (mm)
 
 // ── Angle and spacing ───────────────────────────────────────
